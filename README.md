@@ -17,7 +17,7 @@ Here are some ideas to get you started:
 - URL del repositorio en GitHub: https://github.com/aor00039/aor00039.git 
 - Imagen del repositorio en GitHub: [![Repositorio-aor00039.png](https://i.postimg.cc/Y0WxWVXz/Repositorio-aor00039.png)](https://postimg.cc/y379qfCD)
 
-### ----3º tarea---- Tareas en GitHub Classroom
+#### ----3º tarea---- Tareas en GitHub Classroom
 ### Álvaro Ordóñez Romero
 
 Estudiante de Informática de la Universidad de Jaén.
