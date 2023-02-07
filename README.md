@@ -12,9 +12,9 @@ Here are some ideas to get you started:
 
 
 #### ----1º Tarea---- Creación del usuario en GitHub
-<a Nombre y apellidos: Álvaro Ordóñez Romero> </a>
-<a Email: aor00039@red.ujaen.es> </a>
-<a URL del repositorio en GitHub: https://github.com/aor00039/aor00039.git > </a>
+*Nombre y apellidos: Álvaro Ordóñez Romero
+*Email: aor00039@red.ujaen.es
+*URL del repositorio en GitHub: https://github.com/aor00039/aor00039.git 
 Imagen del repositorio en GitHub: [![Repositorio-aor00039.png](https://i.postimg.cc/Y0WxWVXz/Repositorio-aor00039.png)](https://postimg.cc/y379qfCD)
 
 
