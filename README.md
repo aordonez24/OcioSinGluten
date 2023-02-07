@@ -25,5 +25,10 @@ Estudiante de Informática de la Universidad de Jaén.
 * **GitHub**: https://github.com/aor00039/aor00039.git
 * **Trello**: https://trello.com/b/21PkwH9A/aor00039
 
+## Información a incluir
+- URL del tablero creado en Trello: https://trello.com/b/21PkwH9A/aor00039
+- Tablero al empezar: [![Trello-aor00039-sin-completar.png](https://i.postimg.cc/bvyLBmJq/Trello-aor00039-sin-completar.png)](https://postimg.cc/DSNqWdLN)
+- Tablero al finalizar: [![Trello-aor00039-completado.png](https://i.postimg.cc/KvTqW9PM/Trello-aor00039-completado.png)](https://postimg.cc/VdYWrWHf)
+
 
 
