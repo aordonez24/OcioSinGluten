@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageController {
 
     @GetMapping("/hello")
-    public String hello(){
-      return "Prueba para el TFG.";
+    public String hello() {
+        return "Full Stack Java with Spring Boot and VueJS!";
     }
 }
