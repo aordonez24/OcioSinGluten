@@ -16,3 +16,15 @@ Se trata de una aplicación web basada en un proyecto Java Spring Boot con Vue.j
 
 Consiste en una red social donde se pueden compartir las experiencias que han tenido distintos usuarios en establecimientos para dar a conocer lugares que personas celiacas puedan visitar.
 
+
+## Configuración del proyecto
+
+    spring-boot-vuejs
+    ├─┬ backend     → Modulo backend para Spring Boot
+    │ ├── src
+    │ └── pom.xml
+    ├─┬ frontend    → Modulo frontend para Vue.js
+    │ ├── src
+    │ └── pom.xml
+    └── pom.xml     → Configuracion para ambos módulos
+
