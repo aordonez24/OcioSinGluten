@@ -10,6 +10,6 @@ public class MessageController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Full Stack Java with Spring Boot and VueJS!";
+        return "Hola, aquí comienza mi TFG";
     }
 }
