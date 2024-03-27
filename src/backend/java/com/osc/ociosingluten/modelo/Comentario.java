@@ -1,5 +1,7 @@
 package com.osc.ociosingluten.modelo;
 
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -13,6 +15,9 @@ public class Comentario {
     public Comentario(String mensaje, Usuario autor) {
         this.mensaje = mensaje;
         this.autor = autor;
+        this.numLikes = 0;
+        this.fecha = LocalDate.now();
+        this.comentarios = new ArrayList<>();
     }
 
     public Comentario(String mensaje, Usuario autor, int numLikes, LocalDate fecha, ArrayList<Comentario> comentarios) {

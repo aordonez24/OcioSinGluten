@@ -3,7 +3,7 @@ package com.osc.ociosingluten.modelo;
 import java.time.LocalDate;
 
 enum MensajePredefinido {
-    HA_VISITADO, HA_PUBLICADO
+    HA_VISITADO, HA_PUBLICADO, HA_COMENTADO
 };
 public class Contribucion {
     private Usuario autor;
@@ -15,6 +15,12 @@ public class Contribucion {
         this.autor = autor;
         this.establecimiento = establecimiento;
         this.fechaContribucion = fechaContribucion;
+        this.mensajePredefinido = mensajePredefinido;
+    }
+
+    public Contribucion(Usuario autor, Establecimiento establecimiento, MensajePredefinido mensajePredefinido) {
+        this.autor = autor;
+        this.establecimiento = establecimiento;
         this.mensajePredefinido = mensajePredefinido;
     }
 

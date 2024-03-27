@@ -15,6 +15,8 @@ public class Establecimiento {
         this.nombre = nombre;
         this.telefono = telefono;
         this.direccion = direccion;
+        this.numLikes = 0;
+        this.comentarios = new ArrayList<>();
     }
 
     public Establecimiento(String nombre, int telefono, String direccion, int numLikes, ArrayList<Comentario> comentarios) {
@@ -68,4 +70,6 @@ public class Establecimiento {
     public double obtenerValoracion(Establecimiento est){
         return (double) est.getNumLikes()/mediaValoracion;
     }
+
+    public void anadirComentario(Comentario comentario){comentarios.add(comentario);}
 }

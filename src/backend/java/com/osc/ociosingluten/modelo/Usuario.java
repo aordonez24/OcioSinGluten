@@ -41,8 +41,143 @@ public class Usuario {
         this.establecimientosFavoritos = new ArrayList<>();
         this.establecimientosVisitados = new ArrayList<>();
         this.contribuciones = new ArrayList<>();
-        this.rol = Rol.COMUN;
+        if(comprobarRol(email))
+            this.rol = Rol.COMUN;
+        else
+            this.rol = Rol.ADMIN;
+        this.comentariosRealizados = new ArrayList<>();
 
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
+    public int getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(int telefono) {
+        this.telefono = telefono;
+    }
+
+    public Image getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(Image fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public ArrayList<Usuario> getSeguidos() {
+        return seguidos;
+    }
+
+    public void setSeguidos(ArrayList<Usuario> seguidos) {
+        this.seguidos = seguidos;
+    }
+
+    public ArrayList<Usuario> getSeguidores() {
+        return seguidores;
+    }
+
+    public void setSeguidores(ArrayList<Usuario> seguidores) {
+        this.seguidores = seguidores;
+    }
+
+    public ArrayList<Establecimiento> getEstablecimientosFavoritos() {
+        return establecimientosFavoritos;
+    }
+
+    public void setEstablecimientosFavoritos(ArrayList<Establecimiento> establecimientosFavoritos) {
+        this.establecimientosFavoritos = establecimientosFavoritos;
+    }
+
+    public ArrayList<Establecimiento> getEstablecimientosVisitados() {
+        return establecimientosVisitados;
+    }
+
+    public void setEstablecimientosVisitados(ArrayList<Establecimiento> establecimientosVisitados) {
+        this.establecimientosVisitados = establecimientosVisitados;
+    }
+
+    public ArrayList<Contribucion> getContribuciones() {
+        return contribuciones;
+    }
+
+    public void setContribuciones(ArrayList<Contribucion> contribuciones) {
+        this.contribuciones = contribuciones;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
+    }
+
+    public ArrayList<Comentario> getComentariosRealizados() {
+        return comentariosRealizados;
+    }
+
+    public void setComentariosRealizados(ArrayList<Comentario> comentariosRealizados) {
+        this.comentariosRealizados = comentariosRealizados;
+    }
+
+    private static boolean comprobarRol(String email){
+        if(email.contains("@")){
+            String[] parteCorreo = email.split("@");
+            if(parteCorreo.length == 2){
+                String dominio = parteCorreo[1];
+                return !dominio.contains("admin");
+            }
+        }
+        return true;
     }
 
     private String hashContrasena(String password){
@@ -59,10 +194,11 @@ public class Usuario {
             return null;
         }
     }
-    public boolean iniciarSesion(String identificador, String password){
-        if(identificador.equals(this.email) || identificador.equals(this.username))
-            return this.password.equals(hashContrasena(password));
-        else
-            return false;
+
+    public void guardarComentario(Comentario c){
+        comentariosRealizados.add(c);
     }
+
+
+
 }
