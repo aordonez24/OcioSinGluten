@@ -1,4 +1,4 @@
-package com.osc.ociosingluten.modelo;
+package modelo;
 
 import java.awt.*;
 import java.security.MessageDigest;
@@ -25,6 +25,9 @@ public class Usuario {
     private ArrayList<Contribucion> contribuciones;
     private Rol rol;
     private ArrayList<Comentario> comentariosRealizados;
+    private boolean sesionIniciada;
+    private boolean sesionCerrada;
+
 
 
     public Usuario(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password) {
@@ -46,6 +49,8 @@ public class Usuario {
         else
             this.rol = Rol.ADMIN;
         this.comentariosRealizados = new ArrayList<>();
+        this.sesionIniciada = false;
+        this.sesionCerrada = true;
 
     }
 
@@ -169,6 +174,22 @@ public class Usuario {
         this.comentariosRealizados = comentariosRealizados;
     }
 
+    public boolean isSesionIniciada() {
+        return sesionIniciada;
+    }
+
+    public void setSesionIniciada(boolean sesionIniciada) {
+        this.sesionIniciada = sesionIniciada;
+    }
+
+    public boolean isSesionCerrada() {
+        return sesionCerrada;
+    }
+
+    public void setSesionCerrada(boolean sesionCerrada) {
+        this.sesionCerrada = sesionCerrada;
+    }
+
     private static boolean comprobarRol(String email){
         if(email.contains("@")){
             String[] parteCorreo = email.split("@");
@@ -195,10 +216,31 @@ public class Usuario {
         }
     }
 
-    public void guardarComentario(Comentario c){
+    public void enviarComentario(Comentario c){
         comentariosRealizados.add(c);
     }
+    public void eliminarComentario(Comentario c){
+        for(int i=0; i<comentariosRealizados.size(); i++){
+            if(comentariosRealizados.get(i) == c){
+                comentariosRealizados.remove(i);
+            }
+        }
+    }
 
+    public void anadirEstablecimientoFavorito(Establecimiento est){
+        if(!establecimientosFavoritos.contains(est))
+            establecimientosFavoritos.add(est);
+    }
+
+    public void anadirEstablecimientoVisitado(Establecimiento est){
+        if(!establecimientosVisitados.contains(est))
+            establecimientosVisitados.add(est);
+    }
+
+    public void seguirUsuario(Usuario usu){
+        if(!seguidos.contains(usu))
+            seguidos.add(usu);
+    }
 
 
 }

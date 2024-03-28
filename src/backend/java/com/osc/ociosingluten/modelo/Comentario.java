@@ -1,4 +1,4 @@
-package com.osc.ociosingluten.modelo;
+package modelo;
 
 import org.springframework.cglib.core.Local;
 

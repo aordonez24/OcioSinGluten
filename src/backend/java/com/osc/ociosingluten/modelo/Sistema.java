@@ -1,4 +1,4 @@
-package com.osc.ociosingluten.modelo;
+package modelo;
 
 import java.awt.*;
 import java.security.MessageDigest;
@@ -36,13 +36,25 @@ public class Sistema {
         for(int i=0; i< usuariosRegistrados.size(); i++){
             if(usuariosRegistrados.get(i).getEmail().equals(email)){
                 //Existe ese email
-                if(password.equals(hashContrasena(password)))
+                if(password.equals(hashContrasena(password))){
+                    usuariosRegistrados.get(i).setSesionIniciada(true);
+                    usuariosRegistrados.get(i).setSesionCerrada(false);
                     return true;
+                }
                 else
                     return false;
             }else{
                 return false;
             }
+        }
+        return false;
+    }
+
+    public boolean cerrarSesion(Usuario usuario){
+        if(existeUsuario(usuario)){
+            usuario.setSesionCerrada(true);
+            usuario.setSesionIniciada(false);
+            return true;
         }
         return false;
     }
@@ -59,23 +71,50 @@ public class Sistema {
     }
 
     public Usuario buscarUsuario(Usuario usuario){
-        for(Usuario usu : usuariosRegistrados){
-            if(usuario == usu)
-                return usu;
+        if(usuario.isSesionIniciada()) {
+            if (existeUsuario(usuario))
+                return usuario;
         }
         return null;
     }
 
     public boolean anadirComentario(String texto, Establecimiento establecimiento, Usuario usu){
         //Usu es el usuario que realiza el comentario
-        if(texto.length() > 0 && texto.length() <= 140) {
-            Comentario com = new Comentario(texto, usu);
-            establecimiento.anadirComentario(com);
-            usu.guardarComentario(com);
-            this.comentariosRealizados.add(com);
-            Contribucion cont = new Contribucion(usu, establecimiento, MensajePredefinido.HA_COMENTADO);
-            this.contribucionesRealizadas.add(cont);
-            return true;
+        if(usu.isSesionIniciada()) {
+            if (texto.length() > 0 && texto.length() <= 140) {
+                Comentario com = new Comentario(texto, usu);
+                establecimiento.anadirComentario(com);
+                usu.enviarComentario(com);
+                this.comentariosRealizados.add(com);
+                Contribucion cont = new Contribucion(usu, establecimiento, MensajePredefinido.HA_COMENTADO);
+                this.contribucionesRealizadas.add(cont);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean eliminarComentario(Comentario c, Usuario usu){
+        if(c.getAutor() == usu && usu.isSesionIniciada()){
+            usu.eliminarComentario(c);
+            for(int i=0; i<comentariosRealizados.size(); i++){
+                if(c == comentariosRealizados.get(i)) {
+                    comentariosRealizados.remove(i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean editarComentario(Comentario c, String textoNuevo, Usuario usu){
+        if(c.getAutor() == usu && usu.isSesionIniciada()) {
+            if(c.getMensaje().equals(textoNuevo))
+                return false;
+            else{
+                c.setMensaje(textoNuevo);
+                return true;
+            }
         }
         return false;
     }
@@ -93,7 +132,7 @@ public class Sistema {
     }
 
     public boolean eliminarEstablecimiento(Establecimiento est, Usuario usu){
-        if(usu.getRol() == Rol.ADMIN){
+        if(usu.getRol() == Rol.ADMIN && usu.isSesionIniciada()){
             for(int i=0; i<establecimientosRegistrados.size(); i++){
                 if(est == establecimientosRegistrados.get(i)){
                     establecimientosRegistrados.remove(i);
@@ -105,14 +144,14 @@ public class Sistema {
     }
 
     public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, String direccion, int telefono) {
-        if (usu.getRol() == Rol.ADMIN) {
+        if (usu.getRol() == Rol.ADMIN && usu.isSesionIniciada()) {
             for (int i = 0; i < establecimientosRegistrados.size(); i++) {
                 if (est == establecimientosRegistrados.get(i)) {
                     String numeroComoCadena = String.valueOf(telefono);
                     if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.length() > 0 && direccion.length() <= 100)
                     {
-                       if(nombre != est.getNombre())
-                           est.setNombre(nombre);
+                        if(nombre != est.getNombre())
+                            est.setNombre(nombre);
                         if(direccion != est.getDireccion())
                             est.setDireccion(direccion);
                         if(telefono != est.getTelefono())
@@ -124,5 +163,33 @@ public class Sistema {
         }
         return false;
     }
+    private boolean existeUsuario(Usuario usu){
+        for(Usuario usua : usuariosRegistrados){
+            if(usuariosRegistrados.contains(usu))
+                return true; //Usuario existe
+        }
+        return false;
+    }
+
+    public void visitarEstablecimiento(Establecimiento est, Usuario usuario){
+        if(usuario.isSesionIniciada()) {
+            Contribucion contribucion = new Contribucion(usuario, est, MensajePredefinido.HA_VISITADO);
+            usuario.anadirEstablecimientoVisitado(est);
+        }
+    }
+    public void marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario){
+        if(usuario.isSesionIniciada()) {
+            usuario.anadirEstablecimientoFavorito(est);
+        }
+    }
+
+    public void seguirUsuario(Usuario usu, Usuario usuASeguir){
+        if(usu.isSesionIniciada()){
+            if(existeUsuario(usuASeguir)) {
+                usu.seguirUsuario(usuASeguir);
+            }
+        }
+    }
+
 
 }
