@@ -3,10 +3,13 @@ package modelo;
 import java.awt.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static com.osc.ociosingluten.constantes.Constantes.maxTelefono;
+import static constantes.Constantes.MaxlargoContrasena;
+import static constantes.Constantes.maxTelefono;
+
 
 public class Sistema {
     private String nombre;
@@ -59,10 +62,30 @@ public class Sistema {
         return false;
     }
 
+    private String generarContrasenaAleatoria() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        int longitud = MaxlargoContrasena;
+
+        StringBuilder contrasena = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+        for (int i = 0; i < longitud; i++) {
+            int indice = random.nextInt(caracteres.length());
+            contrasena.append(caracteres.charAt(indice));
+        }
+        return contrasena.toString();
+    }
+
+    public void olvidarContraseña(Usuario usu){
+        //usu es el usuario al que se le olvida la contraseña
+        if(usu.isSesionIniciada()){
+            usu.setPassword(generarContrasenaAleatoria());
+        }
+    }
+
     public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password){
         //Comprueba si existe ese usuario
         for(int i=0; i< usuariosRegistrados.size(); i++){
-            if(usuariosRegistrados.get(i).getEmail().equals(email) || usuariosRegistrados.get(i).getUsername().equals(username))
+            if(usuariosRegistrados.get(i).getEmail().equals(email) || usuariosRegistrados.get(i).getUsername().equals(username)) //Comprueba si ese email o username esta registrado
                 return false;
             else
                 usuariosRegistrados.add(new Usuario(username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password));
@@ -75,6 +98,12 @@ public class Sistema {
             if (existeUsuario(usuario))
                 return usuario;
         }
+        return null;
+    }
+
+    public Establecimiento buscarEstablecimiento(Establecimiento est){
+        if(establecimientosRegistrados.contains(est))
+            return est;
         return null;
     }
 
@@ -174,7 +203,8 @@ public class Sistema {
     public void visitarEstablecimiento(Establecimiento est, Usuario usuario){
         if(usuario.isSesionIniciada()) {
             Contribucion contribucion = new Contribucion(usuario, est, MensajePredefinido.HA_VISITADO);
-            usuario.anadirEstablecimientoVisitado(est);
+            contribucionesRealizadas.add(contribucion);
+            usuario.anadirEstablecimientoVisitado(est, contribucion);
         }
     }
     public void marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario){
@@ -190,6 +220,49 @@ public class Sistema {
             }
         }
     }
+
+    public void gestionUsuario(Usuario usu, int modo, Usuario gestionado, String nombre, String apellidos, String password, LocalDate fnac){
+        if(modo == 1){ //Eliminamos usuario, solo lo puede hacer el admin
+            if(usu.isSesionIniciada() && usu.getRol() == Rol.ADMIN){
+                if(existeUsuario(gestionado)){
+                    usuariosRegistrados.remove(gestionado);
+                }
+            }
+        }else if(modo == 2){
+            //Modificamos datos del usuario
+            if(usu.isSesionIniciada()){
+                if(!usu.getNombre().equals(nombre)){
+                    usu.setNombre(nombre);
+                }
+                if(!usu.getApellidos().equals(apellidos)){
+                    usu.setApellidos(apellidos);
+                }
+                if(!usu.getPassword().equals(email)){
+                    usu.setPassword(password);
+                }
+                if(usu.getFechaNacimiento() != fnac){
+                    usu.setFechaNacimiento(fnac);
+                }
+            }
+        } else if (modo == 3) {
+            //El usuario quiere dar de baja su cuenta
+            if(usu.isSesionIniciada()){
+                usuariosRegistrados.remove(usu);
+            }
+        }
+    }
+
+    public boolean gestionContribuciones(Contribucion cont, Usuario usuario){
+        if(usuario.isSesionIniciada() && usuario.getRol() == Rol.ADMIN){
+            //Eliminar contribucion
+            usuario.quitarContribucion(cont);
+            contribucionesRealizadas.remove(cont);
+            return true;
+        }
+        return false;
+    }
+
+
 
 
 }

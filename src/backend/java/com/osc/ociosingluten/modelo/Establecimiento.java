@@ -2,7 +2,7 @@ package modelo;
 
 import java.util.ArrayList;
 
-import static com.osc.ociosingluten.constantes.Constantes.mediaValoracion;
+import static constantes.Constantes.mediaValoracion;
 
 public class Establecimiento {
     private String nombre;

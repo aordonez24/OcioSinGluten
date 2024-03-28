@@ -115,7 +115,7 @@ public class Usuario {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = hashContrasena(password);
     }
 
     public ArrayList<Usuario> getSeguidos() {
@@ -232,14 +232,20 @@ public class Usuario {
             establecimientosFavoritos.add(est);
     }
 
-    public void anadirEstablecimientoVisitado(Establecimiento est){
+    public void anadirEstablecimientoVisitado(Establecimiento est, Contribucion contribucion){
         if(!establecimientosVisitados.contains(est))
             establecimientosVisitados.add(est);
+        contribuciones.add(contribucion);
     }
 
     public void seguirUsuario(Usuario usu){
         if(!seguidos.contains(usu))
             seguidos.add(usu);
+    }
+
+    public void quitarContribucion(Contribucion cont){
+        if(contribuciones.contains(cont))
+            contribuciones.remove(cont);
     }
 
 
