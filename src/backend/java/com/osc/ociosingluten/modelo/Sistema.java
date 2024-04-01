@@ -16,7 +16,7 @@ public class Sistema {
     private String email;
     private ArrayList<Usuario> usuariosRegistrados;
     private ArrayList<Establecimiento> establecimientosRegistrados;
-    private ArrayList<Contribucion> contribucionesRealizadas;
+    private ArrayList<Actividad> actividadesRealizadas;
     private ArrayList<Comentario> comentariosRealizados;
 
 
@@ -75,6 +75,13 @@ public class Sistema {
         return contrasena.toString();
     }
 
+    private void crearActividad(Actividad act, Usuario usu){
+        if(!actividadesRealizadas.contains(act)) {
+            actividadesRealizadas.add(act);
+            usu.anadirActividad(act);
+        }
+    }
+
     public void olvidarContraseña(Usuario usu){
         //usu es el usuario al que se le olvida la contraseña
         if(usu.isSesionIniciada()){
@@ -115,8 +122,8 @@ public class Sistema {
                 establecimiento.anadirComentario(com);
                 usu.enviarComentario(com);
                 this.comentariosRealizados.add(com);
-                Contribucion cont = new Contribucion(usu, establecimiento, MensajePredefinido.HA_COMENTADO);
-                this.contribucionesRealizadas.add(cont);
+                Actividad cont = new Actividad(usu, establecimiento, MensajePredefinido.HA_COMENTADO);
+                crearActividad(cont, usu);
                 return true;
             }
         }
@@ -153,8 +160,8 @@ public class Sistema {
         if(nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.length() > 0 && direccion.length() <= 100){
             Establecimiento est = new Establecimiento(nombre, telefono, direccion);
             establecimientosRegistrados.add(est);
-            Contribucion cont = new Contribucion(usu, est, MensajePredefinido.HA_PUBLICADO);
-            this.contribucionesRealizadas.add(cont);
+            Actividad cont = new Actividad(usu, est, MensajePredefinido.HA_PUBLICADO);
+            crearActividad(cont, usu);
             return true;
         }
         return false;
@@ -202,9 +209,9 @@ public class Sistema {
 
     public void visitarEstablecimiento(Establecimiento est, Usuario usuario){
         if(usuario.isSesionIniciada()) {
-            Contribucion contribucion = new Contribucion(usuario, est, MensajePredefinido.HA_VISITADO);
-            contribucionesRealizadas.add(contribucion);
-            usuario.anadirEstablecimientoVisitado(est, contribucion);
+            Actividad actividad = new Actividad(usuario, est, MensajePredefinido.HA_VISITADO);
+            crearActividad(actividad, usuario);
+            usuario.anadirEstablecimientoVisitado(est, actividad);
         }
     }
     public void marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario){
@@ -252,11 +259,11 @@ public class Sistema {
         }
     }
 
-    public boolean gestionContribuciones(Contribucion cont, Usuario usuario){
+    public boolean gestionContribuciones(Actividad cont, Usuario usuario){
         if(usuario.isSesionIniciada() && usuario.getRol() == Rol.ADMIN){
             //Eliminar contribucion
-            usuario.quitarContribucion(cont);
-            contribucionesRealizadas.remove(cont);
+            usuario.eliminarActividad(cont);
+            actividadesRealizadas.remove(cont);
             return true;
         }
         return false;

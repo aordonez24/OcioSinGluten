@@ -22,7 +22,7 @@ public class Usuario {
     private ArrayList<Usuario> seguidores;
     private ArrayList<Establecimiento> establecimientosFavoritos;
     private ArrayList<Establecimiento> establecimientosVisitados;
-    private ArrayList<Contribucion> contribuciones;
+    private ArrayList<Actividad> contribuciones;
     private Rol rol;
     private ArrayList<Comentario> comentariosRealizados;
     private boolean sesionIniciada;
@@ -150,11 +150,11 @@ public class Usuario {
         this.establecimientosVisitados = establecimientosVisitados;
     }
 
-    public ArrayList<Contribucion> getContribuciones() {
+    public ArrayList<Actividad> getContribuciones() {
         return contribuciones;
     }
 
-    public void setContribuciones(ArrayList<Contribucion> contribuciones) {
+    public void setContribuciones(ArrayList<Actividad> contribuciones) {
         this.contribuciones = contribuciones;
     }
 
@@ -232,10 +232,10 @@ public class Usuario {
             establecimientosFavoritos.add(est);
     }
 
-    public void anadirEstablecimientoVisitado(Establecimiento est, Contribucion contribucion){
+    public void anadirEstablecimientoVisitado(Establecimiento est, Actividad actividad){
         if(!establecimientosVisitados.contains(est))
             establecimientosVisitados.add(est);
-        contribuciones.add(contribucion);
+        contribuciones.add(actividad);
     }
 
     public void seguirUsuario(Usuario usu){
@@ -243,9 +243,13 @@ public class Usuario {
             seguidos.add(usu);
     }
 
-    public void quitarContribucion(Contribucion cont){
+    public void eliminarActividad(Actividad cont){
         if(contribuciones.contains(cont))
             contribuciones.remove(cont);
+    }
+    public void anadirActividad(Actividad cont){
+        if(!contribuciones.contains(cont))
+            contribuciones.add(cont);
     }
 
 

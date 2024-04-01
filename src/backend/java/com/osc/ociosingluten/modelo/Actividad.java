@@ -5,20 +5,20 @@ import java.time.LocalDate;
 enum MensajePredefinido {
     HA_VISITADO, HA_PUBLICADO, HA_COMENTADO
 };
-public class Contribucion {
+public class Actividad {
     private Usuario autor;
     private Establecimiento establecimiento;
     private LocalDate fechaContribucion;
     private MensajePredefinido mensajePredefinido;
 
-    public Contribucion(Usuario autor, Establecimiento establecimiento, LocalDate fechaContribucion, MensajePredefinido mensajePredefinido) {
+    public Actividad(Usuario autor, Establecimiento establecimiento, LocalDate fechaContribucion, MensajePredefinido mensajePredefinido) {
         this.autor = autor;
         this.establecimiento = establecimiento;
         this.fechaContribucion = fechaContribucion;
         this.mensajePredefinido = mensajePredefinido;
     }
 
-    public Contribucion(Usuario autor, Establecimiento establecimiento, MensajePredefinido mensajePredefinido) {
+    public Actividad(Usuario autor, Establecimiento establecimiento, MensajePredefinido mensajePredefinido) {
         this.autor = autor;
         this.establecimiento = establecimiento;
         this.mensajePredefinido = mensajePredefinido;
