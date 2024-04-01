@@ -7,8 +7,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static constantes.Constantes.MaxlargoContrasena;
-import static constantes.Constantes.maxTelefono;
+import static constantes.Constantes.*;
 
 
 public class Sistema {
@@ -19,13 +18,29 @@ public class Sistema {
     private ArrayList<Actividad> actividadesRealizadas;
     private ArrayList<Comentario> comentariosRealizados;
 
+    public Sistema() {
+        this.nombre = "OcioSinGluten";
+        this.email = "aor00039@red.ujaen.es";
+        this.usuariosRegistrados = new ArrayList<>();
+        this.establecimientosRegistrados = new ArrayList<>();
+        this.actividadesRealizadas = new ArrayList<>();
+        this.comentariosRealizados = new ArrayList<>();
+    }
 
-    private String hashContrasena(String password){
-        try{
+    private String hashContrasena(String password) {
+        try {
+            // Generar salt aleatorio
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[SALT_LENGTH];
+            random.nextBytes(salt);
+            byte[] passwordBytes = password.getBytes();
+            byte[] saltedPassword = new byte[passwordBytes.length + salt.length];
+            System.arraycopy(passwordBytes, 0, saltedPassword, 0, passwordBytes.length);
+            System.arraycopy(salt, 0, saltedPassword, passwordBytes.length, salt.length);
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(password.getBytes());
+            byte[] hashBytes = md.digest(saltedPassword);
             StringBuilder sb = new StringBuilder();
-            for(byte b : hashBytes){
+            for (byte b : hashBytes) {
                 sb.append(String.format("%02x", b));
             }
             return sb.toString();
@@ -37,16 +52,14 @@ public class Sistema {
 
     public boolean iniciarSesion(String email, String password){
         for(int i=0; i< usuariosRegistrados.size(); i++){
-            if(usuariosRegistrados.get(i).getEmail().equals(email)){
+            if(usuariosRegistrados.get(i).getEmail().equals(email) && usuariosRegistrados.get(i).getPassword().equals(password)){
                 //Existe ese email
-                if(password.equals(hashContrasena(password))){
                     usuariosRegistrados.get(i).setSesionIniciada(true);
                     usuariosRegistrados.get(i).setSesionCerrada(false);
                     return true;
-                }
-                else
-                    return false;
             }else{
+                usuariosRegistrados.get(i).setSesionIniciada(false);
+                usuariosRegistrados.get(i).setSesionCerrada(true);
                 return false;
             }
         }
@@ -94,8 +107,10 @@ public class Sistema {
         for(int i=0; i< usuariosRegistrados.size(); i++){
             if(usuariosRegistrados.get(i).getEmail().equals(email) || usuariosRegistrados.get(i).getUsername().equals(username)) //Comprueba si ese email o username esta registrado
                 return false;
-            else
+            else {
                 usuariosRegistrados.add(new Usuario(username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password));
+                return true;
+            }
         }
         return false;
     }
@@ -269,7 +284,33 @@ public class Sistema {
         return false;
     }
 
+    public void anadirUsuario(Usuario usu){
+        if(!usuariosRegistrados.contains(usu)){
+            usuariosRegistrados.add(usu);
+        }
+    }
 
+    public String getNombre() {
+        return nombre;
+    }
 
+    public String getEmail() {
+        return email;
+    }
 
+    public ArrayList<Usuario> getUsuariosRegistrados() {
+        return usuariosRegistrados;
+    }
+
+    public ArrayList<Establecimiento> getEstablecimientosRegistrados() {
+        return establecimientosRegistrados;
+    }
+
+    public ArrayList<Actividad> getActividadesRealizadas() {
+        return actividadesRealizadas;
+    }
+
+    public ArrayList<Comentario> getComentariosRealizados() {
+        return comentariosRealizados;
+    }
 }
