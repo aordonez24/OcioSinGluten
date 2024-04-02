@@ -1,3 +1,4 @@
+import excepciones.UsuarioNoExisteException;
 import modelo.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,27 +40,27 @@ public class SistemaTest {
     }
 
     @Test
-    public void testIniciarSesion() {
-
+    public void testIniciarSesion() throws UsuarioNoExisteException {
         //iniciar sesión con un usuario válido y una contraseña correcta
         assertTrue("Usuario válido y contraseña correcta", sis.iniciarSesion(usuarioInicial.getEmail(), usuarioInicial.getPassword()));
         assertTrue("Sesión iniciada", sis.getUsuariosRegistrados().get(0).isSesionIniciada());
         sis.cerrarSesion(sis.getUsuariosRegistrados().get(0));
+
         //iniciar sesión con un usuario válido pero una contraseña incorrecta
-        assertFalse("Usuario válido pero contraseña incorrecta", sis.iniciarSesion(usuarioInicial.getEmail(), "contrasenaincorrecta"));
+        assertThrows(UsuarioNoExisteException.class, () -> sis.iniciarSesion(usuarioInicial.getEmail(), "contrasenaincorrecta"));
         assertFalse("Sesión no iniciada", sis.getUsuariosRegistrados().get(0).isSesionIniciada());
 
         //iniciar sesión con un usuario no registrado
-        assertFalse("Usuario no registrado", sis.iniciarSesion("correo@noexistente.com", "contrasena"));
+        assertThrows(UsuarioNoExisteException.class, () -> sis.iniciarSesion("correo@noexistente.com", "contrasena"));
 
         //iniciar sesión con email null
-        assertFalse("Email null", sis.iniciarSesion(null, "contrasena"));
+        assertThrows(UsuarioNoExisteException.class, () -> sis.iniciarSesion(null, "contrasena"));
 
         //iniciar sesión con contraseña null
-        assertFalse("Contraseña null", sis.iniciarSesion(usuarioInicial.getEmail(), null));
+        assertThrows(UsuarioNoExisteException.class, () -> sis.iniciarSesion(usuarioInicial.getEmail(), null));
 
         //iniciar sesión con usuario válido pero sin contraseña
-        assertFalse("Usuario válido pero sin contraseña", sis.iniciarSesion(usuarioInicial.getEmail(), null));
+        assertThrows(UsuarioNoExisteException.class, () -> sis.iniciarSesion(usuarioInicial.getEmail(), null));
     }
 
     @Test
@@ -146,7 +147,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testAnadirComentario() {
+    public void testAnadirComentario() throws UsuarioNoExisteException {
         //añadir comentario con sesión iniciada y texto válido
         Usuario usuario1 = sis.getUsuariosRegistrados().get(0);
         sis.iniciarSesion(usuario1.getEmail(), usuario1.getPassword());
@@ -174,7 +175,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEliminarComentario() {
+    public void testEliminarComentario() throws UsuarioNoExisteException {
         //eliminar comentario con un comentario existente y sesión iniciada
         Comentario comentario = sis.getComentariosRealizados().get(0);
         sis.iniciarSesion(usuarioInicial.getEmail(), usuarioInicial.getPassword());
@@ -191,7 +192,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEditarComentario() {
+    public void testEditarComentario() throws UsuarioNoExisteException {
         //editar comentario con usuario y sesión válidos y texto diferente
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Comentario comentario = sis.getComentariosRealizados().get(0);
@@ -222,7 +223,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testAnadirEstablecimiento() {
+    public void testAnadirEstablecimiento() throws UsuarioNoExisteException {
         //agregar un establecimiento válido
         sis.getEstablecimientosRegistrados().clear();
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
@@ -256,7 +257,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEliminarEstablecimiento() {
+    public void testEliminarEstablecimiento() throws UsuarioNoExisteException {
         // Prueba eliminar un establecimiento con usuario admin y sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(1);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -284,7 +285,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEditarEstablecimiento() {
+    public void testEditarEstablecimiento() throws UsuarioNoExisteException {
         //editar un establecimiento con usuario admin y sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(1);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -332,7 +333,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testVisitarEstablecimiento() {
+    public void testVisitarEstablecimiento() throws UsuarioNoExisteException {
         // Prueba visitar un establecimiento con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -349,7 +350,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testMarcarFavoritoEstablecimiento() {
+    public void testMarcarFavoritoEstablecimiento() throws UsuarioNoExisteException {
         // Prueba marcar un establecimiento como favorito con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -365,7 +366,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testDarLikeEstablecimiento() {
+    public void testDarLikeEstablecimiento() throws UsuarioNoExisteException {
         // Prueba dar like a un establecimiento con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -380,7 +381,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testSeguirUsuario() {
+    public void testSeguirUsuario() throws UsuarioNoExisteException {
         // Prueba seguir a un usuario con sesión iniciada y usuario existente
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Usuario usuarioASeguir = sis.getUsuariosRegistrados().get(1);
@@ -402,7 +403,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEliminarUsuario() {
+    public void testEliminarUsuario() throws UsuarioNoExisteException {
         Image image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
         // Prueba eliminar un usuario (modo 1) con sesión iniciada y usuario admin
@@ -426,7 +427,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testModificarUsuario() {
+    public void testModificarUsuario() throws UsuarioNoExisteException {
         // Prueba modificar datos de usuario (modo 2) con sesión iniciada
         LocalDate nuevaFecha = LocalDate.of(2000, 1, 1);
         sis.iniciarSesion(usuarioInicial.getEmail(), usuarioInicial.getPassword());
@@ -444,7 +445,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testDarDeBajaUsuario() {
+    public void testDarDeBajaUsuario() throws UsuarioNoExisteException {
         Image image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
         // Prueba dar de baja usuario (modo 3) con sesión iniciada
@@ -460,7 +461,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testGestionActividades() {
+    public void testGestionActividades() throws UsuarioNoExisteException {
         Actividad actividad = sis.getActividadesRealizadas().get(0);
 
         // Prueba eliminar actividad sin sesión iniciada

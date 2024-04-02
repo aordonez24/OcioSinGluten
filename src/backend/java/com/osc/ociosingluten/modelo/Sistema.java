@@ -1,11 +1,15 @@
 package modelo;
 
+import excepciones.UsuarioNoExisteException;
+
 import java.awt.*;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static constantes.Constantes.*;
+import excepciones.*;
+
 
 
 public class Sistema {
@@ -26,15 +30,15 @@ public class Sistema {
     }
 
 
-    public boolean iniciarSesion(String email, String password){
-        for(int i=0; i< usuariosRegistrados.size(); i++){
-            if(usuariosRegistrados.get(i).getEmail().equals(email) && usuariosRegistrados.get(i).getPassword().equals(password)){
+    public boolean iniciarSesion(String email, String password) throws UsuarioNoExisteException {
+        for(int i = 0; i < usuariosRegistrados.size(); i++) {
+            if(usuariosRegistrados.get(i).getEmail().equals(email) && usuariosRegistrados.get(i).getPassword().equals(password)) {
                 usuariosRegistrados.get(i).setSesionIniciada(true);
                 usuariosRegistrados.get(i).setSesionCerrada(false);
                 return true;
             }
         }
-        return false;
+        throw new UsuarioNoExisteException("El usuario con el correo electrónico " + email + " no existe o la contraseña es incorrecta.");
     }
 
 
