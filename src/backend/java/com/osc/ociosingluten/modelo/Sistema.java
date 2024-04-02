@@ -41,6 +41,10 @@ public class Sistema {
         throw new UsuarioNoExisteException("El usuario con el correo electrónico " + email + " no existe o la contraseña es incorrecta.");
     }
 
+    public void anadirUsuario(Usuario usu){
+        if(!usuariosRegistrados.contains(usu))
+            usuariosRegistrados.add(usu);
+    }
 
     public boolean cerrarSesion(Usuario usuario){
         if(existeUsuario(usuario)){
