@@ -3,8 +3,11 @@ package modelo;
 import java.awt.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import static constantes.Constantes.SALT_LENGTH;
 
 enum Rol{
     COMUN, ADMIN
@@ -201,12 +204,20 @@ public class Usuario {
         return true;
     }
 
-    private String hashContrasena(String password){
-        try{
+    private String hashContrasena(String password) {
+        try {
+            // Generar salt aleatorio
+            SecureRandom random = new SecureRandom();
+            byte[] salt = new byte[SALT_LENGTH];
+            random.nextBytes(salt);
+            byte[] passwordBytes = password.getBytes();
+            byte[] saltedPassword = new byte[passwordBytes.length + salt.length];
+            System.arraycopy(passwordBytes, 0, saltedPassword, 0, passwordBytes.length);
+            System.arraycopy(salt, 0, saltedPassword, passwordBytes.length, salt.length);
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(password.getBytes());
+            byte[] hashBytes = md.digest(saltedPassword);
             StringBuilder sb = new StringBuilder();
-            for(byte b : hashBytes){
+            for (byte b : hashBytes) {
                 sb.append(String.format("%02x", b));
             }
             return sb.toString();

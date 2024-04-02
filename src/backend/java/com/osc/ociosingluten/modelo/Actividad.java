@@ -2,9 +2,7 @@ package modelo;
 
 import java.time.LocalDate;
 
-enum MensajePredefinido {
-    HA_VISITADO, HA_PUBLICADO, HA_COMENTADO
-};
+;
 public class Actividad {
     private Usuario autor;
     private Establecimiento establecimiento;
