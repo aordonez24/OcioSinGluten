@@ -1,10 +1,12 @@
 package modelo;
 
+import jakarta.persistence.Entity;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+@Entity
 public class Comentario {
     private String mensaje;
     private Usuario autor;

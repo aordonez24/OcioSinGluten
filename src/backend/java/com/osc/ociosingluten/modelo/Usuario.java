@@ -1,5 +1,9 @@
 package modelo;
 
+import herramientas.ExpresionesRegulares;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import java.awt.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,28 +16,69 @@ import static constantes.Constantes.SALT_LENGTH;
 enum Rol{
     COMUN, ADMIN
 };
+
+@Entity
 public class Usuario {
+
+    @Id
+    @NotNull
     private String username;
+
+    @Size(min = 0, max = 15)
+    @NotNull
     private String nombre;
+
+    @Size(min = 0, max = 30)
+    @NotNull
     private String apellidos;
+
+    @Past
+    @NotNull
     private LocalDate fechaNacimiento;
+
+    @Pattern(regexp= ExpresionesRegulares.TLF)
     private int telefono;
-    private Image fotoPerfil;
+
+    @Lob
+    private byte[] fotoPerfil;
+
+    @Id
+    @Email
     private String email;
+
+    @NotNull
+    @Pattern(regexp= ExpresionesRegulares.CONTRASENA)
     private String password;
+
+    @ManyToMany
     private ArrayList<Usuario> seguidos;
+
+    @ManyToMany(mappedBy = "seguidos")
     private ArrayList<Usuario> seguidores;
+
+    @ManyToMany
     private ArrayList<Establecimiento> establecimientosFavoritos;
+
+    @ManyToMany
     private ArrayList<Establecimiento> establecimientosVisitados;
+
+    @ManyToMany
     private ArrayList<Actividad> contribuciones;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
     private Rol rol;
+
+    @OneToMany
     private ArrayList<Comentario> comentariosRealizados;
+
+    @Transient
     private boolean sesionIniciada;
+    @Transient
     private boolean sesionCerrada;
 
 
-
-    public Usuario(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password) {
+    public Usuario(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) {
         this.username = username;
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -41,7 +86,7 @@ public class Usuario {
         this.telefono = telefono;
         this.fotoPerfil = fotoPerfil;
         this.email = email;
-        this.password = hashContrasena(password);
+        this.password = password;
         this.seguidos = new ArrayList<>();
         this.seguidores = new ArrayList<>();
         this.establecimientosFavoritos = new ArrayList<>();
@@ -55,6 +100,9 @@ public class Usuario {
         this.sesionIniciada = false;
         this.sesionCerrada = true;
 
+    }
+
+    public Usuario() {
     }
 
     public String getUsername() {
@@ -97,11 +145,11 @@ public class Usuario {
         this.telefono = telefono;
     }
 
-    public Image getFotoPerfil() {
+    public byte[] getFotoPerfil() {
         return fotoPerfil;
     }
 
-    public void setFotoPerfil(Image fotoPerfil) {
+    public void setFotoPerfil(byte[] fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
     }
 
@@ -118,7 +166,7 @@ public class Usuario {
     }
 
     public void setPassword(String password) {
-        this.password = hashContrasena(password);
+        this.password = password;
     }
 
     public ArrayList<Usuario> getSeguidos() {
@@ -202,29 +250,6 @@ public class Usuario {
             }
         }
         return true;
-    }
-
-    private String hashContrasena(String password) {
-        try {
-            // Generar salt aleatorio
-            SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[SALT_LENGTH];
-            random.nextBytes(salt);
-            byte[] passwordBytes = password.getBytes();
-            byte[] saltedPassword = new byte[passwordBytes.length + salt.length];
-            System.arraycopy(passwordBytes, 0, saltedPassword, 0, passwordBytes.length);
-            System.arraycopy(salt, 0, saltedPassword, passwordBytes.length, salt.length);
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(saltedPassword);
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public void enviarComentario(Comentario c){

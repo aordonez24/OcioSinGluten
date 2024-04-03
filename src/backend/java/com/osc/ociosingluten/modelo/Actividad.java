@@ -1,8 +1,10 @@
 package modelo;
 
+import jakarta.persistence.Entity;
+
 import java.time.LocalDate;
 
-;
+@Entity
 public class Actividad {
     private Usuario autor;
     private Establecimiento establecimiento;

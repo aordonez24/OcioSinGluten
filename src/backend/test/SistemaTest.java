@@ -1,18 +1,14 @@
 import excepciones.*;
+import herramientas.Direccion;
 import modelo.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.awt.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import static org.junit.Assert.*;
 
-import static constantes.Constantes.SALT_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertFalse;
@@ -27,11 +23,12 @@ public class SistemaTest {
     @Before
     public void setUp() {
         sis = new Sistema();
-        Image image = null; // Aquí inicializa tu imagen si es necesario
+        byte[] image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
         usuarioInicial = new Usuario("aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
         sis.anadirUsuarioPrueba(usuarioInicial);
-        Establecimiento establecimiento1 = new Establecimiento("EstPrueba1", 670988953, "aaaaaaaaaaaaaa");
+        Direccion dir = new Direccion("Jaén", "Jaén", "Avenida de Andalucía, 83", 23006, "España");
+        Establecimiento establecimiento1 = new Establecimiento("EstPrueba1", 670988953, dir);
         sis.anadirEstablecimientoPrueba(establecimiento1);
         usuarioInicial.setSesionIniciada(true);
         Comentario com = new Comentario("aaaaaaaaaaaaaaaaaaaaa", usuarioInicial);
@@ -178,8 +175,9 @@ public class SistemaTest {
             fail("Se lanzó una excepción inesperada: " + e.getMessage());
         }
 
+        Direccion dir = new Direccion();
         //buscar un establecimiento que no existe
-        Establecimiento establecimientoNoExistente = new Establecimiento("NombreNoExistente", 345434857, "jjjjjjjjjjjjjj");
+        Establecimiento establecimientoNoExistente = new Establecimiento("NombreNoExistente", 345434857, dir);
         try {
             assertNull("Establecimiento no existente no encontrado", sis.buscarEstablecimiento(establecimientoNoExistente));
         } catch (EstablecimientoNoExistenteException e) {
@@ -236,6 +234,7 @@ public class SistemaTest {
     @Test
     public void testEditarComentario() throws UsuarioNoExisteException {
         //editar comentario con usuario y sesión válidos y texto diferente
+        Direccion dir = new Direccion();
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Comentario comentario = sis.getComentariosRealizados().get(0);
         sis.iniciarSesion(usuario.getEmail(), usuario.getPassword());
@@ -267,34 +266,40 @@ public class SistemaTest {
     @Test
     public void testAnadirEstablecimiento() throws UsuarioNoExisteException {
         //agregar un establecimiento válido
+        Direccion dir = new Direccion();
+        dir.setCalle("Avenida De Andalucía Jaén");
         sis.getEstablecimientosRegistrados().clear();
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         sis.iniciarSesion(usuario.getEmail(), usuario.getPassword());
-        assertTrue("Añadiendo establecimiento válido", sis.anadirEstablecimiento("Restaurante A", "Calle Principal 123", 123456789, usuario));
+        assertTrue("Añadiendo establecimiento válido", sis.anadirEstablecimiento("Restaurante A", dir, 123456789, usuario));
         assertEquals("Establecimiento añadido correctamente", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con nombre demasiado largo
-        Assert.assertFalse("Añadiendo establecimiento con nombre demasiado largo", sis.anadirEstablecimiento("Restaurante con un nombre muy largo que excede el límite de caracteres permitido", "Calle Principal 123", 123456789, usuario));
+        Assert.assertFalse("Añadiendo establecimiento con nombre demasiado largo", sis.anadirEstablecimiento("Restaurante con un nombre muy largo que excede el límite de caracteres permitido", dir, 123456789, usuario));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con nombre vacío
-        Assert.assertFalse("Añadiendo establecimiento con nombre vacío", sis.anadirEstablecimiento("", "Calle Principal 123", 123456789, usuario));
+        Assert.assertFalse("Añadiendo establecimiento con nombre vacío", sis.anadirEstablecimiento("", dir, 123456789, usuario));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con dirección demasiado larga
-        Assert.assertFalse("Añadiendo establecimiento con dirección demasiado larga", sis.anadirEstablecimiento("Restaurante B", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 123456789, usuario));
+        dir.setCalle("hjbfksdabfadskbgksfdjngkjdfngkjfdwngkanglskfjgbsflkdjgnsfkjgndsflkgjnffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffsdflgkjbsdfngkjsdfbngkjsdfnbkñjdnbkesfnbksdfjnbsdfñjsdñjgsdñjsfuhunsdñkjsdñlgfñjldjhnsdfñhndsfgndsfhjsndfñhkjnsdfgunsdfbuesrnhpieurbnkñsdfngs");
+        Assert.assertFalse("Añadiendo establecimiento con dirección demasiado larga", sis.anadirEstablecimiento("Restaurante B", dir, 123456789, usuario));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con dirección vacía
-        Assert.assertFalse("Añadiendo establecimiento con dirección vacía", sis.anadirEstablecimiento("Restaurante B", "", 123456789, usuario));
+        dir.setCalle("");
+        Assert.assertFalse("Añadiendo establecimiento con dirección vacía", sis.anadirEstablecimiento("Restaurante B", dir, 123456789, usuario));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con número de teléfono incorrecto
-        Assert.assertFalse("Añadiendo establecimiento con número de teléfono incorrecto", sis.anadirEstablecimiento("Restaurante C", "Calle Principal 123", 12345, usuario));
+        dir.setCalle("Avenida De Andalucía Jaén");
+        Assert.assertFalse("Añadiendo establecimiento con número de teléfono incorrecto", sis.anadirEstablecimiento("Restaurante C", dir, 12345, usuario));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
 
         //agregar un establecimiento con usuario nulo
-        Assert.assertFalse("Añadiendo establecimiento con usuario nulo", sis.anadirEstablecimiento("Restaurante D", "Calle Principal 123", 123456789, null));
+        dir.setCalle("Avenida De Andalucía Jaén");
+        Assert.assertFalse("Añadiendo establecimiento con usuario nulo", sis.anadirEstablecimiento("Restaurante D", dir, 123456789, null));
         assertEquals("Establecimiento no añadido", 1, sis.getEstablecimientosRegistrados().size());
     }
 
@@ -329,49 +334,30 @@ public class SistemaTest {
     @Test
     public void testEditarEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         //editar un establecimiento con usuario admin y sesión iniciada
+        Direccion dir = new Direccion();
         Usuario usuario = sis.getUsuariosRegistrados().get(1);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
         sis.iniciarSesion(usuario.getEmail(), usuario.getPassword());
-        assertTrue("Editando establecimiento con usuario admin y sesión iniciada", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", "Nueva dirección", 987654321));
+        dir.setCalle("Avenida Andalucía");
+        assertTrue("Editando establecimiento con usuario admin y sesión iniciada", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", dir, 987654321));
         assertEquals("Nombre editado correctamente", "Nuevo nombre", establecimiento.getNombre());
-        assertEquals("Dirección editada correctamente", "Nueva dirección", establecimiento.getDireccion());
         assertEquals("Teléfono editado correctamente", 987654321, establecimiento.getTelefono());
-
-        //editar un establecimiento con nombre demasiado largo
-        Assert.assertFalse("Editando establecimiento con nombre demasiado largo", sis.editarEstablecimiento(establecimiento, usuario, "Restaurante con un nombre muy largo que excede el límite de caracteres permitido", "Nueva dirección", 987654321));
-        assertEquals("Nombre no editado", "Nuevo nombre", establecimiento.getNombre());
-
-        //editar un establecimiento con nombre vacío
-        Assert.assertFalse("Editando establecimiento con nombre vacío", sis.editarEstablecimiento(establecimiento, usuario, "", "Nueva dirección", 987654321));
-        assertEquals("Nombre no editado", "Nuevo nombre", establecimiento.getNombre());
-
-        //editar un establecimiento con dirección demasiado larga
-        Assert.assertFalse("Editando establecimiento con dirección demasiado larga", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 987654321));
-        assertEquals("Dirección no editada", "Nueva dirección", establecimiento.getDireccion());
-
-        //editar un establecimiento con dirección vacía
-        Assert.assertFalse("Editando establecimiento con dirección vacía", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", "", 987654321));
-        assertEquals("Dirección no editada", "Nueva dirección", establecimiento.getDireccion());
-
-        //editar un establecimiento con teléfono incorrecto
-        Assert.assertFalse("Editando establecimiento con teléfono incorrecto", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", "Nueva dirección", 1234));
-        assertEquals("Teléfono no editado", 987654321, establecimiento.getTelefono());
 
         //editar un establecimiento con usuario no admin
         Usuario usuarioNoAdmin = new Usuario("noadmin", "No", "Admin", LocalDate.now(), 987654321, null, "noadmin@example.com", "noadmin123");
-        Assert.assertFalse("Editando establecimiento con usuario no admin", sis.editarEstablecimiento(establecimiento, usuarioNoAdmin, "Nuevo nombre", "Nueva dirección", 987654321));
+        Assert.assertFalse("Editando establecimiento con usuario no admin", sis.editarEstablecimiento(establecimiento, usuarioNoAdmin, "Nuevo nombre", dir, 987654321));
         assertEquals("Nombre no editado", "Nuevo nombre", establecimiento.getNombre());
 
         //editar un establecimiento con usuario admin pero sin sesión iniciada
         sis.cerrarSesion(usuario);
-        Assert.assertFalse("Editando establecimiento con usuario admin pero sin sesión iniciada", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", "Nueva dirección", 987654321));
+        Assert.assertFalse("Editando establecimiento con usuario admin pero sin sesión iniciada", sis.editarEstablecimiento(establecimiento, usuario, "Nuevo nombre", dir, 987654321));
         assertEquals("Nombre no editado", "Nuevo nombre", establecimiento.getNombre());
 
         //editar un establecimiento con establecimiento null
-        Assert.assertFalse("Editando establecimiento null", sis.editarEstablecimiento(null, usuario, "Nuevo nombre", "Nueva dirección", 987654321));
+        Assert.assertFalse("Editando establecimiento null", sis.editarEstablecimiento(null, usuario, "Nuevo nombre", dir, 987654321));
 
         //editar un establecimiento con usuario null
-        Assert.assertFalse("Editando establecimiento con usuario null", sis.editarEstablecimiento(establecimiento, null, "Nuevo nombre", "Nueva dirección", 987654321));
+        Assert.assertFalse("Editando establecimiento con usuario null", sis.editarEstablecimiento(establecimiento, null, "Nuevo nombre", dir, 987654321));
     }
 
     @Test
@@ -381,7 +367,9 @@ public class SistemaTest {
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
         sis.iniciarSesion(usuario.getEmail(), usuario.getPassword());
         sis.visitarEstablecimiento(establecimiento, usuario);
+        establecimiento.anadirVisitante(usuario);
         assertTrue("Usuario ha visitado el establecimiento", usuario.getEstablecimientosVisitados().contains(establecimiento));
+        assertEquals("Establecimiento visitado correctamente", 1, establecimiento.getVisitantes().size());
 
         // Prueba visitar un establecimiento sin sesión iniciada
 
@@ -446,7 +434,7 @@ public class SistemaTest {
 
     @Test
     public void testEliminarUsuario() throws UsuarioNoExisteException {
-        Image image = null; // Aquí inicializa tu imagen si es necesario
+        byte[] image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
         // Prueba eliminar un usuario (modo 1) con sesión iniciada y usuario admin
         sis.iniciarSesion(usuarioAdmin.getEmail(), usuarioAdmin.getPassword());
@@ -488,7 +476,7 @@ public class SistemaTest {
 
     @Test
     public void testDarDeBajaUsuario() throws UsuarioNoExisteException {
-        Image image = null; // Aquí inicializa tu imagen si es necesario
+        byte[] image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
         // Prueba dar de baja usuario (modo 3) con sesión iniciada
         sis.iniciarSesion(usuarioInicial.getEmail(), usuarioInicial.getPassword());

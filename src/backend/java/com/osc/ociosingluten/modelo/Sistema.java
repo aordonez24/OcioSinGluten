@@ -2,14 +2,13 @@ package modelo;
 
 import excepciones.UsuarioNoExisteException;
 
-import java.awt.*;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static constantes.Constantes.*;
 import excepciones.*;
-
+import herramientas.Direccion;
 
 
 public class Sistema {
@@ -82,7 +81,7 @@ public class Sistema {
         }
     }
 
-    public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
+    public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
         //Comprueba si existe ese usuario
         for (Usuario usuario : usuariosRegistrados) {
             if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username)) {
@@ -169,11 +168,11 @@ public class Sistema {
         return false;
     }
 
-    public boolean anadirEstablecimiento(String nombre, String direccion, int telefono, Usuario usu){
+    public boolean anadirEstablecimiento(String nombre, Direccion direccion, int telefono, Usuario usu){
         //Usu es quien añade el establecimiento
         if(usu != null && usu.isSesionIniciada() && existeUsuario(usu)) {
             String numeroComoCadena = String.valueOf(telefono);
-            if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.length() > 0 && direccion.length() <= 100) {
+            if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.getCalle().length() > 0 && direccion.getCalle().length() <= 100) {
                 Establecimiento est = new Establecimiento(nombre, telefono, direccion);
                 establecimientosRegistrados.add(est);
                 Actividad cont = new Actividad(usu, est, MensajePredefinido.HA_PUBLICADO);
@@ -198,12 +197,12 @@ public class Sistema {
     }
 
 
-    public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, String direccion, int telefono) throws EstablecimientoNoExistenteException {
+    public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, Direccion direccion, int telefono) throws EstablecimientoNoExistenteException {
         if (usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada()) {
             for (int i = 0; i < establecimientosRegistrados.size(); i++) {
                 if (est == establecimientosRegistrados.get(i)) {
                     String numeroComoCadena = String.valueOf(telefono);
-                    if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.length() > 0 && direccion.length() <= 100)
+                    if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.getCalle().length() > 0 && direccion.getCalle().length() <= 100)
                     {
                         if(nombre != est.getNombre())
                             est.setNombre(nombre);
