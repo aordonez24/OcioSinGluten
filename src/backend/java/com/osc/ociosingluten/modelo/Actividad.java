@@ -20,6 +20,7 @@ public class Actividad {
         this.autor = autor;
         this.establecimiento = establecimiento;
         this.mensajePredefinido = mensajePredefinido;
+        this.fechaContribucion = LocalDate.now();
     }
 
     public Usuario getAutor() {

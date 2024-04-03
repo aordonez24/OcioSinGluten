@@ -1,4 +1,4 @@
-import excepciones.UsuarioNoExisteException;
+import excepciones.*;
 import modelo.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,9 +10,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import static org.junit.Assert.*;
 
 import static constantes.Constantes.SALT_LENGTH;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertFalse;
 
@@ -99,17 +100,39 @@ public class SistemaTest {
     @Test
     public void testRegistro() {
         //registrar un nuevo usuario con datos válidos
-        assertTrue("Registro de nuevo usuario válido", sis.registro("nuevousuario", "Nuevo", "Usuario", LocalDate.now(), 123456789, null, "nuevo@example.com", "contrasena"));
-        assertTrue("Nuevo usuario registrado", existeUsuario("nuevo@example.com"));
+        try {
+            assertTrue("Registro de nuevo usuario válido", sis.registro("nuevousuario", "Nuevo", "Usuario", LocalDate.now(), 123456789, null, "nuevo@example.com", "contrasena"));
+            assertTrue("Nuevo usuario registrado", existeUsuario("nuevo@example.com"));
+        } catch (EmailYaExistenteException | ErrorDatosException e) {
+            fail("No se esperaba ninguna excepción aquí");
+        }
 
         //registrar un usuario con un email ya registrado
-        Assert.assertFalse("Registro con email ya registrado", sis.registro("otrousuario", "Otro", "Usuario", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+        try {
+            assertFalse("Registro con email ya registrado", sis.registro("otrousuario", "Otro", "Usuario", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+            fail("Se esperaba EmailYaExistenteException");
+        } catch (EmailYaExistenteException e) {
+        } catch (ErrorDatosException e) {
+            fail("Se esperaba EmailYaExistenteException, pero se lanzó ErrorDatosException");
+        }
 
         //registrar un usuario con un username ya registrado
-        Assert.assertFalse("Registro con username ya registrado", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "otro@example.com", "contrasena"));
+        try {
+            assertFalse("Registro con username ya registrado", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "otro@example.com", "contrasena"));
+            fail("Se esperaba EmailYaExistenteException");
+        } catch (EmailYaExistenteException e) {
+        } catch (ErrorDatosException e) {
+            fail("Se esperaba EmailYaExistenteException, pero se lanzó ErrorDatosException");
+        }
 
         //registrar un usuario con email y username ya registrados
-        Assert.assertFalse("Registro con email y username ya registrados", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+        try {
+            assertFalse("Registro con email y username ya registrados", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+            fail("Se esperaba EmailYaExistenteException");
+        } catch (EmailYaExistenteException e) {
+        } catch (ErrorDatosException e) {
+            fail("Se esperaba EmailYaExistenteException, pero se lanzó ErrorDatosException");
+        }
     }
 
     private boolean existeUsuario(String email) {
@@ -126,28 +149,44 @@ public class SistemaTest {
         //buscar un usuario con sesión iniciada y que existe
         Usuario usuarioConSesionIniciada = sis.getUsuariosRegistrados().get(0);
         usuarioConSesionIniciada.setSesionIniciada(true);
-        assertEquals("Buscando usuario con sesión iniciada y que existe", usuarioConSesionIniciada, sis.buscarUsuario(usuarioConSesionIniciada));
+        assertDoesNotThrow(() -> {
+            assertEquals("Buscando usuario con sesión iniciada y que existe", usuarioConSesionIniciada, sis.buscarUsuario(usuarioConSesionIniciada));
+        });
 
         //buscar un usuario con sesión no iniciada
         Usuario usuarioSinSesion = sis.getUsuariosRegistrados().get(0);
-        usuarioConSesionIniciada.setSesionIniciada(false);
-        assertNull("Buscando usuario con sesión no iniciada", sis.buscarUsuario(usuarioSinSesion));
+        usuarioSinSesion.setSesionIniciada(false);
+        assertThrows(SesionNoIniciadaException.class, () -> {
+            sis.buscarUsuario(usuarioSinSesion);
+        });
 
         //buscar un usuario que no existe
         Usuario usuarioNoExistente = new Usuario("noexiste", "No", "Existe", LocalDate.now(), 123456789, null, "noexiste@example.com", "contrasena");
-        assertNull("Buscando usuario que no existe", sis.buscarUsuario(usuarioNoExistente));
+        usuarioNoExistente.setSesionIniciada(true);
+        assertThrows(UsuarioNoExisteException.class, () -> {
+            sis.buscarUsuario(usuarioNoExistente);
+        });
     }
 
     @Test
     public void testBuscarEstablecimiento() {
         //buscar un establecimiento existente
         Establecimiento establecimientoExistente = sis.getEstablecimientosRegistrados().get(0);
-        assertEquals("Establecimiento existente encontrado", establecimientoExistente, sis.buscarEstablecimiento(establecimientoExistente));
+        try {
+            assertEquals("Establecimiento existente encontrado", establecimientoExistente, sis.buscarEstablecimiento(establecimientoExistente));
+        } catch (EstablecimientoNoExistenteException e) {
+            fail("Se lanzó una excepción inesperada: " + e.getMessage());
+        }
 
         //buscar un establecimiento que no existe
         Establecimiento establecimientoNoExistente = new Establecimiento("NombreNoExistente", 345434857, "jjjjjjjjjjjjjj");
-        assertNull("Establecimiento no existente no encontrado", sis.buscarEstablecimiento(establecimientoNoExistente));
+        try {
+            assertNull("Establecimiento no existente no encontrado", sis.buscarEstablecimiento(establecimientoNoExistente));
+        } catch (EstablecimientoNoExistenteException e) {
+            // Se esperaba que se lanzara esta excepción, no hace falta hacer nada aquí.
+        }
     }
+
 
     @Test
     public void testAnadirComentario() throws UsuarioNoExisteException {
@@ -260,7 +299,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEliminarEstablecimiento() throws UsuarioNoExisteException {
+    public void testEliminarEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         // Prueba eliminar un establecimiento con usuario admin y sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(1);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -288,7 +327,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testEditarEstablecimiento() throws UsuarioNoExisteException {
+    public void testEditarEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         //editar un establecimiento con usuario admin y sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(1);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -336,7 +375,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testVisitarEstablecimiento() throws UsuarioNoExisteException {
+    public void testVisitarEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         // Prueba visitar un establecimiento con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -353,7 +392,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testMarcarFavoritoEstablecimiento() throws UsuarioNoExisteException {
+    public void testMarcarFavoritoEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         // Prueba marcar un establecimiento como favorito con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);
@@ -369,7 +408,7 @@ public class SistemaTest {
     }
 
     @Test
-    public void testDarLikeEstablecimiento() throws UsuarioNoExisteException {
+    public void testDarLikeEstablecimiento() throws UsuarioNoExisteException, EstablecimientoNoExistenteException {
         // Prueba dar like a un establecimiento con sesión iniciada
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         Establecimiento establecimiento = sis.getEstablecimientosRegistrados().get(0);

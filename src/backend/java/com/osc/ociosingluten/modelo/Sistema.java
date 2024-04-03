@@ -82,32 +82,49 @@ public class Sistema {
         }
     }
 
-    public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password){
+    public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, Image fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
         //Comprueba si existe ese usuario
-        for(int i=0; i< usuariosRegistrados.size(); i++){
-            if(usuariosRegistrados.get(i).getEmail().equals(email) || usuariosRegistrados.get(i).getUsername().equals(username)) //Comprueba si ese email o username esta registrado
-                return false;
-            else {
-                usuariosRegistrados.add(new Usuario(username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password));
-                return true;
+        for (Usuario usuario : usuariosRegistrados) {
+            if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username)) {
+                throw new EmailYaExistenteException("El email o el nombre de usuario ya están registrados.");
             }
         }
-        return false;
-    }
 
-    public Usuario buscarUsuario(Usuario usuario){
-        if(usuario.isSesionIniciada()) {
-            if (existeUsuario(usuario))
-                return usuario;
+        // Validación de datos
+        if (username == null || nombre == null || apellidos == null || fechaNacimiento == null || email == null || password == null) {
+            throw new ErrorDatosException("Alguno de los datos requeridos es nulo.");
         }
-        return null;
+
+        if (username.isEmpty() || nombre.isEmpty() || apellidos.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            throw new ErrorDatosException("Alguno de los datos requeridos está vacío.");
+        }
+
+        // Si todas las validaciones pasan, se crea el usuario
+        Usuario nuevoUsuario = new Usuario(username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
+        usuariosRegistrados.add(nuevoUsuario);
+        return true;
     }
 
-    public Establecimiento buscarEstablecimiento(Establecimiento est){
-        if(establecimientosRegistrados.contains(est))
-            return est;
-        return null;
+    public Usuario buscarUsuario(Usuario usuario) throws UsuarioNoExisteException, SesionNoIniciadaException {
+        if (usuario.isSesionIniciada()) {
+            if (existeUsuario(usuario)) {
+                return usuario;
+            } else {
+                throw new UsuarioNoExisteException("El usuario no existe");
+            }
+        } else {
+            throw new SesionNoIniciadaException("El usuario no ha iniciado sesion");
+        }
     }
+
+    public Establecimiento buscarEstablecimiento(Establecimiento est) throws EstablecimientoNoExistenteException {
+        if(establecimientosRegistrados.contains(est)) {
+            return est;
+        } else {
+            throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
+        }
+    }
+
 
     public boolean anadirComentario(String texto, Establecimiento establecimiento, Usuario usu){
         //Usu es el usuario que realiza el comentario
@@ -167,19 +184,21 @@ public class Sistema {
         return false;
     }
 
-    public boolean eliminarEstablecimiento(Establecimiento est, Usuario usu){
-        if(usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada() && existeUsuario(usu)){
-            for(int i=0; i<establecimientosRegistrados.size(); i++){
-                if(est == establecimientosRegistrados.get(i)){
+    public boolean eliminarEstablecimiento(Establecimiento est, Usuario usu) throws EstablecimientoNoExistenteException {
+        if (usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada() && existeUsuario(usu)) {
+            for (int i = 0; i < establecimientosRegistrados.size(); i++) {
+                if (est == establecimientosRegistrados.get(i)) {
                     establecimientosRegistrados.remove(i);
                     return true;
                 }
             }
+            throw new EstablecimientoNoExistenteException("El establecimiento no existe en la lista.");
         }
         return false;
     }
 
-    public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, String direccion, int telefono) {
+
+    public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, String direccion, int telefono) throws EstablecimientoNoExistenteException {
         if (usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada()) {
             for (int i = 0; i < establecimientosRegistrados.size(); i++) {
                 if (est == establecimientosRegistrados.get(i)) {
@@ -194,6 +213,8 @@ public class Sistema {
                             est.setTelefono(telefono);
                         return true;
                     }
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento no existe en la lista.");
                 }
             }
         }
@@ -206,8 +227,15 @@ public class Sistema {
         return false;
     }
 
-    public boolean visitarEstablecimiento(Establecimiento est, Usuario usuario){
-        if(usuario.isSesionIniciada()) {
+    private boolean existeEstablecimiento(Establecimiento est) throws EstablecimientoNoExistenteException {
+        if(establecimientosRegistrados.contains(est))
+            return true;
+        else
+            throw new EstablecimientoNoExistenteException("El establecimiento no existe en la lista.");
+    }
+
+    public boolean visitarEstablecimiento(Establecimiento est, Usuario usuario) throws EstablecimientoNoExistenteException {
+        if(usuario.isSesionIniciada() && existeEstablecimiento(est)) {
             Actividad actividad = new Actividad(usuario, est, MensajePredefinido.HA_VISITADO);
             crearActividad(actividad, usuario);
             usuario.anadirEstablecimientoVisitado(est, actividad);
@@ -215,16 +243,16 @@ public class Sistema {
         }
         return false;
     }
-    public boolean marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario){
-        if(usuario.isSesionIniciada()) {
+    public boolean marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario) throws EstablecimientoNoExistenteException {
+        if(usuario.isSesionIniciada() && existeEstablecimiento(est)) {
             usuario.anadirEstablecimientoFavorito(est);
             return true;
         }
         return false;
     }
 
-    public boolean darLikeEstablecimiento(Establecimiento est, Usuario usu){
-        if(usu.isSesionIniciada()){
+    public boolean darLikeEstablecimiento(Establecimiento est, Usuario usu) throws EstablecimientoNoExistenteException {
+        if(usu.isSesionIniciada() && existeEstablecimiento(est)){
             est.setNumLikes(est.getNumLikes()+1);
             Actividad actividad = new Actividad(usu, est, MensajePredefinido.HA_DADO_LIKE);
             crearActividad(actividad, usu);
