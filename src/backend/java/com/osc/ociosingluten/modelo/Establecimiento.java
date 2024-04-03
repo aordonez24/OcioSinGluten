@@ -23,10 +23,12 @@ public class Establecimiento {
     @Size(min = 0, max = 30)
     private String nombre;
 
+    @NotNull
     @Pattern(regexp= ExpresionesRegulares.TLF)
     private int telefono;
 
     @Embedded
+    @NotNull
     private Direccion direccion;
 
     @NotNull

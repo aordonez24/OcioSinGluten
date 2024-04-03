@@ -1,6 +1,8 @@
 package modelo;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
@@ -8,11 +10,32 @@ import java.util.ArrayList;
 
 @Entity
 public class Comentario {
-    private String mensaje;
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "username") // Nombre de la columna en la tabla de Comentario que hace referencia al usuario
     private Usuario autor;
-    private int numLikes;
+
+    @Id
     private LocalDate fecha;
+
+    @Size(max = 140)
+    @NotNull
+    private String mensaje;
+
+    private int numLikes;
+
+    @OneToMany(mappedBy = "comentarioPadre")
     private ArrayList<Comentario> comentarios;
+
+    /*
+    La idea de tener un atributo comentarioPadre en la clase Comentario es permitir la creación de una estructura de comentarios anidados o comentarios secundarios. Esto es útil en escenarios donde se permite a los usuarios responder a comentarios existentes.
+
+    Por ejemplo, supongamos que un usuario deja un comentario inicial en una publicación, y otros usuarios pueden responder a ese comentario original. Cada respuesta sería un comentario secundario y estaría asociado al comentario padre al que está respondiendo.
+
+    Al tener un atributo comentarioPadre, puedes establecer fácilmente las relaciones entre comentarios principales y sus respuestas. Esto facilita la navegación a través de la estructura de comentarios y permite mostrar los comentarios de manera jerárquica en la interfaz de usuario, si es necesario.
+     */
+    @ManyToOne
+    private Comentario comentarioPadre;
 
     public Comentario(String mensaje, Usuario autor) {
         this.mensaje = mensaje;
@@ -28,6 +51,10 @@ public class Comentario {
         this.numLikes = numLikes;
         this.fecha = fecha;
         this.comentarios = comentarios;
+    }
+
+    public Comentario() {
+
     }
 
     public String getMensaje() {

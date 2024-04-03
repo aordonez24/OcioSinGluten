@@ -1,6 +1,4 @@
-package chat;
-
-//Se encarga de administrar las conexiones con el webSocket
+package chat;//Se encarga de administrar las conexiones con el webSocket
 //Que va a suceder cuando alguien se conecte al websocket
 
 import org.slf4j.Logger;

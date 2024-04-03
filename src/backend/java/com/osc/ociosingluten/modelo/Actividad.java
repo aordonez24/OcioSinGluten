@@ -1,14 +1,29 @@
 package modelo;
 
-import jakarta.persistence.Entity;
+import herramientas.MensajePredefinido;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 
 import java.time.LocalDate;
 
 @Entity
 public class Actividad {
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "username") // Nombre de la columna en la tabla de Actividad que hace referencia al usuario
     private Usuario autor;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "nombre") // Nombre de la columna en la tabla de Actividad que hace referencia al establecimiento
     private Establecimiento establecimiento;
+
+    @Id
     private LocalDate fechaContribucion;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
     private MensajePredefinido mensajePredefinido;
 
     public Actividad(Usuario autor, Establecimiento establecimiento, LocalDate fechaContribucion, MensajePredefinido mensajePredefinido) {
@@ -23,6 +38,10 @@ public class Actividad {
         this.establecimiento = establecimiento;
         this.mensajePredefinido = mensajePredefinido;
         this.fechaContribucion = LocalDate.now();
+    }
+
+    public Actividad() {
+
     }
 
     public Usuario getAutor() {
