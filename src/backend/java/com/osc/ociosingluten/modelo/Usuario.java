@@ -21,7 +21,11 @@ enum Rol{
 public class Usuario {
 
     @Id
+    @Pattern(regexp= ExpresionesRegulares.DNI)
+    private String dni;
+
     @NotNull
+    @Size(min = 0, max = 30)
     private String username;
 
     @Size(min = 0, max = 15)
@@ -42,7 +46,6 @@ public class Usuario {
     @Lob
     private byte[] fotoPerfil;
 
-    @Id
     @Email
     private String email;
 
@@ -78,7 +81,8 @@ public class Usuario {
     private boolean sesionCerrada;
 
 
-    public Usuario(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) {
+    public Usuario(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) {
+        this.dni = dni;
         this.username = username;
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -288,5 +292,11 @@ public class Usuario {
             contribuciones.add(cont);
     }
 
+    public String getDni() {
+        return dni;
+    }
 
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
 }

@@ -26,7 +26,8 @@ public class SistemaTest {
         sis = new Sistema();
         byte[] image = null; // Aquí inicializa tu imagen si es necesario
         LocalDate fecha = LocalDate.now();
-        usuarioInicial = new Usuario("aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
+        String dni = "78162640S";
+        usuarioInicial = new Usuario(dni, "aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
         sis.anadirUsuarioPrueba(usuarioInicial);
         Direccion dir = new Direccion("Jaén", "Jaén", "Avenida de Andalucía, 83", 23006, "España");
         Establecimiento establecimiento1 = new Establecimiento("EstPrueba1", 670988953, dir);
@@ -35,7 +36,8 @@ public class SistemaTest {
         Comentario com = new Comentario("aaaaaaaaaaaaaaaaaaaaa", usuarioInicial);
         boolean b = sis.anadirComentario(com.getMensaje(), establecimiento1, usuarioInicial);
         usuarioInicial.setSesionIniciada(false);
-        usuarioAdmin = new Usuario("aor00030", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@admin.es", "holaaaaa");
+        String dni2 = "78162641Q";
+        usuarioAdmin = new Usuario(dni2, "aor00030", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@admin.es", "holaaaaa");
         sis.anadirUsuarioPrueba(usuarioAdmin);
         Actividad act = new Actividad(usuarioInicial, establecimiento1, fecha, MensajePredefinido.HA_VISITADO);
         sis.anadirActividadPrueba(act);
@@ -67,6 +69,7 @@ public class SistemaTest {
 
     @Test
     public void testCerrarSesion() {
+        String dni2 = "78062641Q";
         //cerrar sesión con un usuario existente
         Usuario usuario = sis.getUsuariosRegistrados().get(0);
         assertTrue("Cerrando sesión de usuario existente", sis.cerrarSesion(usuario));
@@ -74,7 +77,7 @@ public class SistemaTest {
         assertTrue("Sesión cerrada correctamente", usuario.isSesionCerrada());
 
         //cerrar sesión con un usuario que no existe
-        Usuario usuarioNoExistente = new Usuario("noexiste", "No", "Existe", LocalDate.now(), 123456789, null, "noexiste@example.com", "contrasena");
+        Usuario usuarioNoExistente = new Usuario(dni2, "noexiste", "No", "Existe", LocalDate.now(), 123456789, null, "noexiste@example.com", "contrasena");
         Assert.assertFalse("Cerrando sesión de usuario no existente", sis.cerrarSesion(usuarioNoExistente));
     }
 
@@ -98,8 +101,9 @@ public class SistemaTest {
     @Test
     public void testRegistro() {
         //registrar un nuevo usuario con datos válidos
+        String dni2 = "78162541Q";
         try {
-            assertTrue("Registro de nuevo usuario válido", sis.registro("nuevousuario", "Nuevo", "Usuario", LocalDate.now(), 123456789, null, "nuevo@example.com", "contrasena"));
+            assertTrue("Registro de nuevo usuario válido", sis.registro(dni2, "nuevousuario", "Nuevo", "Usuario", LocalDate.now(), 123456789, null, "nuevo@example.com", "contrasena"));
             assertTrue("Nuevo usuario registrado", existeUsuario("nuevo@example.com"));
         } catch (EmailYaExistenteException | ErrorDatosException e) {
             fail("No se esperaba ninguna excepción aquí");
@@ -107,7 +111,7 @@ public class SistemaTest {
 
         //registrar un usuario con un email ya registrado
         try {
-            assertFalse("Registro con email ya registrado", sis.registro("otrousuario", "Otro", "Usuario", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+            assertFalse("Registro con email ya registrado", sis.registro(dni2, "otrousuario", "Otro", "Usuario", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
             fail("Se esperaba EmailYaExistenteException");
         } catch (EmailYaExistenteException e) {
         } catch (ErrorDatosException e) {
@@ -116,7 +120,7 @@ public class SistemaTest {
 
         //registrar un usuario con un username ya registrado
         try {
-            assertFalse("Registro con username ya registrado", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "otro@example.com", "contrasena"));
+            assertFalse("Registro con username ya registrado", sis.registro(dni2, "aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "otro@example.com", "contrasena"));
             fail("Se esperaba EmailYaExistenteException");
         } catch (EmailYaExistenteException e) {
         } catch (ErrorDatosException e) {
@@ -125,7 +129,7 @@ public class SistemaTest {
 
         //registrar un usuario con email y username ya registrados
         try {
-            assertFalse("Registro con email y username ya registrados", sis.registro("aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
+            assertFalse("Registro con email y username ya registrados", sis.registro(dni2, "aor00039", "Alvaro", "Ordoñez", LocalDate.now(), 987654321, null, "aor00039@red.ujaen.es", "contrasena"));
             fail("Se esperaba EmailYaExistenteException");
         } catch (EmailYaExistenteException e) {
         } catch (ErrorDatosException e) {
@@ -159,7 +163,8 @@ public class SistemaTest {
         });
 
         //buscar un usuario que no existe
-        Usuario usuarioNoExistente = new Usuario("noexiste", "No", "Existe", LocalDate.now(), 123456789, null, "noexiste@example.com", "contrasena");
+        String dni2 = "78100641Q";
+        Usuario usuarioNoExistente = new Usuario(dni2, "noexiste", "No", "Existe", LocalDate.now(), 123456789, null, "noexiste@example.com", "contrasena");
         usuarioNoExistente.setSesionIniciada(true);
         assertThrows(UsuarioNoExisteException.class, () -> {
             sis.buscarUsuario(usuarioNoExistente);
@@ -224,7 +229,8 @@ public class SistemaTest {
         Assert.assertFalse("Comentario eliminado", sis.getComentariosRealizados().contains(comentario));
 
         //eliminar comentario con sesión no iniciada
-        Usuario usuarioSinSesion = new Usuario("sinSesion", "Sin", "Sesión", LocalDate.now(), 123456789, null, "sin@sesion.com", "contrasena");
+        String dni2 = "78162641P";
+        Usuario usuarioSinSesion = new Usuario(dni2, "sinSesion", "Sin", "Sesión", LocalDate.now(), 123456789, null, "sin@sesion.com", "contrasena");
         Assert.assertFalse("Eliminar comentario con sesión no iniciada", sis.eliminarComentario(comentario, usuarioSinSesion));
 
         //eliminar comentario con comentario no existente
@@ -247,7 +253,8 @@ public class SistemaTest {
         assertEquals("Texto no cambió", "Nuevo texto", comentario.getMensaje());
 
         //editar comentario con usuario no autorizado
-        Usuario usuarioNoAutorizado = new Usuario("noautorizado", "No", "Autorizado", LocalDate.now(), 123456789, null, "noautorizado@example.com", "contrasena");
+        String dni2 = "78162641Q43";
+        Usuario usuarioNoAutorizado = new Usuario(dni2, "noautorizado", "No", "Autorizado", LocalDate.now(), 123456789, null, "noautorizado@example.com", "contrasena");
         Assert.assertFalse("Editando comentario con usuario no autorizado", sis.editarComentario(comentario, "Nuevo texto 2", usuarioNoAutorizado));
 
         //editar comentario con usuario autorizado pero sin sesión iniciada
@@ -314,7 +321,8 @@ public class SistemaTest {
         assertEquals("Establecimiento eliminado correctamente", 0, sis.getEstablecimientosRegistrados().size());
 
         // Prueba eliminar un establecimiento con usuario no admin
-        Usuario usuarioNoAdmin = new Usuario("noadmin", "No", "Admin", LocalDate.now(), 987654321, null, "noadmin@example.com", "noadmin123");
+        String dni2 = "7816567641Q";
+        Usuario usuarioNoAdmin = new Usuario(dni2, "noadmin", "No", "Admin", LocalDate.now(), 987654321, null, "noadmin@example.com", "noadmin123");
         Assert.assertFalse("Eliminando establecimiento con usuario no admin", sis.eliminarEstablecimiento(establecimiento, usuarioNoAdmin));
         assertEquals("Establecimiento no eliminado", 0, sis.getEstablecimientosRegistrados().size());
 
@@ -345,7 +353,8 @@ public class SistemaTest {
         assertEquals("Teléfono editado correctamente", 987654321, establecimiento.getTelefono());
 
         //editar un establecimiento con usuario no admin
-        Usuario usuarioNoAdmin = new Usuario("noadmin", "No", "Admin", LocalDate.now(), 987654321, null, "noadmin@example.com", "noadmin123");
+        String dni2 = "345638475f";
+        Usuario usuarioNoAdmin = new Usuario(dni2, "noadmin", "No", "Admin", LocalDate.now(), 987654321, null, "noadmin@example.com", "noadmin123");
         Assert.assertFalse("Editando establecimiento con usuario no admin", sis.editarEstablecimiento(establecimiento, usuarioNoAdmin, "Nuevo nombre", dir, 987654321));
         assertEquals("Nombre no editado", "Nuevo nombre", establecimiento.getNombre());
 
@@ -428,7 +437,8 @@ public class SistemaTest {
 
         // Prueba seguir a un usuario inexistente
         usuario.setSesionIniciada(true);
-        Usuario usuarioInexistente = new Usuario("usuarioinexistente", "Usuario", "Inexistente", LocalDate.now(), 987654321, null, "usuarioinexistente@example.com", "contrasena");
+        String dni2 = "781626466Q";
+        Usuario usuarioInexistente = new Usuario(dni2, "usuarioinexistente", "Usuario", "Inexistente", LocalDate.now(), 987654321, null, "usuarioinexistente@example.com", "contrasena");
         sis.seguirUsuario(usuario, usuarioInexistente);
         Assert.assertFalse("Usuario no ha seguido a un usuario inexistente", usuario.getSeguidos().contains(usuarioInexistente));
     }
@@ -444,14 +454,16 @@ public class SistemaTest {
 
         // Prueba eliminar un usuario sin sesión iniciada
         usuarioAdmin.setSesionIniciada(false);
-        usuarioInicial = new Usuario("aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
+        String dni2 = "7816266541Q";
+        usuarioInicial = new Usuario(dni2,"aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
         sis.anadirUsuarioPrueba(usuarioInicial);
         Assert.assertFalse("Eliminar usuario sin sesión iniciada", sis.gestionUsuario(usuarioAdmin, 1, usuarioInicial, null, null, null, null));
         assertTrue("Usuario no eliminado", sis.existeUsuario(usuarioInicial));
 
         // Prueba eliminar un usuario con sesión iniciada pero no admin
         usuarioInicial.setSesionIniciada(true);
-        usuarioInicial = new Usuario("aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
+        String dni3 = "74162641Q";
+        usuarioInicial = new Usuario(dni3, "aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
         sis.anadirUsuarioPrueba(usuarioInicial);
         Assert.assertFalse("Eliminar usuario con sesión iniciada pero no admin", sis.gestionUsuario(usuarioInicial, 1, usuarioAdmin, null, null, null, null));
         assertTrue("Usuario no eliminado", sis.existeUsuario(usuarioInicial));
@@ -485,7 +497,8 @@ public class SistemaTest {
         Assert.assertFalse("Usuario eliminado correctamente", sis.existeUsuario(usuarioInicial));
 
         // Prueba dar de baja usuario sin sesión iniciada
-        usuarioInicial = new Usuario("aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
+        String dni2 = "847564387p";
+        usuarioInicial = new Usuario(dni2, "aor00039", "Alvaro", "Ordoñez Romero", fecha, 670988953, image, "aor00039@red.ujaen.es", "123456789");
         sis.anadirUsuarioPrueba(usuarioInicial);
         Assert.assertFalse("Dar de baja usuario sin sesión iniciada", sis.gestionUsuario(usuarioInicial, 3, null, null, null, null, null));
         assertTrue("Usuario no eliminado", sis.existeUsuario(usuarioInicial));

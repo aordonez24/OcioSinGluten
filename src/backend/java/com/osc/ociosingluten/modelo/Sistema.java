@@ -82,10 +82,10 @@ public class Sistema {
         }
     }
 
-    public boolean registro(String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
+    public boolean registro(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
         //Comprueba si existe ese usuario
         for (Usuario usuario : usuariosRegistrados) {
-            if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username)) {
+            if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username) || usuario.getDni().equals(dni)) {
                 throw new EmailYaExistenteException("El email o el nombre de usuario ya están registrados.");
             }
         }
@@ -100,7 +100,7 @@ public class Sistema {
         }
 
         // Si todas las validaciones pasan, se crea el usuario
-        Usuario nuevoUsuario = new Usuario(username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
+        Usuario nuevoUsuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
         usuariosRegistrados.add(nuevoUsuario);
         return true;
     }
