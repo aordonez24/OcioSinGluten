@@ -1,4 +1,4 @@
-package modelo;
+package com.osc.ociosingluten.modelo;
 
 import excepciones.UsuarioNoExisteException;
 

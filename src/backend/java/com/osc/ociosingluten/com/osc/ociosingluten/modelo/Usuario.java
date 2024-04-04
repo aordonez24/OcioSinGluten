@@ -1,23 +1,18 @@
-package modelo;
+package com.osc.ociosingluten.modelo;
 
 import herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-import java.awt.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
-import static constantes.Constantes.SALT_LENGTH;
 
 enum Rol{
     COMUN, ADMIN
 };
 
 @Entity
+@Table (name = "usuarios")
 public class Usuario {
 
     @Id
@@ -66,7 +61,7 @@ public class Usuario {
     private ArrayList<Establecimiento> establecimientosVisitados;
 
     @ManyToMany
-    private ArrayList<Actividad> contribuciones;
+    private ArrayList<Actividad> actividades;
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -95,7 +90,7 @@ public class Usuario {
         this.seguidores = new ArrayList<>();
         this.establecimientosFavoritos = new ArrayList<>();
         this.establecimientosVisitados = new ArrayList<>();
-        this.contribuciones = new ArrayList<>();
+        this.actividades = new ArrayList<>();
         if(comprobarRol(email))
             this.rol = Rol.COMUN;
         else
@@ -205,12 +200,12 @@ public class Usuario {
         this.establecimientosVisitados = establecimientosVisitados;
     }
 
-    public ArrayList<Actividad> getContribuciones() {
-        return contribuciones;
+    public ArrayList<Actividad> getActividades() {
+        return actividades;
     }
 
-    public void setContribuciones(ArrayList<Actividad> contribuciones) {
-        this.contribuciones = contribuciones;
+    public void setActividades(ArrayList<Actividad> contribuciones) {
+        this.actividades = contribuciones;
     }
 
     public Rol getRol() {
@@ -275,7 +270,7 @@ public class Usuario {
     public void anadirEstablecimientoVisitado(Establecimiento est, Actividad actividad){
         if(!establecimientosVisitados.contains(est))
             establecimientosVisitados.add(est);
-        contribuciones.add(actividad);
+        actividades.add(actividad);
     }
 
     public void seguirUsuario(Usuario usu){
@@ -284,12 +279,12 @@ public class Usuario {
     }
 
     public void eliminarActividad(Actividad cont){
-        if(contribuciones.contains(cont))
-            contribuciones.remove(cont);
+        if(actividades.contains(cont))
+            actividades.remove(cont);
     }
     public void anadirActividad(Actividad cont){
-        if(!contribuciones.contains(cont))
-            contribuciones.add(cont);
+        if(!actividades.contains(cont))
+            actividades.add(cont);
     }
 
     public String getDni() {

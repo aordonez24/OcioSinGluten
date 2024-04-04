@@ -1,9 +1,8 @@
-package modelo;
+package com.osc.ociosingluten.modelo;
 
 import herramientas.MensajePredefinido;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
 
 import java.time.LocalDate;
 
@@ -11,12 +10,12 @@ import java.time.LocalDate;
 public class Actividad {
     @Id
     @ManyToOne
-    @JoinColumn(name = "username") // Nombre de la columna en la tabla de Actividad que hace referencia al usuario
+    @JoinColumn(name = "dni") // Nombre de la columna en la tabla de Actividad que hace referencia al usuario
     private Usuario autor;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "nombre") // Nombre de la columna en la tabla de Actividad que hace referencia al establecimiento
+    @JoinColumn(name = "idEstablecimiento") // Nombre de la columna en la tabla de Actividad que hace referencia al establecimiento
     private Establecimiento establecimiento;
 
     @Id

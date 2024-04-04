@@ -1,4 +1,4 @@
-package modelo;
+package com.osc.ociosingluten.modelo;
 
 import herramientas.Direccion;
 import herramientas.ExpresionesRegulares;
