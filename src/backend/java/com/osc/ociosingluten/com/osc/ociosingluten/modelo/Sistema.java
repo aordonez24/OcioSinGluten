@@ -5,6 +5,7 @@ import excepciones.UsuarioNoExisteException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import static constantes.Constantes.*;
 import excepciones.*;
@@ -15,10 +16,10 @@ import herramientas.MensajePredefinido;
 public class Sistema {
     private String nombre;
     private String email;
-    private ArrayList<Usuario> usuariosRegistrados;
-    private ArrayList<Establecimiento> establecimientosRegistrados;
-    private ArrayList<Actividad> actividadesRealizadas;
-    private ArrayList<Comentario> comentariosRealizados;
+    private List<Usuario> usuariosRegistrados;
+    private List<Establecimiento> establecimientosRegistrados;
+    private List<Actividad> actividadesRealizadas;
+    private List<Comentario> comentariosRealizados;
 
     public Sistema() {
         this.nombre = "OcioSinGluten";
@@ -339,19 +340,19 @@ public class Sistema {
         return email;
     }
 
-    public ArrayList<Usuario> getUsuariosRegistrados() {
+    public List<Usuario> getUsuariosRegistrados() {
         return usuariosRegistrados;
     }
 
-    public ArrayList<Establecimiento> getEstablecimientosRegistrados() {
+    public List<Establecimiento> getEstablecimientosRegistrados() {
         return establecimientosRegistrados;
     }
 
-    public ArrayList<Actividad> getActividadesRealizadas() {
+    public List<Actividad> getActividadesRealizadas() {
         return actividadesRealizadas;
     }
 
-    public ArrayList<Comentario> getComentariosRealizados() {
+    public List<Comentario> getComentariosRealizados() {
         return comentariosRealizados;
     }
 }

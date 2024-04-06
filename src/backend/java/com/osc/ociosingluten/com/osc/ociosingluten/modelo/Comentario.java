@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Comentario {
@@ -24,7 +25,7 @@ public class Comentario {
     private int numLikes;
 
     @OneToMany(mappedBy = "comentarioPadre")
-    private ArrayList<Comentario> comentarios;
+    private List<Comentario> comentarios;
 
     /*
     La idea de tener un atributo comentarioPadre en la clase Comentario es permitir la creación de una estructura de comentarios anidados o comentarios secundarios. Esto es útil en escenarios donde se permite a los usuarios responder a comentarios existentes.
@@ -88,11 +89,11 @@ public class Comentario {
         this.fecha = fecha;
     }
 
-    public ArrayList<Comentario> getComentarios() {
+    public List<Comentario> getComentarios() {
         return comentarios;
     }
 
-    public void setComentarios(ArrayList<Comentario> comentarios) {
+    public void setComentarios(List<Comentario> comentarios) {
         this.comentarios = comentarios;
     }
 }

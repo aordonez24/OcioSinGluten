@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 enum Rol{
     COMUN, ADMIN
@@ -35,7 +36,7 @@ public class Usuario {
     @NotNull
     private LocalDate fechaNacimiento;
 
-    @Pattern(regexp= ExpresionesRegulares.TLF)
+    @Digits(integer = 9, fraction = 0)
     private int telefono;
 
     @Lob
@@ -49,26 +50,26 @@ public class Usuario {
     private String password;
 
     @ManyToMany
-    private ArrayList<Usuario> seguidos;
+    private List<Usuario> seguidos;
 
     @ManyToMany(mappedBy = "seguidos")
-    private ArrayList<Usuario> seguidores;
+    private List<Usuario> seguidores;
 
     @ManyToMany
-    private ArrayList<Establecimiento> establecimientosFavoritos;
+    private List<Establecimiento> establecimientosFavoritos;
 
     @ManyToMany
-    private ArrayList<Establecimiento> establecimientosVisitados;
+    private List<Establecimiento> establecimientosVisitados;
 
     @ManyToMany
-    private ArrayList<Actividad> actividades;
+    private List<Actividad> actividades;
 
     @Enumerated(EnumType.STRING)
     @NotNull
     private Rol rol;
 
     @OneToMany
-    private ArrayList<Comentario> comentariosRealizados;
+    private List<Comentario> comentariosRealizados;
 
     @Transient
     private boolean sesionIniciada;
@@ -101,7 +102,9 @@ public class Usuario {
 
     }
 
+
     public Usuario() {
+        this.rol = Rol.COMUN;
     }
 
     public String getUsername() {
@@ -168,43 +171,43 @@ public class Usuario {
         this.password = password;
     }
 
-    public ArrayList<Usuario> getSeguidos() {
+    public List<Usuario> getSeguidos() {
         return seguidos;
     }
 
-    public void setSeguidos(ArrayList<Usuario> seguidos) {
+    public void setSeguidos(List<Usuario> seguidos) {
         this.seguidos = seguidos;
     }
 
-    public ArrayList<Usuario> getSeguidores() {
+    public List<Usuario> getSeguidores() {
         return seguidores;
     }
 
-    public void setSeguidores(ArrayList<Usuario> seguidores) {
+    public void setSeguidores(List<Usuario> seguidores) {
         this.seguidores = seguidores;
     }
 
-    public ArrayList<Establecimiento> getEstablecimientosFavoritos() {
+    public List<Establecimiento> getEstablecimientosFavoritos() {
         return establecimientosFavoritos;
     }
 
-    public void setEstablecimientosFavoritos(ArrayList<Establecimiento> establecimientosFavoritos) {
+    public void setEstablecimientosFavoritos(List<Establecimiento> establecimientosFavoritos) {
         this.establecimientosFavoritos = establecimientosFavoritos;
     }
 
-    public ArrayList<Establecimiento> getEstablecimientosVisitados() {
+    public List<Establecimiento> getEstablecimientosVisitados() {
         return establecimientosVisitados;
     }
 
-    public void setEstablecimientosVisitados(ArrayList<Establecimiento> establecimientosVisitados) {
+    public void setEstablecimientosVisitados(List<Establecimiento> establecimientosVisitados) {
         this.establecimientosVisitados = establecimientosVisitados;
     }
 
-    public ArrayList<Actividad> getActividades() {
+    public List<Actividad> getActividades() {
         return actividades;
     }
 
-    public void setActividades(ArrayList<Actividad> contribuciones) {
+    public void setActividades(List<Actividad> contribuciones) {
         this.actividades = contribuciones;
     }
 
@@ -216,11 +219,11 @@ public class Usuario {
         this.rol = rol;
     }
 
-    public ArrayList<Comentario> getComentariosRealizados() {
+    public List<Comentario> getComentariosRealizados() {
         return comentariosRealizados;
     }
 
-    public void setComentariosRealizados(ArrayList<Comentario> comentariosRealizados) {
+    public void setComentariosRealizados(List<Comentario> comentariosRealizados) {
         this.comentariosRealizados = comentariosRealizados;
     }
 

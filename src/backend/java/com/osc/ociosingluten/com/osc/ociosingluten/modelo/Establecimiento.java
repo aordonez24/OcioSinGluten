@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static constantes.Constantes.mediaValoracion;
 
@@ -35,10 +36,10 @@ public class Establecimiento {
     private int numLikes;
 
     @OneToMany
-    private ArrayList<Comentario> comentarios;
+    private List<Comentario> comentarios;
 
     @ManyToMany
-    private ArrayList<Usuario> visitantes;
+    private List<Usuario> visitantes;
 
     public Establecimiento(String nombre, int telefono, Direccion direccion) {
         this.idEstablecimiento = generarIdUnico(direccion.getLocalidad(), direccion.getProvincia(), direccion.getCodPostal());
@@ -87,11 +88,11 @@ public class Establecimiento {
         this.numLikes = numLikes;
     }
 
-    public ArrayList<Comentario> getComentarios() {
+    public List<Comentario> getComentarios() {
         return comentarios;
     }
 
-    public void setComentarios(ArrayList<Comentario> comentarios) {
+    public void setComentarios(List<Comentario> comentarios) {
         this.comentarios = comentarios;
     }
 
@@ -137,7 +138,7 @@ public class Establecimiento {
         return direccion;
     }
 
-    public ArrayList<Usuario> getVisitantes() {
+    public List<Usuario> getVisitantes() {
         return visitantes;
     }
 
