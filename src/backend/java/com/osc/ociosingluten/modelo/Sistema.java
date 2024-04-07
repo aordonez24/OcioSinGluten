@@ -1,14 +1,13 @@
 package com.osc.ociosingluten.modelo;
 
-import excepciones.UsuarioNoExisteException;
-
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static constantes.Constantes.*;
-import excepciones.*;
+
+import com.osc.ociosingluten.excepciones.*;
 import herramientas.Direccion;
 import herramientas.MensajePredefinido;
 

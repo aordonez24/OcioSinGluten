@@ -1,5 +1,7 @@
-package com.osc.ociosingluten.repositorio;
+package com.osc.ociosingluten;
+
 import com.osc.ociosingluten.modelo.Usuario;
+import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,11 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import java.time.LocalDate;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -22,7 +20,7 @@ public class UsuarioRepositoryTest {
     private UsuarioRepository repositorio;
 
     @Test
-    public void testOperacionesUsuario(){
+    public void estOperacionesUsuario(){
         String email = "aor00039@red.ujaen.es";
         LocalDate fecha = LocalDate.of(2002, 10, 24);
         byte[] foto = null;

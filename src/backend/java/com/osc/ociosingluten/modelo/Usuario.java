@@ -4,9 +4,12 @@ import herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import static constantes.Constantes.MaxlargoContrasena;
 
 enum Rol{
     COMUN, ADMIN
@@ -297,4 +300,26 @@ public class Usuario {
     public void setDni(String dni) {
         this.dni = dni;
     }
+
+    public void olvidarContraseña(Usuario usu){
+        //usu es el usuario al que se le olvida la contraseña
+        if(usu.isSesionIniciada()){
+            usu.setPassword(generarContrasenaAleatoria());
+        }
+    }
+
+    private String generarContrasenaAleatoria() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        int longitud = MaxlargoContrasena;
+
+        StringBuilder contrasena = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+        for (int i = 0; i < longitud; i++) {
+            int indice = random.nextInt(caracteres.length());
+            contrasena.append(caracteres.charAt(indice));
+        }
+        return contrasena.toString();
+    }
+
+
 }

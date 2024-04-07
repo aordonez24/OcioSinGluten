@@ -8,17 +8,21 @@ import java.time.LocalDate;
 
 @Entity
 public class Actividad {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
+    private int id;
+
     @ManyToOne
     @JoinColumn(name = "dni") // Nombre de la columna en la tabla de Actividad que hace referencia al usuario
     private Usuario autor;
 
-    @Id
+
     @ManyToOne
     @JoinColumn(name = "idEstablecimiento") // Nombre de la columna en la tabla de Actividad que hace referencia al establecimiento
     private Establecimiento establecimiento;
 
-    @Id
+    @NotNull
     private LocalDate fechaContribucion;
 
     @Enumerated(EnumType.STRING)

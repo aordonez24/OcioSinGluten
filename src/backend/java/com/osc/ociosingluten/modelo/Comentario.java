@@ -2,6 +2,7 @@ package com.osc.ociosingluten.modelo;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -10,12 +11,16 @@ import java.util.List;
 
 @Entity
 public class Comentario {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
+    private int id;
+
     @ManyToOne
     @JoinColumn(name = "username") // Nombre de la columna en la tabla de Comentario que hace referencia al usuario
     private Usuario autor;
 
-    @Id
+    @NotNull
     private LocalDate fecha;
 
     @Size(max = 140)

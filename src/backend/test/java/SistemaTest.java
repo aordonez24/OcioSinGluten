@@ -1,7 +1,9 @@
+import com.osc.ociosingluten.*;
 import com.osc.ociosingluten.modelo.*;
-import excepciones.*;
+import com.osc.ociosingluten.excepciones.*;
 import herramientas.Direccion;
 import herramientas.MensajePredefinido;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
