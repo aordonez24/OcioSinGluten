@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -28,20 +29,20 @@ public class UsuarioRepositoryTest {
 
         repositorio.save(usuario);
 
-        Usuario usuarioGuardado = repositorio.findByEmail(email);
-        Usuario usuario1 = repositorio.findByUsername("aor00039");
+        Optional<Usuario> usuarioGuardado = repositorio.findByEmail(email);
+        Optional<Usuario> usuario1 = repositorio.findByUsername("aor00039");
 
         Assert.assertNotNull(usuarioGuardado);
-        Assert.assertEquals("Alvaro",usuarioGuardado.getNombre());
-        Assert.assertEquals("78162640S",usuarioGuardado.getDni());
-        Assert.assertEquals("78162640S",usuario1.getDni());
+        Assert.assertEquals("Alvaro",usuarioGuardado.get().getNombre());
+        Assert.assertEquals("78162640S",usuarioGuardado.get().getDni());
+        Assert.assertEquals("78162640S",usuario1.get().getDni());
 
 
         String dni = usuario.getDni();
         repositorio.removeUsuarioByDni(dni);
 
-        Usuario usuarioBorrado = repositorio.findByEmail(email);
-        Assert.assertNull(usuarioBorrado);
+        Optional<Usuario> usuarioBorrado = repositorio.findByEmail(email);
+        Assert.assertTrue(usuarioBorrado.isEmpty());
 
     }
 }

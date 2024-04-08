@@ -3,11 +3,13 @@ package com.osc.ociosingluten.repositorio;
 import com.osc.ociosingluten.modelo.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UsuarioRepository extends JpaRepository<Usuario, String> {
-    Usuario findByEmail(String email);
-    Usuario findByUsername(String username);
-    Usuario save(Usuario usuario);
+import java.util.Optional;
 
+public interface UsuarioRepository extends JpaRepository<Usuario, String> {
+    Optional<Usuario> findByEmail(String email);
+    Optional<Usuario> findByUsername(String username);
+    Optional<Usuario> findByDni(String dni);
+    Usuario save(Usuario usuario);
     void removeUsuarioByDni(String dni);
 
 }
