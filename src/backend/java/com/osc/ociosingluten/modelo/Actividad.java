@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
+@Table (name = "actividades")
 public class Actividad {
 
     @Id

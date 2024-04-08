@@ -16,6 +16,7 @@ import java.util.List;
 import static constantes.Constantes.mediaValoracion;
 
 @Entity
+@Table (name = "establecimientos")
 public class Establecimiento {
     @Id
     private int idEstablecimiento;

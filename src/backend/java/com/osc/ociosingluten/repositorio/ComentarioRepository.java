@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface ComentarioRepository extends JpaRepository<Comentario, String> {
+public interface ComentarioRepository extends JpaRepository<Comentario, Integer> {
     Optional<Comentario> findByAutor(Usuario autor);
     Comentario save(Comentario comentario);
     void removeComentarioByAutor(Usuario autor);

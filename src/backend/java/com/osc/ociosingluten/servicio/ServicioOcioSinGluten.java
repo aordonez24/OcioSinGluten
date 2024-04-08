@@ -38,10 +38,16 @@ public class ServicioOcioSinGluten {
     public ServicioOcioSinGluten() {
     }
 
-    public Optional<Usuario> registroUsuario(@NotNull @Valid Usuario usu) throws UsuarioExisteException {
+    /**
+     * Funcion utilizada para el registro del usuario, el registro se simula añadiendo un usuario a la base de datos
+     * @param usu Usuario a registrar
+     * @return True si se ha registrado correctamente
+     * @throws UsuarioExisteException si ese usuario existe en la base de datos
+     */
+    public boolean registroUsuario(@NotNull @Valid Usuario usu) throws UsuarioExisteException {
         Optional<Usuario> prueba = repoUsuario.findByDni(usu.getDni());
         if(prueba.isPresent())
             throw new UsuarioExisteException("El usuario ya existe.");
-        return prueba;
+        return true;
     }
 }
