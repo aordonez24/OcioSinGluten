@@ -7,11 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(classes =com.osc.ociosingluten.app.OcioSinGlutenApplication.class)
+@SpringBootTest
 public class ServicioTest {
 
-    @Autowired
-    ServicioOcioSinGluten servicio;
+    private ServicioOcioSinGluten servicio = new ServicioOcioSinGluten();
 
     @Test
     public void testAccesoServicio(){

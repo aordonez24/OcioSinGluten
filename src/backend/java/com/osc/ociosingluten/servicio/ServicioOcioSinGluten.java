@@ -20,17 +20,17 @@ import java.util.Optional;
 @Validated
 public class ServicioOcioSinGluten {
 
-    @Autowired
-    UsuarioRepository repoUsuario;
+    @Autowired(required = true)
+    private UsuarioRepository repoUsuario;
 
     @Autowired
-    EstablecimientoRepository repoEst;
+    private EstablecimientoRepository repoEst;
 
     @Autowired
-    ComentarioRepository repoComen;
+    private ComentarioRepository repoComen;
 
     @Autowired
-    ActividadRepository repoAct;
+    private ActividadRepository repoAct;
 
     @Autowired
     CacheManager cacheManager;
