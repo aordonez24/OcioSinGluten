@@ -69,8 +69,8 @@ public class ServicioTest {
                 .isInstanceOf(UsuarioExisteException.class);
 
         //Segundo caso --> Usuario correcto
-        Usuario UsuarioCorrecto = new Usuario("78162641Q", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00049@gmail.com", "alonsismoF13");
+        Usuario UsuarioCorrecto = new Usuario("82734655P", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00050@gmail.com", "alonsismoF13");
 
         Assert.assertTrue(servicio.registroUsuario(UsuarioCorrecto));
     }
