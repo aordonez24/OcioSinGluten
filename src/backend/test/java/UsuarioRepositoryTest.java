@@ -1,5 +1,3 @@
-package com.osc.ociosingluten;
-
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import org.junit.Assert;
@@ -14,12 +12,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest(classes=com.osc.ociosingluten.app.OcioSinGlutenApplication.class)
 public class UsuarioRepositoryTest {
 
     @Autowired
-    private UsuarioRepository repositorio;
+    UsuarioRepository repositorio;
 
     @Test
     public void estOperacionesUsuario(){

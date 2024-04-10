@@ -5,15 +5,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = {
+        "com.osc.ociosingluten.servicio",
         "com.osc.ociosingluten.repositorio",
-        "com.osc.ociosingluten.servicio"
 })
-
 @EntityScan(basePackages = "com/osc/ociosingluten/modelo")
-@ComponentScan("com.osc.ociosingluten.repositorio")
-@ComponentScan("com.osc.ociosingluten.servicio")
+@EnableJpaRepositories(basePackages = "com.osc.ociosingluten.repositorio")
+@ComponentScan(basePackages = "com.osc.ociosingluten.repositorio")
+@ComponentScan(basePackages = "com.osc.ociosingluten.servicio")
 @EnableCaching
 public class OcioSinGlutenApplication {
 

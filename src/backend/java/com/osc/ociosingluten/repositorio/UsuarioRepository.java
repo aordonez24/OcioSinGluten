@@ -5,30 +5,20 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, String> {
-
-    @Cacheable("usuarios")
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    @Transactional
     Optional<Usuario> findByEmail(String email);
-
-    @Cacheable("usuarios")
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    @Transactional
     Optional<Usuario> findByUsername(String username);
-
-    @Cacheable("usuarios")
-    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    @Transactional
     Optional<Usuario> findByDni(String dni);
-
-    @CacheEvict(value = "usuarios", key="usuario.dni")
+    @Transactional
     Usuario save(Usuario usuario);
-
-    @CacheEvict(value = "usuarios", key="usuario.dni")
+    @Transactional
     void removeUsuarioByDni(String dni);
-
 }

@@ -82,11 +82,11 @@ public class Sistema {
         }
     }
 
-    public boolean registro(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws EmailYaExistenteException, ErrorDatosException {
+    public boolean registro(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws ContrasenaIncorrectaException, ErrorDatosException {
         //Comprueba si existe ese usuario
         for (Usuario usuario : usuariosRegistrados) {
             if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username) || usuario.getDni().equals(dni)) {
-                throw new EmailYaExistenteException("El email o el nombre de usuario ya están registrados.");
+                throw new ContrasenaIncorrectaException("El email o el nombre de usuario ya están registrados.");
             }
         }
 
