@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static constantes.Constantes.MaxlargoContrasena;
+import static com.osc.ociosingluten.constantes.Constantes.MaxlargoContrasena;
 
 enum Rol{
     COMUN, ADMIN

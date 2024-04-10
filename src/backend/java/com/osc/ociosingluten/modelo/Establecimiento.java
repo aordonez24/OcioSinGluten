@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static constantes.Constantes.mediaValoracion;
+import static com.osc.ociosingluten.constantes.Constantes.mediaValoracion;
 
 @Entity
 @Table (name = "establecimientos")

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static constantes.Constantes.*;
+import static com.osc.ociosingluten.constantes.Constantes.*;
 
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.Direccion;
