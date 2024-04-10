@@ -1,4 +1,4 @@
-package com.osc.ociosingluten.chat;
+package com.osc.ociosingluten.herramientas;
 
 import chat.ChatHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +11,12 @@ import static chat.ChatHandler.*;
 
 @Configuration
 @EnableWebSocket
-@ComponentScan(basePackages = {"chat"})
+@ComponentScan(basePackages = {"com.osc.ociosingluten.chat"})
 public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
     private ChatHandler chatHandler;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(chatHandler, "/chat");
