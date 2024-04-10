@@ -1,4 +1,4 @@
-package herramientas;
+package com.osc.ociosingluten.chat;
 
 import chat.ChatHandler;
 import org.springframework.beans.factory.annotation.Autowired;

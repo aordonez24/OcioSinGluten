@@ -1,7 +1,7 @@
 package com.osc.ociosingluten.modelo;
 
-import herramientas.Direccion;
-import herramientas.ExpresionesRegulares;
+import com.osc.ociosingluten.herramientas.Direccion;
+import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

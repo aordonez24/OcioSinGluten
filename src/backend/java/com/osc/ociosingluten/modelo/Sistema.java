@@ -8,8 +8,8 @@ import java.util.List;
 import static constantes.Constantes.*;
 
 import com.osc.ociosingluten.excepciones.*;
-import herramientas.Direccion;
-import herramientas.MensajePredefinido;
+import com.osc.ociosingluten.herramientas.Direccion;
+import com.osc.ociosingluten.herramientas.MensajePredefinido;
 
 
 public class Sistema {

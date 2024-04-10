@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
@@ -29,12 +30,12 @@ public class UsuarioRepositoryTest {
         repositorio.save(usuario);
 
         Optional<Usuario> usuarioGuardado = repositorio.findByEmail(email);
-        Optional<Usuario> usuario1 = repositorio.findByUsername("aor00039");
+        List<Usuario> usuarios = repositorio.findByUsername("aor00039");
 
         Assert.assertNotNull(usuarioGuardado);
         Assert.assertEquals("Alvaro",usuarioGuardado.get().getNombre());
         Assert.assertEquals("78162640S",usuarioGuardado.get().getDni());
-        Assert.assertEquals("78162640S",usuario1.get().getDni());
+        Assert.assertEquals("78162640S",usuarios.get(0).getDni());
 
 
         String dni = usuario.getDni();

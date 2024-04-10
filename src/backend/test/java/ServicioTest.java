@@ -1,34 +1,26 @@
 import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
+import com.osc.ociosingluten.excepciones.SesionNoIniciadaException;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
 import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.constraints.AssertTrue;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,6 +29,34 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(classes=com.osc.ociosingluten.app.OcioSinGlutenApplication.class)
 @ActiveProfiles(profiles = {"test"})
 public class ServicioTest {
+
+    private static final String CARACTERES_LETRAS_DNI = "ABCDEFGHJKLMNPQRSTVWXYZ";
+    public static String generarDNIAleatorio() {
+        Random random = new Random();
+        StringBuilder dniBuilder = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            dniBuilder.append(random.nextInt(10));
+        }
+        char letraDNI = CARACTERES_LETRAS_DNI.charAt(random.nextInt(CARACTERES_LETRAS_DNI.length()));
+        dniBuilder.append(letraDNI);
+
+        return dniBuilder.toString();
+    }
+
+    public String generarCorreoAleatorio() {
+        String caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder correoBuilder = new StringBuilder();
+        Random random = new Random();
+
+        int longitudCorreo = 10 + random.nextInt(10); // Longitud entre 10 y 19 caracteres
+
+        for (int i = 0; i < longitudCorreo; i++) {
+            correoBuilder.append(caracteres.charAt(random.nextInt(caracteres.length())));
+        }
+        correoBuilder.append("@example.com");
+
+        return correoBuilder.toString();
+    }
 
     @Autowired
     ServicioOcioSinGluten servicio;
@@ -51,8 +71,8 @@ public class ServicioTest {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
-
         servicio.registroUsuario(usuario);
+
     }
 
     @Test
@@ -69,21 +89,22 @@ public class ServicioTest {
                 .isInstanceOf(UsuarioExisteException.class);
 
         //Segundo caso --> Usuario correcto
-        Usuario UsuarioCorrecto = new Usuario("82734655P", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00050@gmail.com", "alonsismoF13");
+        Usuario UsuarioCorrecto = new Usuario(generarDNIAleatorio(), "aor00040", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
 
         Assert.assertTrue(servicio.registroUsuario(UsuarioCorrecto));
     }
 
     @Test
-    public void pruebaLoginUsuario() throws UsuarioNoExisteException, ContrasenaIncorrectaException {
+    public void pruebaLoginUsuario() throws UsuarioNoExisteException, ContrasenaIncorrectaException, SesionNoIniciadaException {
 
         //Primer caso -> Credenciales correctas
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
 
-        Assert.assertTrue(servicio.loginUsuario(usuario.getEmail(), usuario.getPassword()));
+        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Assert.assertTrue(usuPrueba.isSesionIniciada());
 
         //Segundo caso --> Email no existente
         usuario.setEmail("aor00039@red.ujaen.es");
@@ -120,4 +141,68 @@ public class ServicioTest {
         assertEquals(1024, imagenDesdeBytes.getWidth(), "El ancho de la imagen cargada es correcto");
         assertEquals(1024, imagenDesdeBytes.getHeight(), "El alto de la imagen cargada es correcto");
     }
+
+    @Test
+    public void pruebaLogOut() throws UsuarioNoExisteException, ContrasenaIncorrectaException, SesionNoIniciadaException, UsuarioExisteException {
+        //Primer caso --> Usuario con sesion iniciada puede cerrar sesión
+        byte[] fotoPerfil = null;
+        Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+
+        Assert.assertTrue(usuPrueba.isSesionIniciada());
+        Assert.assertFalse(usuPrueba.isSesionCerrada());
+
+        //Ahora que está la sesión iniciada, debemos cerrarla
+        Usuario usu = servicio.logoutUsuario(usuario.getEmail(), usuario.getPassword());
+        Assert.assertTrue(usu.isSesionCerrada());
+        Assert.assertFalse(usu.isSesionIniciada());
+
+
+    }
+
+    @Test
+    public void testOlvidarContrasena() throws UsuarioNoExisteException, SesionNoIniciadaException, ContrasenaIncorrectaException, UsuarioExisteException {
+        //Primer caso, usuario iniciado sesion
+        byte[] fotoPerfil = null;
+        Usuario usuario = new Usuario(generarDNIAleatorio(), "prueba", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        servicio.registroUsuario(usuario);
+        servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        String oldPassword = usuario.getPassword();
+        servicio.olvidarContrasena(usuario);
+        Assert.assertNotEquals(oldPassword, usuario.getPassword());
+
+        //Segundo caso, usuario sin sesion iniciada
+        Usuario usuario2 = new Usuario(generarDNIAleatorio(), "prueba", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        servicio.registroUsuario(usuario2);
+        Assertions.assertThatThrownBy(() -> {
+                    servicio.olvidarContrasena(usuario);
+                })
+                .isInstanceOf(SesionNoIniciadaException.class);
+    }
+
+    @Test
+    public void testBuscarUsuario() throws UsuarioNoExisteException {
+        byte[] fotoPerfil = null;
+        Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        List<Usuario> usuarios = servicio.buscarUsuario(usuario);
+
+        Assert.assertFalse(usuarios.isEmpty());
+
+        Usuario usuario1 = new Usuario(generarDNIAleatorio(), "akufhaku2987", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+
+        Assertions.assertThatThrownBy(() -> {
+                    servicio.buscarUsuario(usuario1);
+                })
+                .isInstanceOf(UsuarioNoExisteException.class);
+
+    }
+
+
 }

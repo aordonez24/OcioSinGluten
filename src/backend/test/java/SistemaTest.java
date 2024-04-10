@@ -1,7 +1,7 @@
+import com.osc.ociosingluten.herramientas.Direccion;
+import com.osc.ociosingluten.herramientas.MensajePredefinido;
 import com.osc.ociosingluten.modelo.*;
 import com.osc.ociosingluten.excepciones.*;
-import herramientas.Direccion;
-import herramientas.MensajePredefinido;
 
 
 import org.junit.jupiter.api.BeforeEach;

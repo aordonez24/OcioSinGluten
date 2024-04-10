@@ -1,6 +1,7 @@
 package com.osc.ociosingluten.servicio;
 
 import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
+import com.osc.ociosingluten.excepciones.SesionNoIniciadaException;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
 import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
 import com.osc.ociosingluten.modelo.Usuario;
@@ -19,7 +20,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
+
+import static constantes.Constantes.MaxlargoContrasena;
 
 @Service
 public class ServicioOcioSinGluten {
@@ -48,16 +53,36 @@ public class ServicioOcioSinGluten {
         return true;
     }
 
-    public boolean loginUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
-        Optional<Usuario> usu = repoUsuario.findByEmail(email).stream().findFirst();
+    public Usuario loginUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
+        Optional<Usuario> usu = repoUsuario.findByEmail(email);
 
         if(usu.isPresent()){
             Usuario usuario = usu.get();
             if(usuario.getPassword().equals(password)){
+                usuario.setSesionCerrada(false);
                 usuario.setSesionIniciada(true);
-                return true;
+                repoUsuario.actualizarUsuario(usuario);
+                return usuario;
             }else{
                 throw new ContrasenaIncorrectaException("La contraseña no es correcta");
+            }
+        }else{
+            throw new UsuarioNoExisteException("No existe ese email registrado.");
+        }
+    }
+
+    public Usuario logoutUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, SesionNoIniciadaException, ContrasenaIncorrectaException {
+        Optional<Usuario> usu = repoUsuario.findByEmail(email).stream().findFirst();
+
+        if(usu.isPresent()){
+            Usuario usuario = usu.get();
+            if(usuario.isSesionIniciada()) {
+                usuario.setSesionCerrada(true);
+                usuario.setSesionIniciada(false);
+                repoUsuario.actualizarUsuario(usuario);
+                return usuario;
+            }else{
+                throw new SesionNoIniciadaException("No se ha iniciado sesion");
             }
         }else{
             throw new UsuarioNoExisteException("No existe ese email registrado.");
@@ -77,6 +102,43 @@ public class ServicioOcioSinGluten {
     public BufferedImage cargarImagenDesdeBytes(byte[] bytes) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         return ImageIO.read(bis);
+    }
+
+    public void olvidarContrasena(Usuario usuario) throws UsuarioNoExisteException, SesionNoIniciadaException {
+        Optional<Usuario> usu = repoUsuario.findByDni(usuario.getDni());
+        if(usu.isPresent()){
+            if(usu.get().isSesionIniciada()) {
+                usuario.setPassword(generarContrasenaAleatoria());
+                repoUsuario.actualizarUsuario(usuario);
+            }else{
+                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
+    private String generarContrasenaAleatoria() {
+        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        int longitud = MaxlargoContrasena;
+
+        StringBuilder contrasena = new StringBuilder();
+        SecureRandom random = new SecureRandom();
+        for (int i = 0; i < longitud; i++) {
+            int indice = random.nextInt(caracteres.length());
+            contrasena.append(caracteres.charAt(indice));
+        }
+        return contrasena.toString();
+    }
+
+
+    public List<Usuario> buscarUsuario(Usuario usuario) throws UsuarioNoExisteException {
+        List<Usuario> usuarios = repoUsuario.findByUsername(usuario.getUsername());
+        if(!usuarios.isEmpty()) {
+            return usuarios; // Por ejemplo, podrías devolver el primer usuario de la lista
+        } else {
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
     }
 
 

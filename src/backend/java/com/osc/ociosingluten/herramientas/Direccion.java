@@ -1,6 +1,5 @@
-package herramientas;
+package com.osc.ociosingluten.herramientas;
 
-import herramientas.ExpresionesRegulares;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;

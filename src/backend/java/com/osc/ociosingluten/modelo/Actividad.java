@@ -1,6 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
-import herramientas.MensajePredefinido;
+import com.osc.ociosingluten.herramientas.MensajePredefinido;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 

@@ -1,6 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
-import herramientas.ExpresionesRegulares;
+import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -74,9 +74,9 @@ public class Usuario {
     @OneToMany
     private List<Comentario> comentariosRealizados;
 
-    @Transient
+    @NotNull
     private boolean sesionIniciada;
-    @Transient
+    @NotNull
     private boolean sesionCerrada;
 
 

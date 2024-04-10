@@ -1,4 +1,4 @@
-package herramientas;
+package com.osc.ociosingluten.herramientas;
 
 public class ExpresionesRegulares {
     private ExpresionesRegulares() {
