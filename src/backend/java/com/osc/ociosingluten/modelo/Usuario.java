@@ -1,6 +1,7 @@
 package com.osc.ociosingluten.modelo;
 
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
+import com.osc.ociosingluten.herramientas.Rol;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -11,9 +12,7 @@ import java.util.List;
 
 import static com.osc.ociosingluten.constantes.Constantes.MaxlargoContrasena;
 
-enum Rol{
-    COMUN, ADMIN
-};
+;
 
 @Entity
 @Table (name = "usuarios")

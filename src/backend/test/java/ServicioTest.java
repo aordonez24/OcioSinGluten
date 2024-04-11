@@ -1,12 +1,12 @@
-import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
-import com.osc.ociosingluten.excepciones.SesionNoIniciadaException;
-import com.osc.ociosingluten.excepciones.UsuarioExisteException;
-import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
+import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,7 +67,7 @@ public class ServicioTest {
         Assertions.assertThat(servicio).isNotNull();
     }
 
-    @BeforeEach
+    @BeforeAll
     public void cargarDatosPrueba() throws UsuarioExisteException {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
@@ -80,6 +81,9 @@ public class ServicioTest {
 
         //Primer caso --> Usuario incorrecto
         byte[] fotoPerfil = null;
+        Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+        servicio.registroUsuario(usuario);
         Usuario usuarioIncorrecto = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
 
@@ -175,7 +179,7 @@ public class ServicioTest {
         Assert.assertNotEquals(oldPassword, usuario.getPassword());
 
         //Segundo caso, usuario sin sesion iniciada
-        Usuario usuario2 = new Usuario(generarDNIAleatorio(), "prueba", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+        Usuario usuario2 = new Usuario(generarDNIAleatorio(), "prueba2", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
         servicio.registroUsuario(usuario2);
         Assertions.assertThatThrownBy(() -> {
@@ -190,9 +194,9 @@ public class ServicioTest {
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
 
-        List<Usuario> usuarios = servicio.buscarUsuario(usuario);
+        Usuario usuarios = servicio.buscarUsuario(usuario);
 
-        Assert.assertFalse(usuarios.isEmpty());
+        Assert.assertNotNull(usuarios);
 
         Usuario usuario1 = new Usuario(generarDNIAleatorio(), "akufhaku2987", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
@@ -203,6 +207,50 @@ public class ServicioTest {
                 .isInstanceOf(UsuarioNoExisteException.class);
 
     }
+
+    @Test
+    public void AnadirEditarEliminarListarEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, SesionNoIniciadaException, ActividadNoCreada, UsuarioExisteException, NoPermisosException, EstablecimientoNoExistenteException {
+        Establecimiento establecimiento = new Establecimiento("Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        byte[] fotoPerfil = null;
+        Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        //Caso 1 --> anadir correctamente el establecimiento
+        Usuario usuario1 = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Assert.assertTrue(servicio.publicarEstablecimiento(usuario1, establecimiento));
+
+        //Caso 2 --> Añadir el mismo establecimiento
+        Assertions.assertThatThrownBy(() -> {
+                    servicio.publicarEstablecimiento(usuario1, establecimiento);
+                })
+                .isInstanceOf(EstablecimientoExistenteException.class);
+
+        //Caso 3 --> el usuario no ha iniciado sesión
+        Usuario usuario2 = servicio.logoutUsuario(usuario1.getEmail(), usuario.getPassword());
+        Assertions.assertThatThrownBy(() -> {
+                    servicio.publicarEstablecimiento(usuario2, establecimiento);
+                })
+                .isInstanceOf(SesionNoIniciadaException.class);
+
+        //Eliminamos el establecimiento, pero primero la actividad
+        Usuario admin = new Usuario("78162641Q", "aor00043", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@admin.com", "alonsismoF13");
+        servicio.registroUsuario(admin);
+
+        Usuario usuario3 = servicio.loginUsuario(admin.getEmail(), admin.getPassword());
+        //Editamos establecimiento
+        Assert.assertTrue(servicio.editarEstablecimiento(usuario3, establecimiento, "Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "Alemania"));
+
+        //Listamos los establecimientos
+        List<Establecimiento> establecimientos = servicio.buscarEstablecimiento(establecimiento);
+
+        Assert.assertFalse(establecimientos.isEmpty());
+
+        //Eliminamos el establecimiento, pero primero la actividad (En el propio método borramos la actividad)
+        Assert.assertTrue(servicio.eliminarEstablecimiento(usuario3, establecimiento));
+    }
+
+
 
 
 }

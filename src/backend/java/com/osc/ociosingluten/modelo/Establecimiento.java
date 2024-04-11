@@ -1,8 +1,8 @@
 package com.osc.ociosingluten.modelo;
 
-import com.osc.ociosingluten.herramientas.Direccion;
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -18,6 +18,7 @@ import static com.osc.ociosingluten.constantes.Constantes.mediaValoracion;
 @Entity
 @Table (name = "establecimientos")
 public class Establecimiento {
+
     @Id
     private int idEstablecimiento;
 
@@ -26,12 +27,23 @@ public class Establecimiento {
     private String nombre;
 
     @NotNull
-    @Pattern(regexp= ExpresionesRegulares.TLF)
+    @Digits(integer = 9, fraction = 0)
     private int telefono;
 
-    @Embedded
     @NotNull
-    private Direccion direccion;
+    private String localidad;
+
+    @NotNull
+    private String provincia;
+
+    @NotNull
+    private String calle;
+
+    @NotNull
+    private int codPostal;
+
+    @NotNull
+    private String pais;
 
     @NotNull
     private int numLikes;
@@ -42,23 +54,16 @@ public class Establecimiento {
     @ManyToMany
     private List<Usuario> visitantes;
 
-    public Establecimiento(String nombre, int telefono, Direccion direccion) {
-        this.idEstablecimiento = generarIdUnico(direccion.getLocalidad(), direccion.getProvincia(), direccion.getCodPostal());
+    public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
+        this.idEstablecimiento = generarIdUnico(localidad, provincia, codPostal);
         this.nombre = nombre;
         this.telefono = telefono;
-        this.direccion = direccion;
+        this.localidad = localidad;
+        this.provincia = provincia;
+        this.calle = calle;
+        this.codPostal = codPostal;
+        this.pais = pais;
         this.numLikes = 0;
-        this.comentarios = new ArrayList<>();
-        this.visitantes = new ArrayList<>();
-    }
-
-    public Establecimiento(String nombre, int telefono, Direccion direccion, int numLikes, ArrayList<Comentario> comentarios) {
-        this.idEstablecimiento = generarIdUnico(direccion.getLocalidad(), direccion.getProvincia(), direccion.getCodPostal());
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.direccion = direccion;
-        this.numLikes = numLikes;
-        this.comentarios = comentarios;
     }
 
     public Establecimiento() {
@@ -109,19 +114,18 @@ public class Establecimiento {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
 
-            // Convertir los primeros 4 bytes del hash a un entero para usar como ID
             int result = 0;
             for (int i = 0; i < 4; i++) {
                 result += (hash[i] & 0xFF) << (8 * (3 - i));
             }
-            return result;
+            // Asegurarse de que el resultado sea positivo
+            return Math.abs(result);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            // Manejo de la excepción en caso de que el algoritmo no esté disponible
-            // Podrías devolver un valor predeterminado o lanzar una excepción personalizada
             return 0;
         }
     }
+
 
     public int getIdEstablecimiento() {
         return idEstablecimiento;
@@ -129,14 +133,6 @@ public class Establecimiento {
 
     public void setIdEstablecimiento(int idEstablecimiento) {
         this.idEstablecimiento = idEstablecimiento;
-    }
-
-    public void setDireccion(Direccion direccion) {
-        this.direccion = direccion;
-    }
-
-    public Direccion getDireccion() {
-        return direccion;
     }
 
     public List<Usuario> getVisitantes() {
@@ -151,4 +147,47 @@ public class Establecimiento {
         this.visitantes.add(usu);
     }
 
+    public String getLocalidad() {
+        return localidad;
+    }
+
+    public void setLocalidad(String localidad) {
+        this.localidad = localidad;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
+    }
+
+    public String getCalle() {
+        return calle;
+    }
+
+    public void setCalle(String calle) {
+        this.calle = calle;
+    }
+
+    public int getCodPostal() {
+        return codPostal;
+    }
+
+    public void setCodPostal(int codPostal) {
+        this.codPostal = codPostal;
+    }
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
+
+    public void setVisitantes(List<Usuario> visitantes) {
+        this.visitantes = visitantes;
+    }
 }

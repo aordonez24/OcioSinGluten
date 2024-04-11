@@ -30,12 +30,12 @@ public class UsuarioRepositoryTest {
         repositorio.save(usuario);
 
         Optional<Usuario> usuarioGuardado = repositorio.findByEmail(email);
-        List<Usuario> usuarios = repositorio.findByUsername("aor00039");
+        Optional<Usuario> usuarios = repositorio.findByUsername("aor00039");
 
         Assert.assertNotNull(usuarioGuardado);
         Assert.assertEquals("Alvaro",usuarioGuardado.get().getNombre());
         Assert.assertEquals("78162640S",usuarioGuardado.get().getDni());
-        Assert.assertEquals("78162640S",usuarios.get(0).getDni());
+        Assert.assertEquals("78162640S",usuarios.get().getDni());
 
 
         String dni = usuario.getDni();

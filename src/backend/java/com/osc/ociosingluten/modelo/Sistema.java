@@ -1,6 +1,5 @@
 package com.osc.ociosingluten.modelo;
 
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +7,8 @@ import java.util.List;
 import static com.osc.ociosingluten.constantes.Constantes.*;
 
 import com.osc.ociosingluten.excepciones.*;
-import com.osc.ociosingluten.herramientas.Direccion;
 import com.osc.ociosingluten.herramientas.MensajePredefinido;
+import com.osc.ociosingluten.herramientas.Rol;
 
 
 public class Sistema {
@@ -30,44 +29,6 @@ public class Sistema {
     }
 
 
-    public boolean iniciarSesion(String email, String password) throws UsuarioNoExisteException {
-        for(int i = 0; i < usuariosRegistrados.size(); i++) {
-            if(usuariosRegistrados.get(i).getEmail().equals(email) && usuariosRegistrados.get(i).getPassword().equals(password)) {
-                usuariosRegistrados.get(i).setSesionIniciada(true);
-                usuariosRegistrados.get(i).setSesionCerrada(false);
-                return true;
-            }
-        }
-        throw new UsuarioNoExisteException("El usuario con el correo electrónico " + email + " no existe o la contraseña es incorrecta.");
-    }
-
-    public void anadirUsuario(Usuario usu){
-        if(!usuariosRegistrados.contains(usu))
-            usuariosRegistrados.add(usu);
-    }
-
-    public boolean cerrarSesion(Usuario usuario){
-        if(existeUsuario(usuario)){
-            usuario.setSesionCerrada(true);
-            usuario.setSesionIniciada(false);
-            return true;
-        }
-        return false;
-    }
-
-    private String generarContrasenaAleatoria() {
-        String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        int longitud = MaxlargoContrasena;
-
-        StringBuilder contrasena = new StringBuilder();
-        SecureRandom random = new SecureRandom();
-        for (int i = 0; i < longitud; i++) {
-            int indice = random.nextInt(caracteres.length());
-            contrasena.append(caracteres.charAt(indice));
-        }
-        return contrasena.toString();
-    }
-
     private void crearActividad(Actividad act, Usuario usu){
         if(!actividadesRealizadas.contains(act)) {
             actividadesRealizadas.add(act);
@@ -75,47 +36,6 @@ public class Sistema {
         }
     }
 
-    public void olvidarContraseña(Usuario usu){
-        //usu es el usuario al que se le olvida la contraseña
-        if(usu.isSesionIniciada()){
-            usu.setPassword(generarContrasenaAleatoria());
-        }
-    }
-
-    public boolean registro(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) throws ContrasenaIncorrectaException, ErrorDatosException {
-        //Comprueba si existe ese usuario
-        for (Usuario usuario : usuariosRegistrados) {
-            if (usuario.getEmail().equals(email) || usuario.getUsername().equals(username) || usuario.getDni().equals(dni)) {
-                throw new ContrasenaIncorrectaException("El email o el nombre de usuario ya están registrados.");
-            }
-        }
-
-        // Validación de datos
-        if (username == null || nombre == null || apellidos == null || fechaNacimiento == null || email == null || password == null) {
-            throw new ErrorDatosException("Alguno de los datos requeridos es nulo.");
-        }
-
-        if (username.isEmpty() || nombre.isEmpty() || apellidos.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            throw new ErrorDatosException("Alguno de los datos requeridos está vacío.");
-        }
-
-        // Si todas las validaciones pasan, se crea el usuario
-        Usuario nuevoUsuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
-        usuariosRegistrados.add(nuevoUsuario);
-        return true;
-    }
-
-    public Usuario buscarUsuario(Usuario usuario) throws UsuarioNoExisteException, SesionNoIniciadaException {
-        if (usuario.isSesionIniciada()) {
-            if (existeUsuario(usuario)) {
-                return usuario;
-            } else {
-                throw new UsuarioNoExisteException("El usuario no existe");
-            }
-        } else {
-            throw new SesionNoIniciadaException("El usuario no ha iniciado sesion");
-        }
-    }
 
     public Establecimiento buscarEstablecimiento(Establecimiento est) throws EstablecimientoNoExistenteException {
         if(establecimientosRegistrados.contains(est)) {
@@ -169,20 +89,6 @@ public class Sistema {
         return false;
     }
 
-    public boolean anadirEstablecimiento(String nombre, Direccion direccion, int telefono, Usuario usu){
-        //Usu es quien añade el establecimiento
-        if(usu != null && usu.isSesionIniciada() && existeUsuario(usu)) {
-            String numeroComoCadena = String.valueOf(telefono);
-            if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.getCalle().length() > 0 && direccion.getCalle().length() <= 100) {
-                Establecimiento est = new Establecimiento(nombre, telefono, direccion);
-                establecimientosRegistrados.add(est);
-                Actividad cont = new Actividad(usu, est, MensajePredefinido.HA_PUBLICADO);
-                crearActividad(cont, usu);
-                return true;
-            }
-        }
-        return false;
-    }
 
     public boolean eliminarEstablecimiento(Establecimiento est, Usuario usu) throws EstablecimientoNoExistenteException {
         if (usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada() && existeUsuario(usu)) {
@@ -198,28 +104,6 @@ public class Sistema {
     }
 
 
-    public boolean editarEstablecimiento(Establecimiento est, Usuario usu, String nombre, Direccion direccion, int telefono) throws EstablecimientoNoExistenteException {
-        if (usu != null && usu.getRol() == Rol.ADMIN && usu.isSesionIniciada()) {
-            for (int i = 0; i < establecimientosRegistrados.size(); i++) {
-                if (est == establecimientosRegistrados.get(i)) {
-                    String numeroComoCadena = String.valueOf(telefono);
-                    if (nombre.length() > 0 && nombre.length() <= 20 && numeroComoCadena.length() == maxTelefono && direccion.getCalle().length() > 0 && direccion.getCalle().length() <= 100)
-                    {
-                        if(nombre != est.getNombre())
-                            est.setNombre(nombre);
-                        if(direccion != est.getDireccion())
-                            est.setDireccion(direccion);
-                        if(telefono != est.getTelefono())
-                            est.setTelefono(telefono);
-                        return true;
-                    }
-                }else{
-                    throw new EstablecimientoNoExistenteException("El establecimiento no existe en la lista.");
-                }
-            }
-        }
-        return false;
-    }
     public boolean existeUsuario(Usuario usu){
         if(usuariosRegistrados.contains(usu)){
             return true;
