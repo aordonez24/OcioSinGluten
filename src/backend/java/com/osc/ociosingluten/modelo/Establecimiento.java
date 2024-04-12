@@ -1,5 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
+import com.osc.ociosingluten.excepciones.ComentarioNoExiste;
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
@@ -64,6 +65,8 @@ public class Establecimiento {
         this.codPostal = codPostal;
         this.pais = pais;
         this.numLikes = 0;
+        this.comentarios = new ArrayList<>();
+        this.visitantes = new ArrayList<>();
     }
 
     public Establecimiento() {
@@ -92,6 +95,10 @@ public class Establecimiento {
 
     public void setNumLikes(int numLikes) {
         this.numLikes = numLikes;
+    }
+
+    public void sumarLike() {
+        this.numLikes += 1;
     }
 
     public List<Comentario> getComentarios() {
@@ -189,5 +196,13 @@ public class Establecimiento {
 
     public void setVisitantes(List<Usuario> visitantes) {
         this.visitantes = visitantes;
+    }
+
+    public void eliminarComentario(Comentario com) throws ComentarioNoExiste {
+        if(comentarios.contains(com)){
+            comentarios.remove(com);
+        }else{
+            throw new ComentarioNoExiste("El comentario no existe.");
+        }
     }
 }

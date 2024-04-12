@@ -57,10 +57,10 @@ public class Usuario {
     @ManyToMany(mappedBy = "seguidos")
     private List<Usuario> seguidores;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Establecimiento> establecimientosFavoritos;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Establecimiento> establecimientosVisitados;
 
     @ManyToMany
@@ -272,10 +272,8 @@ public class Usuario {
             establecimientosFavoritos.add(est);
     }
 
-    public void anadirEstablecimientoVisitado(Establecimiento est, Actividad actividad){
-        if(!establecimientosVisitados.contains(est))
-            establecimientosVisitados.add(est);
-        actividades.add(actividad);
+    public void visitarEstablecimiento(Establecimiento est){
+        establecimientosVisitados.add(est);
     }
 
     public void seguirUsuario(Usuario usu){

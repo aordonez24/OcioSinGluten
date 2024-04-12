@@ -18,6 +18,9 @@ public interface ActividadRepository extends JpaRepository<Actividad, Integer> {
     Optional<Actividad> findByEstablecimiento(Establecimiento establecimiento);
 
     @Transactional
+    Optional<Actividad> findByEstablecimientoAndMensajePredefinidoAndAutor(Establecimiento establecimiento, MensajePredefinido msg, Usuario autor);
+
+    @Transactional
     Actividad save(Actividad act);
 
     @Transactional
@@ -28,6 +31,8 @@ public interface ActividadRepository extends JpaRepository<Actividad, Integer> {
 
     @Transactional
     void delete(Actividad actividad);
+
+
 
 
 

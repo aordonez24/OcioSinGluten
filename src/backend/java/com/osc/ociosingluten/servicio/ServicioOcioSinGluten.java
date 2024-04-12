@@ -4,6 +4,7 @@ import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.MensajePredefinido;
 import com.osc.ociosingluten.herramientas.Rol;
 import com.osc.ociosingluten.modelo.Actividad;
+import com.osc.ociosingluten.modelo.Comentario;
 import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.*;
@@ -14,8 +15,10 @@ import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.imageio.ImageIO;
+import javax.swing.text.html.Option;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,6 +40,9 @@ public class ServicioOcioSinGluten {
 
     @Autowired
     EstablecimientoRepository repoEst;
+
+    @Autowired
+    ComentarioRepository repoCom;
 
     @Autowired
     CacheManager cacheManager;
@@ -64,12 +70,12 @@ public class ServicioOcioSinGluten {
         Optional<Usuario> usu = repoUsuario.findByEmail(email);
 
         if(usu.isPresent()){
-            Usuario usuario = usu.get();
-            if(usuario.getPassword().equals(password)){
-                usuario.setSesionCerrada(false);
-                usuario.setSesionIniciada(true);
+            if(usu.get().getPassword().equals(password)){
+                usu.get().setSesionCerrada(false);
+                usu.get().setSesionIniciada(true);
+                Usuario usuario = usu.get();
                 repoUsuario.actualizarUsuario(usuario);
-                return usuario;
+                return usu.get();
             }else{
                 throw new ContrasenaIncorrectaException("La contraseña no es correcta");
             }
@@ -261,6 +267,142 @@ public class ServicioOcioSinGluten {
 
     }
 
+    public boolean comentarEstablecimiento(Usuario comentador, Establecimiento estComentado, Comentario com) throws UsuarioNoExisteException, SesionNoIniciadaException, EstablecimientoNoExistenteException, ActividadNoCreada {
+        Optional<Usuario> usuario = repoUsuario.findByDni(comentador.getDni());
+        if(usuario.isPresent()){
+            if(comentador.isSesionIniciada()){
+                Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(estComentado.getIdEstablecimiento());
+                if(est.isPresent()){
+                    repoCom.save(com);
+                    estComentado.anadirComentario(com);
+                    repoEst.actualizar(estComentado);
+                    Actividad act = new Actividad(comentador, estComentado, MensajePredefinido.HA_COMENTADO);
+                    crearActividad(act);
+                    return true; //El comentario se ha realizado con éxito
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento al que desea comentar no existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("Registrese para realizar el comentario.");
+        }
+    }
+
+    public boolean editarComentario(Usuario comentador, Comentario com, String nuevoComentario) throws UsuarioNoExisteException, SesionNoIniciadaException, EstablecimientoNoExistenteException, ActividadNoCreada, ComentarioNoExiste {
+        Optional<Usuario> usuario = repoUsuario.findByDni(comentador.getDni());
+        if(usuario.isPresent()){
+            if(comentador.isSesionIniciada()){
+                Optional<Comentario> comentario = repoCom.findById(com.getId());
+                if(comentario.isPresent()) {
+                    if(!com.getMensaje().equals(nuevoComentario)) {
+                        com.setMensaje(nuevoComentario);
+                        repoCom.actualizar(com);
+                        return true;
+                    }
+                }else{
+                    throw new ComentarioNoExiste("El comentario no existe");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("Registrese para realizar el comentario.");
+        }
+        return false;
+    }
+
+    public boolean eliminarComentarioEstablecimiento(Usuario usuGestor, Comentario com, Establecimiento establecimiento) throws UsuarioNoExisteException, ComentarioNoExiste, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
+        Optional<Usuario> usu = repoUsuario.findByDni(usuGestor.getDni());
+        if(usu.isPresent()){
+            if(usu.get().isSesionIniciada()){
+                Optional<Establecimiento> establecimiento1 = repoEst.findByIdEstablecimiento(establecimiento.getIdEstablecimiento());
+                if(establecimiento1.isPresent()){
+                    //Comprobamos si el comentario existe
+                    Optional<Comentario> comentario = repoCom.findById(com.getId());
+                    if(comentario.isPresent()){
+                        establecimiento.eliminarComentario(com);
+                        repoEst.actualizar(establecimiento);
+                        repoCom.delete(com);
+                        return true; //Comentario eliminado satisfactoriamente
+                    }else{
+                        throw new ComentarioNoExiste("El comentario no existe.");
+                    }
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento ni siquiera existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("Sesión no iniciada.");
+            }
+        }
+        throw new UsuarioNoExisteException("El usuario no está registrado.");
+    }
+
+    @Transactional
+    public boolean visitarEstablecimiento(Usuario visitante, Establecimiento estVisitado) throws UsuarioNoExisteException, SesionNoIniciadaException, ActividadNoCreada, EstablecimientoNoExistenteException {
+        Optional<Usuario> usu = repoUsuario.findByDni(visitante.getDni());
+        if(usu.isPresent()){
+            if(visitante.isSesionIniciada()){
+                Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(estVisitado.getIdEstablecimiento());
+                if(est.isPresent()){
+                    estVisitado.anadirVisitante(visitante);
+                    visitante.visitarEstablecimiento(estVisitado);
+                    repoUsuario.actualizarUsuario(visitante);
+                    repoEst.actualizar(estVisitado);
+                    Actividad act = new Actividad(visitante, estVisitado, MensajePredefinido.HA_VISITADO);
+                    crearActividad(act);
+                    return true;
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuairo no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
+    public boolean marcarEstablecimientoFavorito(Usuario visitante, Establecimiento estVisitado) throws UsuarioNoExisteException, SesionNoIniciadaException, ActividadNoCreada, EstablecimientoNoExistenteException {
+        Optional<Usuario> usu = repoUsuario.findByDni(visitante.getDni());
+        if(usu.isPresent()){
+            if(visitante.isSesionIniciada()){
+                Optional<Establecimiento> est = repoEst.findById(estVisitado.getIdEstablecimiento());
+                if(est.isPresent()){
+                    visitante.anadirEstablecimientoFavorito(estVisitado);
+                    repoUsuario.actualizarUsuario(visitante);
+                    return true;
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuairo no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
+    public boolean darLikeEstablecimiento(Usuario visitante, Establecimiento estVisitado) throws UsuarioNoExisteException, SesionNoIniciadaException, ActividadNoCreada, EstablecimientoNoExistenteException {
+        Optional<Usuario> usu = repoUsuario.findByDni(visitante.getDni());
+        if(usu.isPresent()){
+            if(visitante.isSesionIniciada()){
+                Optional<Establecimiento> est = repoEst.findById(estVisitado.getIdEstablecimiento());
+                if(est.isPresent()){
+                    estVisitado.sumarLike();
+                    repoEst.actualizar(estVisitado);
+                    return true;
+                }else{
+                    throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuairo no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
 
 
 

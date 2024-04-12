@@ -16,6 +16,10 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     Optional<Establecimiento> findByIdEstablecimiento(int id);
     @Transactional
     Optional<Establecimiento> findByNombreAndCodPostal(String nombre, int codPostal);
+
+    @Transactional
+    Optional<Establecimiento> findByVisitantes(Usuario visitante);
+
     @Transactional
     Establecimiento save(Establecimiento establecimiento);
     @Transactional

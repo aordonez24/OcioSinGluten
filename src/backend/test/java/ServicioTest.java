@@ -1,4 +1,5 @@
 import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.modelo.Comentario;
 import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
@@ -67,7 +68,7 @@ public class ServicioTest {
         Assertions.assertThat(servicio).isNotNull();
     }
 
-    @BeforeAll
+    @Test
     public void cargarDatosPrueba() throws UsuarioExisteException {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
@@ -249,6 +250,55 @@ public class ServicioTest {
         //Eliminamos el establecimiento, pero primero la actividad (En el propio método borramos la actividad)
         Assert.assertTrue(servicio.eliminarEstablecimiento(usuario3, establecimiento));
     }
+
+    @Test
+    public void pruebaAnadirEditarEliminarComentario() throws EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, UsuarioNoExisteException, EstablecimientoNoExistenteException, ContrasenaIncorrectaException, ComentarioNoExiste {
+        Establecimiento establecimiento = new Establecimiento("Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        byte[] fotoPerfil = null;
+        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Comentario com = new Comentario("Que bien se come hay, además te atienden muy rapido. Un gustazo!", comentador);
+
+        Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
+        Assert.assertTrue(servicio.comentarEstablecimiento(usu, establecimiento, com));
+
+        String nuevoMensaje = "Que bien se come ahí, además te atienden muy rapido. Un gustazo!";
+        Assert.assertTrue(servicio.editarComentario(usu, com, nuevoMensaje));
+
+        Assert.assertTrue(servicio.eliminarComentarioEstablecimiento(usu, com, establecimiento));
+
+    }
+
+
+    @Test
+    public void visitarEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
+        Establecimiento establecimiento = new Establecimiento("Burger King", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        byte[] fotoPerfil = null;
+        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
+        Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
+    }
+
+    @Test
+    public void favEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
+        Establecimiento establecimiento = new Establecimiento("McDonalds", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        byte[] fotoPerfil = null;
+        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
+        Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
+        Assert.assertTrue(servicio.marcarEstablecimientoFavorito(usu, establecimiento));
+
+        Assert.assertTrue(servicio.darLikeEstablecimiento(usu, establecimiento));
+    }
+
 
 
 
