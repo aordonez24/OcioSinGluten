@@ -24,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -147,7 +149,7 @@ public class ServicioOcioSinGluten {
 
     public Usuario buscarUsuario(Usuario usuario) throws UsuarioNoExisteException {
         Optional<Usuario> usuarios = repoUsuario.findByUsername(usuario.getUsername());
-        if(usuarios.isPresent()) {
+        if(usuarios.isPresent() && !usuarios.get().isArchivado()) {
             return usuarios.get(); // Por ejemplo, podrías devolver el primer usuario de la lista
         } else {
             throw new UsuarioNoExisteException("El usuario no existe.");
@@ -157,10 +159,16 @@ public class ServicioOcioSinGluten {
     public List<Establecimiento> buscarEstablecimiento(Establecimiento establecimiento) throws UsuarioNoExisteException {
         List<Establecimiento> establecimientos = repoEst.findByNombre(establecimiento.getNombre());
         if(!establecimientos.isEmpty()) {
-            return establecimientos; // Por ejemplo, podrías devolver el primer usuario de la lista
+            List<Establecimiento> establecimientosDevolver = new ArrayList<>();
+            for(Establecimiento est: establecimientos){
+                if(!est.isArchivada())
+                    establecimientosDevolver.add(est);
+            }
+            return establecimientosDevolver;
         } else {
             throw new UsuarioNoExisteException("El establecimiento no existe.");
         }
+
     }
 
     public Usuario cambiarPermisos(Usuario usu, Usuario aCambiar) throws SesionNoIniciadaException, NoPermisosException, UsuarioNoExisteException {
@@ -203,29 +211,27 @@ public class ServicioOcioSinGluten {
 
     }
 
-    public boolean eliminarEstablecimiento(Usuario usuGestor, Establecimiento est) throws EstablecimientoNoExistenteException, ActividadNoCreada, SesionNoIniciadaException, NoPermisosException {
+    public boolean eliminarEstablecimiento(Usuario usuGestor, Establecimiento est) throws EstablecimientoNoExistenteException, ActividadNoCreada, SesionNoIniciadaException, NoPermisosException, UsuarioNoExisteException {
         //Esta opción solo la puede hacer un usuario con la sesion iniciada y si es un admin
-        if(usuGestor.isSesionIniciada()) {
-            if(usuGestor.getRol() == Rol.ADMIN) {
-                Optional<Establecimiento> establecimiento = repoEst.findByIdEstablecimiento(est.getIdEstablecimiento());
-                Optional<Actividad> actividad = repoAct.findByEstablecimiento(est);
-                if (actividad.isPresent()) {
-                    Actividad act = actividad.get();
-                    repoAct.delete(act);
+        Optional<Usuario> usuu = repoUsuario.findByDni(usuGestor.getDni());
+        if(usuu.isPresent()){
+            if (usuGestor.isSesionIniciada()) {
+                if (usuGestor.getRol() == Rol.ADMIN) {
+                    Optional<Establecimiento> establecimiento = repoEst.findByIdEstablecimiento(est.getIdEstablecimiento());
                     if (establecimiento.isPresent()) {
-                        repoEst.delete(est);
+                        est.setArchivada(true);
                         return true;
                     } else {
                         throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
                     }
                 } else {
-                    throw new ActividadNoCreada("No existe esa actividad.");
+                    throw new NoPermisosException("El usuario no tiene permisos para realizar esa acción.");
                 }
-            }else{
-                throw new NoPermisosException("El usuario no tiene permisos para realizar esa acción.");
             }
+            throw new SesionNoIniciadaException("El usuario no ha iniciado sesion.");
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
         }
-        throw new SesionNoIniciadaException("El usuario no ha iniciado sesion.");
     }
 
     public boolean editarEstablecimiento(Usuario usuGestor, Establecimiento est, String nuevoNombre, int nuevoTelefono, String nuevaLocalidad, String nuevaProvincia, String nuevaCalle, int nuevoCodPostal, String nuevoPais) throws SesionNoIniciadaException, NoPermisosException, EstablecimientoNoExistenteException {
@@ -402,6 +408,129 @@ public class ServicioOcioSinGluten {
         }else{
             throw new UsuarioNoExisteException("El usuario no existe.");
         }
+    }
+
+    public boolean seguirUsuario(Usuario sigueA, Usuario seguido) throws UsuarioNoExisteException, SesionNoIniciadaException {
+        Optional<Usuario> usu = repoUsuario.findByDni(sigueA.getDni());
+        if(usu.isPresent()){
+            if(sigueA.isSesionIniciada()){
+                Optional<Usuario> seguir = repoUsuario.findByDni(seguido.getDni());
+                if(seguir.isPresent()){
+                    sigueA.seguirUsuario(seguido);
+                    repoUsuario.actualizarUsuario(seguido);
+                    seguido.anadirSeguidor(sigueA);
+                    repoUsuario.actualizarUsuario(sigueA);
+                    return true;
+                }else{
+                    throw new UsuarioNoExisteException("El usuario que desea seguir no existe.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no está registrado.");
+        }
+    }
+
+
+    public boolean comentarComentario(Usuario comentador, Comentario comPadre, Comentario comHijo, int modo, String nuevoMensaje) throws SesionNoIniciadaException, UsuarioNoExisteException, ComentarioNoExiste {
+        Optional<Usuario> usu = repoUsuario.findByDni(comentador.getDni());
+        if(usu.isPresent()){
+            if(comentador.isSesionIniciada()){
+                Optional<Comentario> comen = repoCom.findById(comPadre.getId());
+                if(comen.isPresent()){
+                    if(modo == 1) {
+                        //AñadirComentario
+                        repoCom.save(comHijo);
+                        comPadre.anadirComentario(comHijo);
+                        repoCom.actualizar(comPadre);
+                        return true;
+                    } else if (modo == 2) {
+                        //EliminarComentario
+                        Optional<Comentario> comen2 = repoCom.findById(comHijo.getId());
+                        if(comen2.isPresent()) {
+                            comPadre.quitarComentario(comHijo);
+                            repoCom.save(comPadre);
+                            repoCom.delete(comHijo);
+                        }else{
+                            throw new ComentarioNoExiste("El comentario no eiste.");
+                        }
+                    } else if (modo == 3) {
+                        Optional<Comentario> comen2 = repoCom.findById(comHijo.getId());
+                        if(comen2.isPresent()) {
+                            if(comHijo.getMensaje()!=nuevoMensaje) {
+                                comHijo.setMensaje(nuevoMensaje);
+                                repoCom.save(comHijo);
+                                return true;
+                            }
+                        }else{
+                            throw new ComentarioNoExiste("El comentario no eiste.");
+                        }
+                    }
+                }else{
+                    throw new ComentarioNoExiste("El comentario no eiste.");
+                }
+            }else{
+                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no está registrado.");
+        }
+        return false;
+    }
+
+    public boolean gestionUsuario(Usuario usu, int modo, Usuario gestionado, String nombre, String apellidos, String email, String password, LocalDate fnac) throws UsuarioNoExisteException, SesionNoIniciadaException, NoPermisosException {
+        Optional<Usuario> usuarioGestor = repoUsuario.findByDni(usu.getDni());
+        Optional<Usuario> usuarioGestionado = repoUsuario.findByDni(gestionado.getDni());
+
+        if(usuarioGestor.isPresent()) {
+            if (usuarioGestionado.isPresent()) {
+                if (modo == 1) { //Eliminamos usuario, solo lo puede hacer el admin
+                    if (usu.isSesionIniciada()) {
+                        if (usu.getRol() == Rol.ADMIN && usu != gestionado) {
+                            gestionado.setArchivado(true);
+                            repoUsuario.save(gestionado);
+                        }
+                        throw new NoPermisosException("El usuario no tiene permisos para realizar esta acción.");
+                    }
+                    throw new SesionNoIniciadaException("El usuario no ha iniciado sesión");
+
+                } else if (modo == 2) {
+                    //Modificamos datos del usuario
+                    if (gestionado.isSesionIniciada()) {
+                        if (!usu.getNombre().equals(nombre)) {
+                            usu.setNombre(nombre);
+                        }
+                        if (!usu.getApellidos().equals(apellidos)) {
+                            usu.setApellidos(apellidos);
+                        }
+                        if (!usu.getPassword().equals(email)) {
+                            usu.setPassword(password);
+                        }
+                        if (usu.getFechaNacimiento() != fnac) {
+                            usu.setFechaNacimiento(fnac);
+                        }
+                        repoUsuario.save(gestionado);
+                        return true;
+                    }else{
+                        throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+                    }
+                } else if (modo == 3) {
+                    //El usuario quiere dar de baja su cuenta
+                    if (gestionado.isSesionIniciada()) {
+                        gestionado.setArchivado(true);
+                        return true;
+                    }else{
+                        throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+                    }
+                }
+            }else{
+                throw new UsuarioNoExisteException("El usuario no existe.");
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+        return false;
     }
 
 

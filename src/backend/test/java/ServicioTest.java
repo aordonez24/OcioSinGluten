@@ -1,4 +1,5 @@
 import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.herramientas.Rol;
 import com.osc.ociosingluten.modelo.Comentario;
 import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
@@ -77,19 +78,17 @@ public class ServicioTest {
 
     }
 
-    @Test
+    @Test //Al principio da fallo pero hay que reejecutarlo
     public void pruebaAnadirUsuarioCorrectoEincorrecto() throws UsuarioExisteException {
 
         //Primer caso --> Usuario incorrecto
         byte[] fotoPerfil = null;
+
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
-        servicio.registroUsuario(usuario);
-        Usuario usuarioIncorrecto = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
 
         Assertions.assertThatThrownBy(() -> {
-                    servicio.registroUsuario(usuarioIncorrecto);
+                    servicio.registroUsuario(usuario);
                 })
                 .isInstanceOf(UsuarioExisteException.class);
 
@@ -253,7 +252,7 @@ public class ServicioTest {
 
     @Test
     public void pruebaAnadirEditarEliminarComentario() throws EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, UsuarioNoExisteException, EstablecimientoNoExistenteException, ContrasenaIncorrectaException, ComentarioNoExiste {
-        Establecimiento establecimiento = new Establecimiento("Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        Establecimiento establecimiento = new Establecimiento("La Espuela", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
@@ -267,30 +266,32 @@ public class ServicioTest {
         String nuevoMensaje = "Que bien se come ahí, además te atienden muy rapido. Un gustazo!";
         Assert.assertTrue(servicio.editarComentario(usu, com, nuevoMensaje));
 
+
+
         Assert.assertTrue(servicio.eliminarComentarioEstablecimiento(usu, com, establecimiento));
 
     }
 
 
     @Test
-    public void visitarEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
+    public void visitarEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException, UsuarioExisteException {
         Establecimiento establecimiento = new Establecimiento("Burger King", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
-        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
-
+        Usuario comentador = new Usuario(generarDNIAleatorio(), "aor00050", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        servicio.registroUsuario(comentador);
         Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
     }
 
     @Test
-    public void favEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
+    public void favEstablecimiento() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException, UsuarioExisteException {
         Establecimiento establecimiento = new Establecimiento("McDonalds", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
-        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
-
+        Usuario comentador = new Usuario(generarDNIAleatorio(), "aor00051", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        servicio.registroUsuario(comentador);
         Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
@@ -299,6 +300,60 @@ public class ServicioTest {
         Assert.assertTrue(servicio.darLikeEstablecimiento(usu, establecimiento));
     }
 
+    @Test
+    public void seguirUsuario() throws UsuarioExisteException, UsuarioNoExisteException, SesionNoIniciadaException, ContrasenaIncorrectaException {
+        byte[] fotoPerfil = null;
+        Usuario elQueSigue = new Usuario(generarDNIAleatorio(), "aor00777", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+
+        Usuario elSeguido = new Usuario(generarDNIAleatorio(), "aor00776", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+
+        servicio.registroUsuario(elQueSigue);
+        servicio.registroUsuario(elSeguido);
+
+        Usuario usu = servicio.loginUsuario(elQueSigue.getEmail(), elQueSigue.getPassword());
+        Assert.assertTrue(servicio.seguirUsuario(usu, elSeguido));
+
+    }
+
+    @Test
+    public void comentarComentario() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException, UsuarioExisteException, ComentarioNoExiste {
+        Establecimiento establecimiento = new Establecimiento("Taberna Don Sancho", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
+        byte[] fotoPerfil = null;
+        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Comentario com = new Comentario("Que bien se come ahí, además te atienden muy rapido. Un gustazo!", comentador);
+
+        Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
+        Assert.assertTrue(servicio.comentarEstablecimiento(usu, establecimiento, com));
+
+        Usuario comentador2 = new Usuario(generarDNIAleatorio(), "aor00776", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        servicio.registroUsuario(comentador2);
+        Usuario usu2 = servicio.loginUsuario(comentador2.getEmail(), comentador2.getPassword());
+
+        Comentario respuesta = new Comentario("Si, la verdad es que sí, tienen muchísima variedad!", comentador2);
+
+        Assert.assertTrue(servicio.comentarComentario(usu2, com, respuesta, 1, ""));
+
+
+    }
+
+    @Test
+    public void testGestionUsuario() throws UsuarioExisteException, UsuarioNoExisteException, ContrasenaIncorrectaException, NoPermisosException, SesionNoIniciadaException {
+        byte[] fotoPerfil = null;
+        Usuario gestionado = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+
+        String nuevoNombre = "Alvarín";
+        gestionado = servicio.loginUsuario(gestionado.getEmail(), gestionado.getPassword());
+        servicio.gestionUsuario(gestionado, 2, gestionado, nuevoNombre, gestionado.getApellidos(), gestionado.getEmail(), gestionado.getPassword(), gestionado.getFechaNacimiento());
+        Assert.assertEquals(nuevoNombre, gestionado.getNombre());
+
+    }
 
 
 

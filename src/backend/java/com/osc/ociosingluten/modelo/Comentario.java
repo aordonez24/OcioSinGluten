@@ -30,7 +30,7 @@ public class Comentario {
 
     private int numLikes;
 
-    @OneToMany(mappedBy = "comentarioPadre")
+    @OneToMany(mappedBy = "comentarioPadre", fetch = FetchType.EAGER)
     private List<Comentario> comentarios;
 
     /*
@@ -109,5 +109,12 @@ public class Comentario {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void anadirComentario(Comentario comentario){
+        comentarios.add(comentario);
+    }
+    public void quitarComentario(Comentario comentario){
+        comentarios.remove(comentario);
     }
 }

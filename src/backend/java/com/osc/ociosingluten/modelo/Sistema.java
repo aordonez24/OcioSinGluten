@@ -27,33 +27,7 @@ public class Sistema {
     }
 
 
-
-    /*public boolean marcarFavoritoEstablecimiento(Establecimiento est, Usuario usuario) throws EstablecimientoNoExistenteException {
-        if(usuario.isSesionIniciada() && existeEstablecimiento(est)) {
-            usuario.anadirEstablecimientoFavorito(est);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean darLikeEstablecimiento(Establecimiento est, Usuario usu) throws EstablecimientoNoExistenteException {
-        if(usu.isSesionIniciada() && existeEstablecimiento(est)){
-            est.setNumLikes(est.getNumLikes()+1);
-            Actividad actividad = new Actividad(usu, est, MensajePredefinido.HA_DADO_LIKE);
-            crearActividad(actividad, usu);
-            return true;
-        }
-        return false;
-    }
-
-    public void seguirUsuario(Usuario usu, Usuario usuASeguir){
-        if(usu.isSesionIniciada()){
-            if(existeUsuario(usuASeguir)) {
-                usu.seguirUsuario(usuASeguir);
-            }
-        }
-    }
-
+    /*
     public boolean gestionUsuario(Usuario usu, int modo, Usuario gestionado, String nombre, String apellidos, String password, LocalDate fnac){
         if(modo == 1){ //Eliminamos usuario, solo lo puede hacer el admin
             if(usu.isSesionIniciada() && usu.getRol() == Rol.ADMIN){
@@ -88,14 +62,5 @@ public class Sistema {
         }
         return false;
     }
-
-    public boolean gestionActividades(Actividad cont, Usuario usuario){
-        if(usuario.isSesionIniciada() && usuario.getRol() == Rol.ADMIN){
-            //Eliminar actividad
-            usuario.eliminarActividad(cont);
-            actividadesRealizadas.remove(cont);
-            return true;
-        }
-        return false;
     }*/
 }

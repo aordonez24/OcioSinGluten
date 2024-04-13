@@ -51,10 +51,10 @@ public class Usuario {
     @Pattern(regexp= ExpresionesRegulares.CONTRASENA)
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Usuario> seguidos;
 
-    @ManyToMany(mappedBy = "seguidos")
+    @ManyToMany(mappedBy = "seguidos", fetch = FetchType.EAGER)
     private List<Usuario> seguidores;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -77,6 +77,9 @@ public class Usuario {
     private boolean sesionIniciada;
     @NotNull
     private boolean sesionCerrada;
+
+    @NotNull
+    private boolean archivado;
 
 
     public Usuario(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password) {
@@ -101,7 +104,7 @@ public class Usuario {
         this.comentariosRealizados = new ArrayList<>();
         this.sesionIniciada = false;
         this.sesionCerrada = true;
-
+        this.archivado = false;
     }
 
 
@@ -318,5 +321,17 @@ public class Usuario {
         return contrasena.toString();
     }
 
+    public void anadirSeguidor(Usuario usuario){
+        if(!seguidores.contains(usuario)){
+            seguidores.add(usuario);
+        }
+    }
 
+    public boolean isArchivado() {
+        return archivado;
+    }
+
+    public void setArchivado(boolean archivado) {
+        this.archivado = archivado;
+    }
 }

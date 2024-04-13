@@ -55,6 +55,9 @@ public class Establecimiento {
     @ManyToMany
     private List<Usuario> visitantes;
 
+    @NotNull
+    private boolean archivada; //Si un establecimiento esta archivado, no estará eliminado de la base de datos pero tampoco aparecerá a los usuarios
+
     public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
         this.idEstablecimiento = generarIdUnico(localidad, provincia, codPostal);
         this.nombre = nombre;
@@ -67,6 +70,7 @@ public class Establecimiento {
         this.numLikes = 0;
         this.comentarios = new ArrayList<>();
         this.visitantes = new ArrayList<>();
+        this.archivada = false;
     }
 
     public Establecimiento() {
@@ -204,5 +208,13 @@ public class Establecimiento {
         }else{
             throw new ComentarioNoExiste("El comentario no existe.");
         }
+    }
+
+    public boolean isArchivada() {
+        return archivada;
+    }
+
+    public void setArchivada(boolean archivada) {
+        this.archivada = archivada;
     }
 }
