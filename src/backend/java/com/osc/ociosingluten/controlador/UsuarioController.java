@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
@@ -47,23 +51,24 @@ public class UsuarioController {
                               @RequestParam("fotoPerfil") byte[] fotoPerfil,
                               @RequestParam("email") String email,
                               @RequestParam("password") String password) throws IOException {
-        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compressImage(fotoPerfil), email, password);
+        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compress(fotoPerfil), email, password);
         repoUsu.save(usuario);
     }
 
 
 
-    public static byte[] compressImage(byte[] input) throws IOException {
+    private byte[] compress(byte[] input) throws IOException {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+             LZMACompressorOutputStream lzmaOutputStream = new LZMACompressorOutputStream(outputStream)) {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
-                deflaterOutputStream.write(buffer, 0, bytesRead);
+                lzmaOutputStream.write(buffer, 0, bytesRead);
             }
-            deflaterOutputStream.finish();
+            lzmaOutputStream.finish();
+
             return outputStream.toByteArray();
         }
     }
