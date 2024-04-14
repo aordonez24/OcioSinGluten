@@ -1,16 +1,14 @@
 <template>
-  <div id="app">
-    <Usuario/>
-  </div>
+  <agregar-usuario />
 </template>
 
 <script>
-import Usuario from './components/Usuario.vue'
+import AgregarUsuario from "@/components/registroUsuario.vue";
 
 export default {
   name: 'App',
   components: {
-    Usuario
+    AgregarUsuario
   }
 }
 </script>
