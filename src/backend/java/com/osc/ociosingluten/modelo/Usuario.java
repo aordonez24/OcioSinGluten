@@ -43,6 +43,7 @@ public class Usuario {
     private int telefono;
 
     @Lob
+    @Column(columnDefinition = "MEDIUMBLOB")
     private byte[] fotoPerfil;
 
     @Email

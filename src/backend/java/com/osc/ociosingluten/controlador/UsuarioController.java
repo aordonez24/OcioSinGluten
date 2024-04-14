@@ -15,10 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.zip.DeflaterOutputStream;
 
 @RestController
 @RequestMapping("/ociosingluten")
@@ -45,19 +47,24 @@ public class UsuarioController {
                               @RequestParam("fotoPerfil") byte[] fotoPerfil,
                               @RequestParam("email") String email,
                               @RequestParam("password") String password) throws IOException {
-        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
+        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compressImage(fotoPerfil), email, password);
         repoUsu.save(usuario);
     }
 
 
 
-    public byte[] convertirImagenAByte(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
+    public static byte[] compressImage(byte[] input) throws IOException {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                deflaterOutputStream.write(buffer, 0, bytesRead);
+            }
+            deflaterOutputStream.finish();
+            return outputStream.toByteArray();
         }
-        return outputStream.toByteArray();
     }
 }

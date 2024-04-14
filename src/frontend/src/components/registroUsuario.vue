@@ -51,6 +51,12 @@
         <div class="form-group">
           <label for="fotoPerfil">Foto de Perfil:</label>
           <input type="file" class="form-control-file" id="fotoPerfil" @change="onFileChange">
+          <!-- Previsualización de la imagen -->
+          <div v-if="imagePreview" class="image-preview">
+            <img :src="imagePreview" alt="Previsualización de la imagen" class="rounded-circle">
+          </div>
+          <!-- Mensaje de aviso -->
+          <span v-if="showFormatWarning" class="text-danger">Por favor, seleccione una imagen en formato JPG o JPEG.</span>
         </div>
         <!-- Botón de Agregar Usuario -->
         <div class="form-group">
@@ -79,7 +85,9 @@ export default {
         email: '',
         password: ''
       },
-      confirmPassword: '' // Variable para confirmar la contraseña
+      confirmPassword: '',
+      imagePreview: '',
+      showFormatWarning: false // Mostrar advertencia de formato de imagen
     }
   },
   methods: {
@@ -114,6 +122,7 @@ export default {
               email: '',
               password: ''
             };
+            this.confirmPassword= '';
             // Actualizar la lista de usuarios después de agregar uno nuevo
             this.$emit('usuario-agregado');
           })
@@ -123,6 +132,17 @@ export default {
     },
     onFileChange(event) {
       const selectedFile = event.target.files[0];
+
+      // Verificar el tipo de archivo seleccionado
+      if (!['image/jpeg', 'image/jpg'].includes(selectedFile.type)) {
+        this.showFormatWarning = true; // Mostrar advertencia si el tipo de archivo no es válido
+        return;
+      }
+      this.showFormatWarning = false; // Ocultar advertencia si el tipo de archivo es válido
+
+      // Crear una URL de objeto de la imagen seleccionada para mostrar la previsualización
+      this.imagePreview = URL.createObjectURL(selectedFile);
+
       const reader = new FileReader();
 
       reader.onload = (e) => {
@@ -140,8 +160,6 @@ export default {
   }
 }
 </script>
-
-
 
 <style>
 @import '../assets/css/registro.css';
