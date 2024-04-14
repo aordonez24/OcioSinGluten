@@ -69,7 +69,7 @@ public class ServicioTest {
         Assertions.assertThat(servicio).isNotNull();
     }
 
-    @Test
+    @BeforeEach
     public void cargarDatosPrueba() throws UsuarioExisteException {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
@@ -78,7 +78,7 @@ public class ServicioTest {
 
     }
 
-    @Test //Al principio da fallo pero hay que reejecutarlo
+    @Test //Al principio da fallo pero hay que volver a ejecutarlo
     public void pruebaAnadirUsuarioCorrectoEincorrecto() throws UsuarioExisteException {
 
         //Primer caso --> Usuario incorrecto

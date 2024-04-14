@@ -10,13 +10,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(scanBasePackages = {
         "com.osc.ociosingluten.servicio",
         "com.osc.ociosingluten.repositorio",
-        "com.osc.ociosingluten.chat"
+        "com.osc.ociosingluten.chat",
+        "com.osc.ociosingluten.controlador"
 })
 @EntityScan(basePackages = "com/osc/ociosingluten/modelo")
 @EnableJpaRepositories(basePackages = "com.osc.ociosingluten.repositorio")
 @ComponentScan(basePackages = "com.osc.ociosingluten.repositorio")
 @ComponentScan(basePackages = "com.osc.ociosingluten.servicio")
 @ComponentScan(basePackages = "com.osc.ociosingluten.chat")
+@ComponentScan(basePackages = "com.osc.ociosingluten.controlador")
 @EnableCaching
 public class OcioSinGlutenApplication {
 

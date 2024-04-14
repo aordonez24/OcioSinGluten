@@ -1,5 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import com.osc.ociosingluten.herramientas.Rol;
 import jakarta.persistence.*;
@@ -52,18 +53,23 @@ public class Usuario {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Usuario> seguidos;
 
     @ManyToMany(mappedBy = "seguidos", fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Usuario> seguidores;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Establecimiento> establecimientosFavoritos;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Establecimiento> establecimientosVisitados;
 
     @ManyToMany
+    @JsonIgnore
     private List<Actividad> actividades;
 
     @Enumerated(EnumType.STRING)
@@ -71,6 +77,7 @@ public class Usuario {
     private Rol rol;
 
     @OneToMany
+    @JsonIgnore
     private List<Comentario> comentariosRealizados;
 
     @NotNull
