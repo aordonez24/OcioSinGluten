@@ -79,4 +79,8 @@ public class Actividad {
     public void setMensajePredefinido(MensajePredefinido mensajePredefinido) {
         this.mensajePredefinido = mensajePredefinido;
     }
+
+    public int getId() {
+        return id;
+    }
 }

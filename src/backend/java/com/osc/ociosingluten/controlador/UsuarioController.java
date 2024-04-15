@@ -1,6 +1,7 @@
 package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
+import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
 import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
 import com.osc.ociosingluten.modelo.Usuario;
@@ -47,8 +48,8 @@ public class UsuarioController {
     }
 
     //Añadir el usuario
-    @PostMapping("/altaUsuario")
-    public Usuario anadirUsuario(@RequestParam("dni") String dni,
+    @PostMapping("/nuevoUsuario")
+    public ResponseEntity<UsuarioDTO> anadirUsuario(@RequestParam("dni") String dni,
                               @RequestParam("username") String username,
                               @RequestParam("nombre") String nombre,
                               @RequestParam("apellidos") String apellidos,
@@ -59,12 +60,13 @@ public class UsuarioController {
                               @RequestParam("password") String password) throws IOException, UsuarioExisteException {
         Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compress(fotoPerfil), email, password);
         if(servicio.registroUsuario(usuario)){
-            return usuario;
+            return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioDTO(usuario));
         }else{
-            return null;
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
     }
+
 
 
     @GetMapping("/perfilUsuarioUsername/{username}")
