@@ -2,8 +2,10 @@ package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
+import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
+import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
 import org.apache.coyote.Response;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +26,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.DeflaterOutputStream;
 
 @RestController
-@RequestMapping("/ociosingluten")
+@RequestMapping("/ociosingluten/usuarios")
 @CrossOrigin("http://localhost:3000")
 public class UsuarioController {
 
     @Autowired
     private UsuarioRepository repoUsu;
 
+    @Autowired
+    private ServicioOcioSinGluten servicio;
+
     //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
-    @GetMapping("/usuarios")
+    @GetMapping("/listadoUsuarios")
     public List<Usuario> cargarTodosUsuarios(){
         return repoUsu.findAll();
     }
 
     //Añadir el usuario
-    @PostMapping("/usuarios")
-    public void anadirUsuario(@RequestParam("dni") String dni,
+    @PostMapping("/altaUsuario")
+    public Usuario anadirUsuario(@RequestParam("dni") String dni,
                               @RequestParam("username") String username,
                               @RequestParam("nombre") String nombre,
                               @RequestParam("apellidos") String apellidos,
@@ -50,9 +56,27 @@ public class UsuarioController {
                               @RequestParam("telefono") int telefono,
                               @RequestParam("fotoPerfil") byte[] fotoPerfil,
                               @RequestParam("email") String email,
-                              @RequestParam("password") String password) throws IOException {
+                              @RequestParam("password") String password) throws IOException, UsuarioExisteException {
         Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compress(fotoPerfil), email, password);
-        repoUsu.save(usuario);
+        if(servicio.registroUsuario(usuario)){
+            return usuario;
+        }else{
+            return null;
+        }
+
+    }
+
+
+    @GetMapping("/perfilUsuarioUsername/{username}")
+    public ResponseEntity<UsuarioDTO> mostrarUsuarioporUsername(@PathVariable String username){
+        Optional<Usuario> usuario = repoUsu.findByDni(username);
+        return usuario.map(c -> ResponseEntity.ok(new UsuarioDTO(c))).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/perfilUsuarioDni/{dni}")
+    public ResponseEntity<UsuarioDTO> mostrarUsuarioporDni(@PathVariable String dni){
+        Optional<Usuario> usuario = repoUsu.findByDni(dni);
+        return usuario.map(c -> ResponseEntity.ok(new UsuarioDTO(c))).orElse(ResponseEntity.notFound().build());
     }
 
 

@@ -1,17 +1,15 @@
 package com.osc.ociosingluten.controlador.DTO;
 
+import com.osc.ociosingluten.modelo.Usuario;
+
 import java.time.LocalDate;
 
-public class UsuarioDTO {
-    private String dni;
-    private String username;
-    private String nombre;
-    private String apellidos;
-    private LocalDate fechaNacimiento;
-    private int telefono;
-    private byte[] fotoPerfil;
-    private String email;
-    private String password;
+
+    public record UsuarioDTO(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password){
+
+    public UsuarioDTO(Usuario usuario) {
+        this(usuario.getDni(), usuario.getUsername(), usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(), usuario.getTelefono(), usuario.getFotoPerfil(), usuario.getEmail(), usuario.getPassword());
+    }
 
     public String getDni() {
         return dni;

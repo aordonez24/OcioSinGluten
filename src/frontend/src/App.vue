@@ -1,14 +1,14 @@
 <template>
-  <agregar-usuario />
+  <hello-world />
 </template>
 
 <script>
-import AgregarUsuario from "@/components/registroUsuario.vue";
+import HelloWorld from "@/components/Inicio.vue";
 
 export default {
   name: 'App',
   components: {
-    AgregarUsuario
+    HelloWorld
   }
 }
 </script>

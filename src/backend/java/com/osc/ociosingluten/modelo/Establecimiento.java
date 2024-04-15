@@ -58,6 +58,11 @@ public class Establecimiento {
     @NotNull
     private boolean archivada; //Si un establecimiento esta archivado, no estará eliminado de la base de datos pero tampoco aparecerá a los usuarios
 
+    @ElementCollection
+    @CollectionTable(name = "imagenes_establecimiento", joinColumns = @JoinColumn(name = "id_establecimiento"))
+    @Column(name = "imagen")
+    private List<byte[]> imagenes;
+
     public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
         this.idEstablecimiento = generarIdUnico(localidad, provincia, codPostal);
         this.nombre = nombre;
@@ -71,6 +76,7 @@ public class Establecimiento {
         this.comentarios = new ArrayList<>();
         this.visitantes = new ArrayList<>();
         this.archivada = false;
+        this.imagenes = new ArrayList<>();
     }
 
     public Establecimiento() {
@@ -216,5 +222,21 @@ public class Establecimiento {
 
     public void setArchivada(boolean archivada) {
         this.archivada = archivada;
+    }
+
+    public List<byte[]> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(List<byte[]> imagenes) {
+        this.imagenes = imagenes;
+    }
+
+    public void anadirImagen(byte[] imagen){
+        imagenes.add(imagen);
+    }
+
+    public void quitarImagen(byte[] imagen){
+        imagenes.remove(imagen);
     }
 }
