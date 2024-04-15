@@ -1,5 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.osc.ociosingluten.excepciones.ComentarioNoExiste;
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import jakarta.persistence.*;
@@ -50,9 +51,11 @@ public class Establecimiento {
     private int numLikes;
 
     @OneToMany
+    @JsonIgnore
     private List<Comentario> comentarios;
 
     @ManyToMany
+    @JsonIgnore
     private List<Usuario> visitantes;
 
     @NotNull

@@ -14,6 +14,10 @@ import java.util.Optional;
 public interface ComentarioRepository extends JpaRepository<Comentario, Integer> {
     @Transactional
     Optional<Comentario> findByAutor(Usuario autor);
+
+    @Transactional
+    Optional<Comentario> findById(int id);
+
     @Transactional
     Comentario save(Comentario comentario);
     @Transactional

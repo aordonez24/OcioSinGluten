@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.zip.DeflaterOutputStream;
 
 @RestController
@@ -67,13 +68,19 @@ public class UsuarioController {
 
     }
 
-
-
     @GetMapping("/perfilUsuarioUsername/{username}")
-    public ResponseEntity<UsuarioDTO> mostrarUsuarioporUsername(@PathVariable String username){
-        Optional<Usuario> usuario = repoUsu.findByDni(username);
-        return usuario.map(c -> ResponseEntity.ok(new UsuarioDTO(c))).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<List<UsuarioDTO>> mostrarUsuarioporUsername(@PathVariable String username){
+        List<Usuario> usuarios = repoUsu.findByUsernameContaining(username);
+        if (!usuarios.isEmpty()) {
+            List<UsuarioDTO> usuariosDTO = usuarios.stream()
+                    .map(UsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(usuariosDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 
     @GetMapping("/perfilUsuarioDni/{dni}")
     public ResponseEntity<UsuarioDTO> mostrarUsuarioporDni(@PathVariable String dni){

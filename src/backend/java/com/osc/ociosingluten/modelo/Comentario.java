@@ -117,4 +117,8 @@ public class Comentario {
     public void quitarComentario(Comentario comentario){
         comentarios.remove(comentario);
     }
+
+    public void setComentarioPadre(Comentario comentarioPadre) {
+        this.comentarioPadre = comentarioPadre;
+    }
 }

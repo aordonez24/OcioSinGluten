@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
 
     @Transactional
     Establecimiento save(Establecimiento establecimiento);
+
     @Transactional
     void removeByIdEstablecimiento(int id);
 
@@ -32,6 +34,10 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     default Establecimiento actualizar(Establecimiento est) {
         return save(est);
     }
+
+    @Transactional
+    List<Establecimiento> findByNombreContaining(String nombre);
+
 
 
 }

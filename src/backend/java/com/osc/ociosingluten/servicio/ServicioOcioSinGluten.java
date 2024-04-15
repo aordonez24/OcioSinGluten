@@ -441,8 +441,9 @@ public class ServicioOcioSinGluten {
                 if(comen.isPresent()){
                     if(modo == 1) {
                         //AñadirComentario
-                        repoCom.save(comHijo);
                         comPadre.anadirComentario(comHijo);
+                        comHijo.setComentarioPadre(comPadre);
+                        repoCom.save(comHijo);
                         repoCom.actualizar(comPadre);
                         return true;
                     } else if (modo == 2) {
