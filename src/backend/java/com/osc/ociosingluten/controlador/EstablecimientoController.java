@@ -35,6 +35,16 @@ public class EstablecimientoController {
         return repoEst.findByNombreContaining(nombre);
     }
 
+    @GetMapping("/establecimientosProvincia/{provincia}")
+    public List<Establecimiento> cargarEstxProvincia(@PathVariable String provincia){
+        return repoEst.findByProvinciaContaining(provincia);
+    }
+
+    @GetMapping("/establecimientosLocalidad/{localidad}")
+    public List<Establecimiento> cargarEstxLocalidad(@PathVariable String localidad){
+        return repoEst.findByProvinciaContaining(localidad);
+    }
+
     @GetMapping("/establecimientos/{nombre}/comentarios")
     public ResponseEntity<List<Comentario>> cargarComentariosEst(@PathVariable String nombre){
         // Buscar el establecimiento por nombre

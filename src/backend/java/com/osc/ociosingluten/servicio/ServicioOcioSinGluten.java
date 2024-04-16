@@ -59,14 +59,22 @@ public class ServicioOcioSinGluten {
      * @throws UsuarioExisteException si ese usuario existe en la base de datos
      */
     public boolean registroUsuario(@NotNull @Valid Usuario usu) throws UsuarioExisteException {
-        Optional<Usuario> prueba = repoUsuario.findByDni(usu.getDni());
-        Optional<Usuario> prueba2 = repoUsuario.findByEmail(usu.getEmail());
-        Optional<Usuario> prueba3 = repoUsuario.findByUsername(usu.getUsername());
-        if(prueba.isPresent() && prueba2.isPresent() && prueba3.isPresent())
-            throw new UsuarioExisteException("El usuario ya existe.");
-        repoUsuario.save(usu);
-        return true;
+        Optional<Usuario> usuarioPorDni = repoUsuario.findByDni(usu.getDni());
+        Optional<Usuario> usuarioPorEmail = repoUsuario.findByEmail(usu.getEmail());
+        Optional<Usuario> usuarioPorUsername = repoUsuario.findByUsername(usu.getUsername());
+
+        if (usuarioPorDni.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este DNI ya existe.");
+        } else if (usuarioPorEmail.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este email ya existe.");
+        } else if (usuarioPorUsername.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este nombre de usuario ya existe.");
+        } else {
+            repoUsuario.save(usu);
+            return true;
+        }
     }
+
 
     public Usuario loginUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         Optional<Usuario> usu = repoUsuario.findByEmail(email);

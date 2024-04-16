@@ -38,6 +38,13 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     @Transactional
     List<Establecimiento> findByNombreContaining(String nombre);
 
+    @Transactional
+    List<Establecimiento> findByProvinciaContaining(String provincia);
+
+    @Transactional
+    List<Establecimiento> findByLocalidadContaining(String localidad);
+
+
 
 
 }

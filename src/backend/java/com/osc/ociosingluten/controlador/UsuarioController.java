@@ -105,4 +105,32 @@ public class UsuarioController {
             return outputStream.toByteArray();
         }
     }
+
+    @GetMapping("/perfilUsuario/{username}/seguidores")
+    public ResponseEntity<List<UsuarioDTO>> obtenerSeguidores(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<UsuarioDTO> seguidoresDTO = usuarioOptional.get().getSeguidores().stream()
+                    .map(UsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(seguidoresDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/seguidos")
+    public ResponseEntity<List<UsuarioDTO>> obtenerSeguidos(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<UsuarioDTO> seguidosDTO = usuarioOptional.get().getSeguidos().stream()
+                    .map(UsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(seguidosDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }
