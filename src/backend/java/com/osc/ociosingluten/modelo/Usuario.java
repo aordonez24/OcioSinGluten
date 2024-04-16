@@ -69,7 +69,7 @@ public class Usuario {
     @JsonIgnore
     private List<Establecimiento> establecimientosVisitados;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Actividad> actividades;
 
@@ -77,7 +77,7 @@ public class Usuario {
     @NotNull
     private Rol rol;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Comentario> comentariosRealizados;
 
@@ -270,6 +270,7 @@ public class Usuario {
     public void enviarComentario(Comentario c){
         comentariosRealizados.add(c);
     }
+
     public void eliminarComentario(Comentario c){
         for(int i=0; i<comentariosRealizados.size(); i++){
             if(comentariosRealizados.get(i) == c){
@@ -342,4 +343,9 @@ public class Usuario {
     public void setArchivado(boolean archivado) {
         this.archivado = archivado;
     }
+
+    public void anadirComentario(Comentario com){
+        comentariosRealizados.add(com);
+    }
+
 }

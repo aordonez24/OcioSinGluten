@@ -4,6 +4,8 @@ import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
 import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
+import com.osc.ociosingluten.modelo.Actividad;
+import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
@@ -131,6 +133,42 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // En el controlador UsuarioController
+
+    @GetMapping("/perfilUsuario/{username}/actividades")
+    public ResponseEntity<List<Actividad>> obtenerActividadesPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Actividad> actividades = usuarioOptional.get().getActividades();
+            return ResponseEntity.ok(actividades);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/estFavoritos")
+    public ResponseEntity<List<Establecimiento>> obtenerEstablecimientosFavoritosPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Establecimiento> establecimientos = usuarioOptional.get().getEstablecimientosFavoritos();
+            return ResponseEntity.ok(establecimientos);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/estVisitados")
+    public ResponseEntity<List<Establecimiento>> obtenerEstablecimientosVisitadosPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Establecimiento> establecimientos = usuarioOptional.get().getEstablecimientosVisitados();
+            return ResponseEntity.ok(establecimientos);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
 
 }
