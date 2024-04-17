@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import HelloWorld from "@/components/Inicio.vue";
+import HelloWorld from "@/components/registroUsuario.vue";
 
 export default {
   name: 'App',

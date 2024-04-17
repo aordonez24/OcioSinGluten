@@ -1,23 +1,16 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import Usuario from "@/components/Usuario.vue";
-import RegistroUsuario from "@/components/registroUsuario.vue";
+import { createMemoryHistory, createRouter } from 'vue-router'
+
+import Usuario from "../views/Usuario.vue";
+import RegistroUsuario from "../views/registroUsuario.vue";
 
 const routes = [
-    {
-        path: "/usuario",
-        name: "Usuario",
-        component: Usuario
-    },
-    {
-        path: "/registroUsuario",
-        name: "RegistroUsuario",
-        component: RegistroUsuario
-    }
-];
+    { path: '/usuarios', component: Usuario },
+    { path: '/registro', component: RegistroUsuario },
+]
 
 const router = createRouter({
-    history: createWebHistory(process.env.BASE_URL),
-    routes
-});
+    history: createMemoryHistory(),
+    routes,
+})
 
-export default router;
+export default router
