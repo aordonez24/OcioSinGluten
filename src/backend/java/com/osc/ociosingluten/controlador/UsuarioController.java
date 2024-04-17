@@ -1,9 +1,10 @@
 package com.osc.ociosingluten.controlador;
 
+import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
-import com.osc.ociosingluten.excepciones.ContrasenaIncorrectaException;
-import com.osc.ociosingluten.excepciones.UsuarioExisteException;
-import com.osc.ociosingluten.excepciones.UsuarioNoExisteException;
+import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.modelo.Actividad;
+import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
@@ -12,6 +13,7 @@ import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
@@ -26,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -105,4 +108,127 @@ public class UsuarioController {
             return outputStream.toByteArray();
         }
     }
+
+    @GetMapping("/perfilUsuario/{username}/seguidores")
+    public ResponseEntity<List<UsuarioDTO>> obtenerSeguidores(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<UsuarioDTO> seguidoresDTO = usuarioOptional.get().getSeguidores().stream()
+                    .map(UsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(seguidoresDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/seguidos")
+    public ResponseEntity<List<UsuarioDTO>> obtenerSeguidos(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<UsuarioDTO> seguidosDTO = usuarioOptional.get().getSeguidos().stream()
+                    .map(UsuarioDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(seguidosDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // En el controlador UsuarioController
+
+    @GetMapping("/perfilUsuario/{username}/actividades")
+    public ResponseEntity<List<Actividad>> obtenerActividadesPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Actividad> actividades = usuarioOptional.get().getActividades();
+            return ResponseEntity.ok(actividades);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/estFavoritos")
+    public ResponseEntity<List<Establecimiento>> obtenerEstablecimientosFavoritosPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Establecimiento> establecimientos = usuarioOptional.get().getEstablecimientosFavoritos();
+            return ResponseEntity.ok(establecimientos);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/perfilUsuario/{username}/estVisitados")
+    public ResponseEntity<List<Establecimiento>> obtenerEstablecimientosVisitadosPorUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            List<Establecimiento> establecimientos = usuarioOptional.get().getEstablecimientosVisitados();
+            return ResponseEntity.ok(establecimientos);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/perfilUsuario/{username}/modUsuario")
+    public ResponseEntity<UsuarioDTO> modificarUsuarioDesdeFormulario(@PathVariable String username,
+                                                                      @RequestBody MultiValueMap<String, String> formData) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+
+            if(usuario.isSesionIniciada()) {
+                usuario.setPassword(formData.getFirst("password"));
+                usuario.setNombre(formData.getFirst("nombre"));
+                usuario.setApellidos(formData.getFirst("apellidos"));
+                usuario.setFechaNacimiento(LocalDate.parse(formData.getFirst("fechaNacimiento")));
+                usuario.setEmail(formData.getFirst("email"));
+                usuario.setUsername(formData.getFirst("username"));
+                usuario.setDni(formData.getFirst("dni"));
+
+                repoUsu.save(usuario);
+            }else{
+                return ResponseEntity.badRequest().build();
+            }
+
+            return ResponseEntity.ok(new UsuarioDTO(usuario));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @PostMapping("/usuarios/{dni}/nuevoEstablecimiento")
+    public ResponseEntity<EstablecimientoDTO> anadirEstablecimiento(@RequestParam("nombre") String nombre,
+                                                                    @RequestParam("localidad") String localidad,
+                                                                    @RequestParam("provincia") String provincia,
+                                                                    @RequestParam("calle") String calle,
+                                                                    @RequestParam("codPostal") int codPostal,
+                                                                    @RequestParam("telefono") int telefono,
+                                                                    @RequestParam("fotos") List<byte[]> imagenes,
+                                                                    @RequestParam("pais") String pais, @PathVariable String dni) throws IOException, UsuarioExisteException, UsuarioNoExisteException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException {
+        Optional<Usuario> usuQueAnade = repoUsu.findByDni(dni);
+        if(usuQueAnade.isPresent()) {
+            Usuario usuario = usuQueAnade.get();
+            if(usuario.isSesionIniciada()) {
+                List<byte[]> imagenesComprimidas = new ArrayList<>();
+                for (int i = 0; i < imagenes.size(); i++) {
+                    imagenesComprimidas.add(compress(imagenes.get(i)));
+                }
+
+                Establecimiento establecimiento = new Establecimiento(nombre, telefono, localidad, provincia, calle, codPostal, pais, imagenesComprimidas);
+                if (servicio.publicarEstablecimiento(usuario, establecimiento)) {
+                    return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(establecimiento));
+                } else {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).build();
+                }
+            }
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe");
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+
+
 }

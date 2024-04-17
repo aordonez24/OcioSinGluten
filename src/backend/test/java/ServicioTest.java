@@ -330,7 +330,7 @@ public class ServicioTest {
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.comentarEstablecimiento(usu, establecimiento, com));
 
-        Usuario comentador2 = new Usuario(generarDNIAleatorio(), "aor00776", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+        Usuario comentador2 = new Usuario(generarDNIAleatorio(), "aor00770", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
                 ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
         servicio.registroUsuario(comentador2);
         Usuario usu2 = servicio.loginUsuario(comentador2.getEmail(), comentador2.getPassword());

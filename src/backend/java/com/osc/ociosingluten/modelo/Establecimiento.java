@@ -22,6 +22,7 @@ import static com.osc.ociosingluten.constantes.Constantes.mediaValoracion;
 public class Establecimiento {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
     private int idEstablecimiento;
 
     @NotNull
@@ -50,8 +51,8 @@ public class Establecimiento {
     @NotNull
     private int numLikes;
 
-    @OneToMany
     @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Comentario> comentarios;
 
     @ManyToMany
@@ -67,7 +68,6 @@ public class Establecimiento {
     private List<byte[]> imagenes;
 
     public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
-        this.idEstablecimiento = generarIdUnico(localidad, provincia, codPostal);
         this.nombre = nombre;
         this.telefono = telefono;
         this.localidad = localidad;
@@ -80,6 +80,21 @@ public class Establecimiento {
         this.visitantes = new ArrayList<>();
         this.archivada = false;
         this.imagenes = new ArrayList<>();
+    }
+
+    public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais, List<byte[]> imagenes) {
+        this.nombre = nombre;
+        this.telefono = telefono;
+        this.localidad = localidad;
+        this.provincia = provincia;
+        this.calle = calle;
+        this.codPostal = codPostal;
+        this.pais = pais;
+        this.numLikes = 0;
+        this.comentarios = new ArrayList<>();
+        this.visitantes = new ArrayList<>();
+        this.archivada = false;
+        this.imagenes = imagenes;
     }
 
     public Establecimiento() {

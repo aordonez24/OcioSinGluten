@@ -59,14 +59,22 @@ public class ServicioOcioSinGluten {
      * @throws UsuarioExisteException si ese usuario existe en la base de datos
      */
     public boolean registroUsuario(@NotNull @Valid Usuario usu) throws UsuarioExisteException {
-        Optional<Usuario> prueba = repoUsuario.findByDni(usu.getDni());
-        Optional<Usuario> prueba2 = repoUsuario.findByEmail(usu.getEmail());
-        Optional<Usuario> prueba3 = repoUsuario.findByUsername(usu.getUsername());
-        if(prueba.isPresent() && prueba2.isPresent() && prueba3.isPresent())
-            throw new UsuarioExisteException("El usuario ya existe.");
-        repoUsuario.save(usu);
-        return true;
+        Optional<Usuario> usuarioPorDni = repoUsuario.findByDni(usu.getDni());
+        Optional<Usuario> usuarioPorEmail = repoUsuario.findByEmail(usu.getEmail());
+        Optional<Usuario> usuarioPorUsername = repoUsuario.findByUsername(usu.getUsername());
+
+        if (usuarioPorDni.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este DNI ya existe.");
+        } else if (usuarioPorEmail.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este email ya existe.");
+        } else if (usuarioPorUsername.isPresent()) {
+            throw new UsuarioExisteException("El usuario con este nombre de usuario ya existe.");
+        } else {
+            repoUsuario.save(usu);
+            return true;
+        }
     }
+
 
     public Usuario loginUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         Optional<Usuario> usu = repoUsuario.findByEmail(email);
@@ -203,6 +211,8 @@ public class ServicioOcioSinGluten {
                 repoEst.save(est);
                 Actividad act = new Actividad(anadeEst, est, MensajePredefinido.HA_PUBLICADO);
                 crearActividad(act);
+                anadeEst.anadirActividad(act);
+                repoUsuario.actualizarUsuario(anadeEst);
                 return true;
             }
         }else{
@@ -281,9 +291,10 @@ public class ServicioOcioSinGluten {
                 if(est.isPresent()){
                     repoCom.save(com);
                     estComentado.anadirComentario(com);
-                    repoEst.actualizar(estComentado);
+                    comentador.anadirComentario(com);
                     Actividad act = new Actividad(comentador, estComentado, MensajePredefinido.HA_COMENTADO);
                     crearActividad(act);
+                    comentador.anadirActividad(act);
                     return true; //El comentario se ha realizado con éxito
                 }else{
                     throw new EstablecimientoNoExistenteException("El establecimiento al que desea comentar no existe.");
@@ -321,29 +332,28 @@ public class ServicioOcioSinGluten {
 
     public boolean eliminarComentarioEstablecimiento(Usuario usuGestor, Comentario com, Establecimiento establecimiento) throws UsuarioNoExisteException, ComentarioNoExiste, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException {
         Optional<Usuario> usu = repoUsuario.findByDni(usuGestor.getDni());
-        if(usu.isPresent()){
-            if(usu.get().isSesionIniciada()){
+        if (usu.isPresent()) {
+            if (usu.get().isSesionIniciada()) {
                 Optional<Establecimiento> establecimiento1 = repoEst.findByIdEstablecimiento(establecimiento.getIdEstablecimiento());
-                if(establecimiento1.isPresent()){
-                    //Comprobamos si el comentario existe
+                if (establecimiento1.isPresent()) {
                     Optional<Comentario> comentario = repoCom.findById(com.getId());
-                    if(comentario.isPresent()){
+                    if (comentario.isPresent()) {
                         establecimiento.eliminarComentario(com);
-                        repoEst.actualizar(establecimiento);
-                        repoCom.delete(com);
-                        return true; //Comentario eliminado satisfactoriamente
-                    }else{
+                        return true; // Comentario eliminado satisfactoriamente
+                    } else {
                         throw new ComentarioNoExiste("El comentario no existe.");
                     }
-                }else{
+                } else {
                     throw new EstablecimientoNoExistenteException("El establecimiento ni siquiera existe.");
                 }
-            }else{
+            } else {
                 throw new SesionNoIniciadaException("Sesión no iniciada.");
             }
         }
         throw new UsuarioNoExisteException("El usuario no está registrado.");
     }
+
+
 
     @Transactional
     public boolean visitarEstablecimiento(Usuario visitante, Establecimiento estVisitado) throws UsuarioNoExisteException, SesionNoIniciadaException, ActividadNoCreada, EstablecimientoNoExistenteException {
@@ -352,12 +362,10 @@ public class ServicioOcioSinGluten {
             if(visitante.isSesionIniciada()){
                 Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(estVisitado.getIdEstablecimiento());
                 if(est.isPresent()){
-                    estVisitado.anadirVisitante(visitante);
                     visitante.visitarEstablecimiento(estVisitado);
-                    repoUsuario.actualizarUsuario(visitante);
-                    repoEst.actualizar(estVisitado);
                     Actividad act = new Actividad(visitante, estVisitado, MensajePredefinido.HA_VISITADO);
                     crearActividad(act);
+                    visitante.anadirActividad(act);
                     return true;
                 }else{
                     throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
@@ -377,7 +385,6 @@ public class ServicioOcioSinGluten {
                 Optional<Establecimiento> est = repoEst.findById(estVisitado.getIdEstablecimiento());
                 if(est.isPresent()){
                     visitante.anadirEstablecimientoFavorito(estVisitado);
-                    repoUsuario.actualizarUsuario(visitante);
                     return true;
                 }else{
                     throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
@@ -398,6 +405,10 @@ public class ServicioOcioSinGluten {
                 if(est.isPresent()){
                     estVisitado.sumarLike();
                     repoEst.actualizar(estVisitado);
+                    Actividad actividad = new Actividad(visitante, estVisitado, MensajePredefinido.HA_DADO_LIKE);
+                    crearActividad(actividad);
+                    visitante.anadirActividad(actividad);
+                    repoUsuario.actualizarUsuario(visitante);
                     return true;
                 }else{
                     throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
@@ -443,6 +454,7 @@ public class ServicioOcioSinGluten {
                         //AñadirComentario
                         comPadre.anadirComentario(comHijo);
                         comHijo.setComentarioPadre(comPadre);
+                        comentador.anadirComentario(comHijo);
                         repoCom.save(comHijo);
                         repoCom.actualizar(comPadre);
                         return true;
