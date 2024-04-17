@@ -55,12 +55,8 @@ public class ComentarioController {
 
         if (comentarioOptional.isPresent()) {
             Comentario comentarioPadre = comentarioOptional.get();
-
-            // Crea un nuevo comentario a partir de DTO
             Optional<Usuario> usuario = repoUsu.findByUsername(respuestaDTO.nombreAutor());
-
             Comentario respuesta = new Comentario(respuestaDTO.mensaje(), usuario.get());
-
             respuesta.setComentarioPadre(comentarioPadre);
             Comentario respuestaGuardada = comRe.save(respuesta);
             comentarioPadre.anadirComentario(respuestaGuardada);

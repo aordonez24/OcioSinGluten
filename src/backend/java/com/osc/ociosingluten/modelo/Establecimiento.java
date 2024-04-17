@@ -82,6 +82,21 @@ public class Establecimiento {
         this.imagenes = new ArrayList<>();
     }
 
+    public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais, List<byte[]> imagenes) {
+        this.nombre = nombre;
+        this.telefono = telefono;
+        this.localidad = localidad;
+        this.provincia = provincia;
+        this.calle = calle;
+        this.codPostal = codPostal;
+        this.pais = pais;
+        this.numLikes = 0;
+        this.comentarios = new ArrayList<>();
+        this.visitantes = new ArrayList<>();
+        this.archivada = false;
+        this.imagenes = imagenes;
+    }
+
     public Establecimiento() {
 
     }
