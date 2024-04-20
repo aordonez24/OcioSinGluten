@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,10 @@ public class ServicioOcioSinGluten {
     @Autowired
     CacheManager cacheManager;
 
+    @Autowired
+    BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
     public ServicioOcioSinGluten() {
     }
 
@@ -70,6 +75,7 @@ public class ServicioOcioSinGluten {
         } else if (usuarioPorUsername.isPresent()) {
             throw new UsuarioExisteException("El usuario con este nombre de usuario ya existe.");
         } else {
+            usu.setPassword(bCryptPasswordEncoder.encode(usu.getPassword()));
             repoUsuario.save(usu);
             return true;
         }
@@ -77,22 +83,22 @@ public class ServicioOcioSinGluten {
 
 
     public Usuario loginUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
-        Optional<Usuario> usu = repoUsuario.findByEmail(email);
-
-        if(usu.isPresent()){
-            if(usu.get().getPassword().equals(password)){
-                usu.get().setSesionCerrada(false);
-                usu.get().setSesionIniciada(true);
-                Usuario usuario = usu.get();
-                repoUsuario.actualizarUsuario(usuario);
-                return usu.get();
-            }else{
-                throw new ContrasenaIncorrectaException("La contraseña no es correcta");
-            }
-        }else{
-            throw new UsuarioNoExisteException("No existe ese email registrado.");
+        if(!repoUsuario.findByEmail(email).isPresent()){
+            throw new UsuarioNoExisteException("El usuario no existe");
         }
+        Optional<Usuario> clienteLogin = repoUsuario.findByEmail(email).filter((usuario -> usuario.claveValida(password)));
+        if(clienteLogin.isPresent()) {
+            Usuario usu = clienteLogin.get();
+            usu.setSesionIniciada(true);
+            usu.setSesionCerrada(false);
+            repoUsuario.save(usu);
+            return usu;
+        }else{
+            throw new ContrasenaIncorrectaException("La contraseña es incorrecta.");
+        }
+
     }
+
 
     public Usuario logoutUsuario(@NotBlank String email, @NotBlank String password) throws UsuarioNoExisteException, SesionNoIniciadaException, ContrasenaIncorrectaException {
         Optional<Usuario> usu = repoUsuario.findByEmail(email).stream().findFirst();

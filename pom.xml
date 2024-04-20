@@ -104,7 +104,10 @@
             <artifactId>xz</artifactId>
             <version>1.9</version> <!-- O utiliza la versión más reciente -->
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
 
     </dependencies>

@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -64,6 +65,8 @@ public class ServicioTest {
     @Autowired
     ServicioOcioSinGluten servicio;
 
+    String contrasena = "alonsismoF13";
+
     @Test
     public void testAccesoServicio(){
         Assertions.assertThat(servicio).isNotNull();
@@ -73,7 +76,7 @@ public class ServicioTest {
     public void cargarDatosPrueba() throws UsuarioExisteException {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
         servicio.registroUsuario(usuario);
 
     }
@@ -85,7 +88,7 @@ public class ServicioTest {
         byte[] fotoPerfil = null;
 
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
         Assertions.assertThatThrownBy(() -> {
                     servicio.registroUsuario(usuario);
@@ -93,8 +96,8 @@ public class ServicioTest {
                 .isInstanceOf(UsuarioExisteException.class);
 
         //Segundo caso --> Usuario correcto
-        Usuario UsuarioCorrecto = new Usuario(generarDNIAleatorio(), "aor00040", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+        Usuario UsuarioCorrecto = new Usuario(generarDNIAleatorio(), "aor0000", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
 
         Assert.assertTrue(servicio.registroUsuario(UsuarioCorrecto));
     }
@@ -105,23 +108,21 @@ public class ServicioTest {
         //Primer caso -> Credenciales correctas
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
-        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), contrasena);
         Assert.assertTrue(usuPrueba.isSesionIniciada());
 
         //Segundo caso --> Email no existente
-        usuario.setEmail("aor00039@red.ujaen.es");
         Assertions.assertThatThrownBy(() -> {
-                    servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+                    servicio.loginUsuario("aor00066@red.ujaen.es", contrasena);
                 })
                 .isInstanceOf(UsuarioNoExisteException.class);
 
         //Tercer caso --> Email existente pero contraseña incorrecta
         usuario.setEmail("aor00039@gmail.com");
-        usuario.setPassword("alonsismoF133");
         Assertions.assertThatThrownBy(() -> {
-                    servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+                    servicio.loginUsuario(usuario.getEmail(), "kjasdfsdfa");
                 })
                 .isInstanceOf(ContrasenaIncorrectaException.class);
 
@@ -151,15 +152,15 @@ public class ServicioTest {
         //Primer caso --> Usuario con sesion iniciada puede cerrar sesión
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
-        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Usuario usuPrueba = servicio.loginUsuario(usuario.getEmail(), contrasena);
 
         Assert.assertTrue(usuPrueba.isSesionIniciada());
         Assert.assertFalse(usuPrueba.isSesionCerrada());
 
         //Ahora que está la sesión iniciada, debemos cerrarla
-        Usuario usu = servicio.logoutUsuario(usuario.getEmail(), usuario.getPassword());
+        Usuario usu = servicio.logoutUsuario(usuario.getEmail(), contrasena);
         Assert.assertTrue(usu.isSesionCerrada());
         Assert.assertFalse(usu.isSesionIniciada());
 
@@ -171,35 +172,27 @@ public class ServicioTest {
         //Primer caso, usuario iniciado sesion
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario(generarDNIAleatorio(), "prueba", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
         servicio.registroUsuario(usuario);
-        servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Usuario usuar1 = servicio.loginUsuario(usuario.getEmail(), contrasena);
         String oldPassword = usuario.getPassword();
-        servicio.olvidarContrasena(usuario);
-        Assert.assertNotEquals(oldPassword, usuario.getPassword());
+        servicio.olvidarContrasena(usuar1);
+        Assert.assertNotEquals(contrasena, usuario.getPassword());
 
-        //Segundo caso, usuario sin sesion iniciada
-        Usuario usuario2 = new Usuario(generarDNIAleatorio(), "prueba2", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
-        servicio.registroUsuario(usuario2);
-        Assertions.assertThatThrownBy(() -> {
-                    servicio.olvidarContrasena(usuario);
-                })
-                .isInstanceOf(SesionNoIniciadaException.class);
     }
 
     @Test
     public void testBuscarUsuario() throws UsuarioNoExisteException {
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
         Usuario usuarios = servicio.buscarUsuario(usuario);
 
         Assert.assertNotNull(usuarios);
 
         Usuario usuario1 = new Usuario(generarDNIAleatorio(), "akufhaku2987", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
 
         Assertions.assertThatThrownBy(() -> {
                     servicio.buscarUsuario(usuario1);
@@ -213,10 +206,10 @@ public class ServicioTest {
         Establecimiento establecimiento = new Establecimiento("Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario usuario = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
         //Caso 1 --> anadir correctamente el establecimiento
-        Usuario usuario1 = servicio.loginUsuario(usuario.getEmail(), usuario.getPassword());
+        Usuario usuario1 = servicio.loginUsuario(usuario.getEmail(), contrasena);
         Assert.assertTrue(servicio.publicarEstablecimiento(usuario1, establecimiento));
 
         //Caso 2 --> Añadir el mismo establecimiento
@@ -226,7 +219,7 @@ public class ServicioTest {
                 .isInstanceOf(EstablecimientoExistenteException.class);
 
         //Caso 3 --> el usuario no ha iniciado sesión
-        Usuario usuario2 = servicio.logoutUsuario(usuario1.getEmail(), usuario.getPassword());
+        Usuario usuario2 = servicio.logoutUsuario(usuario1.getEmail(), contrasena);
         Assertions.assertThatThrownBy(() -> {
                     servicio.publicarEstablecimiento(usuario2, establecimiento);
                 })
@@ -234,10 +227,10 @@ public class ServicioTest {
 
         //Eliminamos el establecimiento, pero primero la actividad
         Usuario admin = new Usuario("78162641Q", "aor00043", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@admin.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@admin.com", contrasena);
         servicio.registroUsuario(admin);
 
-        Usuario usuario3 = servicio.loginUsuario(admin.getEmail(), admin.getPassword());
+        Usuario usuario3 = servicio.loginUsuario(admin.getEmail(), contrasena);
         //Editamos establecimiento
         Assert.assertTrue(servicio.editarEstablecimiento(usuario3, establecimiento, "Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "Alemania"));
 
@@ -255,9 +248,9 @@ public class ServicioTest {
         Establecimiento establecimiento = new Establecimiento("La Espuela", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
-        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), contrasena);
         Comentario com = new Comentario("Que bien se come hay, además te atienden muy rapido. Un gustazo!", comentador);
 
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
@@ -278,9 +271,9 @@ public class ServicioTest {
         Establecimiento establecimiento = new Establecimiento("Burger King", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario comentador = new Usuario(generarDNIAleatorio(), "aor00050", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
         servicio.registroUsuario(comentador);
-        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), contrasena);
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
     }
@@ -290,9 +283,9 @@ public class ServicioTest {
         Establecimiento establecimiento = new Establecimiento("McDonalds", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario comentador = new Usuario(generarDNIAleatorio(), "aor00051", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
         servicio.registroUsuario(comentador);
-        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), contrasena);
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.visitarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.marcarEstablecimientoFavorito(usu, establecimiento));
@@ -304,15 +297,15 @@ public class ServicioTest {
     public void seguirUsuario() throws UsuarioExisteException, UsuarioNoExisteException, SesionNoIniciadaException, ContrasenaIncorrectaException {
         byte[] fotoPerfil = null;
         Usuario elQueSigue = new Usuario(generarDNIAleatorio(), "aor00777", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
 
         Usuario elSeguido = new Usuario(generarDNIAleatorio(), "aor00776", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
 
         servicio.registroUsuario(elQueSigue);
         servicio.registroUsuario(elSeguido);
 
-        Usuario usu = servicio.loginUsuario(elQueSigue.getEmail(), elQueSigue.getPassword());
+        Usuario usu = servicio.loginUsuario(elQueSigue.getEmail(), contrasena);
         Assert.assertTrue(servicio.seguirUsuario(usu, elSeguido));
 
     }
@@ -322,18 +315,18 @@ public class ServicioTest {
         Establecimiento establecimiento = new Establecimiento("Taberna Don Sancho", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
         byte[] fotoPerfil = null;
         Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
 
-        Usuario usu = servicio.loginUsuario(comentador.getEmail(), comentador.getPassword());
+        Usuario usu = servicio.loginUsuario(comentador.getEmail(), contrasena);
         Comentario com = new Comentario("Que bien se come ahí, además te atienden muy rapido. Un gustazo!", comentador);
 
         Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
         Assert.assertTrue(servicio.comentarEstablecimiento(usu, establecimiento, com));
 
         Usuario comentador2 = new Usuario(generarDNIAleatorio(), "aor00770", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), "alonsismoF13");
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
         servicio.registroUsuario(comentador2);
-        Usuario usu2 = servicio.loginUsuario(comentador2.getEmail(), comentador2.getPassword());
+        Usuario usu2 = servicio.loginUsuario(comentador2.getEmail(), contrasena);
 
         Comentario respuesta = new Comentario("Si, la verdad es que sí, tienen muchísima variedad!", comentador2);
 
@@ -345,13 +338,14 @@ public class ServicioTest {
     @Test
     public void testGestionUsuario() throws UsuarioExisteException, UsuarioNoExisteException, ContrasenaIncorrectaException, NoPermisosException, SesionNoIniciadaException {
         byte[] fotoPerfil = null;
-        Usuario gestionado = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", "alonsismoF13");
+        Usuario gestionado = new Usuario(generarDNIAleatorio(), "aor10000", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
+                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
 
+        servicio.registroUsuario(gestionado);
         String nuevoNombre = "Alvarín";
-        gestionado = servicio.loginUsuario(gestionado.getEmail(), gestionado.getPassword());
-        servicio.gestionUsuario(gestionado, 2, gestionado, nuevoNombre, gestionado.getApellidos(), gestionado.getEmail(), gestionado.getPassword(), gestionado.getFechaNacimiento());
-        Assert.assertEquals(nuevoNombre, gestionado.getNombre());
+        Usuario gets = servicio.loginUsuario(gestionado.getEmail(), contrasena);
+        servicio.gestionUsuario(gets, 2, gets, nuevoNombre, gestionado.getApellidos(), gestionado.getEmail(), contrasena, gestionado.getFechaNacimiento());
+        Assert.assertEquals(nuevoNombre, gets.getNombre());
 
     }
 

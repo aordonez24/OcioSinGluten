@@ -3,6 +3,7 @@ package com.osc.ociosingluten.modelo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.osc.ociosingluten.herramientas.ExpresionesRegulares;
 import com.osc.ociosingluten.herramientas.Rol;
+import com.osc.ociosingluten.seguridad.CodificadorPassword;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -346,6 +347,10 @@ public class Usuario {
 
     public void anadirComentario(Comentario com){
         comentariosRealizados.add(com);
+    }
+
+    public boolean claveValida(String clave){
+        return CodificadorPassword.igual(clave, this.password);
     }
 
 }
