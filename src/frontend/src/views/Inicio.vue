@@ -47,16 +47,23 @@
       </div>
       <div class="column">
         <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-        <!-- Agrega aquí tus iconos o enlaces de redes sociales -->
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+        </div>
       </div>
     </div>
   </div>
-  <footer>
-    <p>Ocio Sin Gluten</p>
+  <footer class="footer">
+    <p>Ocio Sin Gluten - Todos los derechos reservados. Álvaro Ordóñez Romero</p>
   </footer>
+
 </template>
 
 <script>
+import '@fortawesome/fontawesome-free/css/all.css';
+
 export default {
   name: 'Vista-Inicio'
 }
