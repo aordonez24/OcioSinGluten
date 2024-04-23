@@ -1,18 +1,17 @@
 <template>
-  <hello-world />
+  <cabecera-componente />
+  <Vista-Inicio />
 </template>
 
 <script>
-import HelloWorld from "./views/registroUsuario.vue";
+import CabeceraComponente from "@/components/header.vue";
+import VistaInicio from "@/views/Inicio.vue"
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    CabeceraComponente,
+    VistaInicio
   }
 }
 </script>
-
-<style>
-
-</style>

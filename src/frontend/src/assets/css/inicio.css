@@ -1,57 +1,144 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-header {
-    background-color: #ffffff;
-    padding: 20px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.logo-container {
-    display: flex;
-    align-items: center;
-}
-
-.logo {
-    width: 80px; /* Tamaño del logo */
-    height: 80px;
-    border-radius: 50%; /* Forma redonda */
-}
-
-.title {
-    font-size: 24px; /* Tamaño del título */
-    margin-left: 20px; /* Espacio entre el logo y el título */
-}
-
-nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-}
-
-nav ul li {
-    margin-right: 20px;
-}
-
-.additional-links {
-    margin-right: 20px; /* Espacio entre los enlaces adicionales y los principales */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
 }
 
 .main-section {
     background-color: #353535; /* Color de fondo gris */
-    padding: 20px;
+    padding: 80px; /* Aumentar el padding para hacer la sección más grande */
     color: rgb(244, 255, 253); /* Color de texto blanco */
     text-align: center; /* Centrar texto */
+
 }
 
 .main-section h2 {
     color: rgb(244, 255, 253); /* Color de texto blanco */
+    text-align: center; /* Centrar el título de los síntomas */
+    margin-bottom: 20px; /* Agregar margen inferior al título */
+    font-size: 45px; /* Tamaño de fuente más grande */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+
 }
+
+.main-section p {
+    font-size: 16px; /* Tamaño de fuente más pequeño */
+    line-height: 1.4; /* Espaciado entre líneas más compacto */
+    max-width: 800px; /* Ancho máximo del texto para evitar que se extienda demasiado */
+    margin: 0 auto; /* Centrar el texto horizontalmente */
+}
+
+.symptoms-container {
+    background-color: #ffffff; /* Color de fondo gris */
+    margin-top: 0; /* Espacio entre el section y los síntomas */
+    padding: 30px; /* Aumentar el padding para hacer la sección más grande */
+}
+
+.symptoms-container h3 {
+    margin-top: -15px; /* Reducir margen superior del título */
+    text-align: center; /* Centrar el título de los síntomas */
+    margin-bottom: 30px; /* Agregar margen inferior al título */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+}
+
+.symptoms-columns {
+    display: flex;
+    justify-content: center; /* Centrar las columnas horizontalmente */
+}
+
+
+.column-container {
+    width: 15%; /* Reducir el ancho de los contenedores para que estén más juntos */
+    margin: 0 20px; /* Agregar un margen entre las columnas */
+    text-align: center; /* Centrar el contenido de los contenedores */
+}
+
+.left-column ul,
+.right-column ul {
+    padding-left: 0;
+    list-style-type: none; /* Elimina los puntos de la lista */
+}
+
+.symptoms-column ul li {
+    list-style-type: none;
+}
+
+.footer {
+    background-color: #9DD9D2; /* Color de fondo gris */
+    padding: 80px;
+}
+
+.footer p {
+    text-align: center; /* Centrar el título de los síntomas */
+    font-size: 45px; /* Tamaño de fuente más grande */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+}
+
+.contactin {
+    background-color: #353535; /* Color de fondo gris */
+    padding: 80px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.contactin .column {
+    flex: 1; /* Las columnas ocupan el mismo espacio */
+    padding: 20px; /* Agregar espaciado interno */
+    text-align: center; /* Centrar el contenido */
+}
+
+.contactin h1,
+.contactin p {
+    font-size: 30px; /* Tamaño de fuente más pequeño */
+    line-height: 1.4; /* Espaciado entre líneas más compacto */
+    max-width: 400px; /* Ancho máximo del texto para evitar que se extienda demasiado */
+    margin: 0 auto; /* Centrar el texto horizontalmente */
+    color: white;
+}
+
+.contactin form {
+    text-align: left; /* Alinear el contenido del formulario a la izquierda */
+    max-width: 400px; /* Limitar el ancho del formulario para que no se vea muy extendido */
+    margin: 0 auto; /* Centrar el formulario horizontalmente */
+}
+
+.contactin form label {
+    display: block; /* Mostrar los labels en una línea nueva */
+    margin-bottom: 8px; /* Añadir un poco de espacio entre los labels */
+    color: white; /* Color del texto de los labels */
+}
+
+.contactin form input,
+.contactin form textarea {
+    width: calc(100% - 16px); /* Hacer que los campos de entrada y el área de texto ocupen todo el ancho disponible */
+    padding: 10px; /* Añadir relleno a los campos de entrada */
+    margin-bottom: 16px; /* Añadir espacio entre los campos */
+    border: 1px solid #ddd; /* Añadir un borde */
+    border-radius: 4px; /* Agregar bordes redondeados */
+    background-color: #f9f9f9; /* Color de fondo del campo */
+    color: #333; /* Color del texto */
+    font-size: 16px; /* Tamaño de fuente */
+}
+
+.contactin form textarea {
+    height: 120px; /* Establecer una altura para el área de texto */
+}
+
+.contactin form button {
+    background-color: #7F7F7F; /* Color de fondo del botón */
+    color: white; /* Color del texto del botón */
+    border: none; /* Eliminar el borde del botón */
+    padding: 12px 24px; /* Aumentar el relleno del botón */
+    cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+    font-size: 16px; /* Tamaño de fuente */
+    border-radius: 4px; /* Agregar bordes redondeados */
+    transition: background-color 0.3s ease; /* Agregar una transición suave al color de fondo */
+}
+
+.contactin form button:hover {
+    background-color: #ffa500; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
+}
+
+
+

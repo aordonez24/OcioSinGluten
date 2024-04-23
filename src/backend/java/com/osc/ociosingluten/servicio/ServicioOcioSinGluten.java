@@ -298,6 +298,8 @@ public class ServicioOcioSinGluten {
                     repoCom.save(com);
                     estComentado.anadirComentario(com);
                     comentador.anadirComentario(com);
+                    repoEst.actualizar(estComentado);
+                    repoUsuario.actualizarUsuario(comentador);
                     Actividad act = new Actividad(comentador, estComentado, MensajePredefinido.HA_COMENTADO);
                     crearActividad(act);
                     comentador.anadirActividad(act);
@@ -461,7 +463,7 @@ public class ServicioOcioSinGluten {
                         comPadre.anadirComentario(comHijo);
                         comHijo.setComentarioPadre(comPadre);
                         comentador.anadirComentario(comHijo);
-                        repoCom.save(comHijo);
+                        repoCom.actualizar(comHijo);
                         repoCom.actualizar(comPadre);
                         return true;
                     } else if (modo == 2) {
