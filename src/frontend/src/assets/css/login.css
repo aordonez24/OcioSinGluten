@@ -1,0 +1,159 @@
+/* login-styles.css */
+
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Lato');
+
+/* GLOBAL */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: linear-gradient(rgba(220, 234, 237, 0.7), rgba(220, 234, 237, 0.7)), url(http://res.cloudinary.com/jenelle-miller/image/upload/v1518619522/doodles_cuau2z.png) repeat;
+}
+
+.container {
+    height: 100%;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    color: black;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 32px;
+}
+
+/* FORM */
+
+.form-background {
+    background: #fff;
+    width: 420px;
+    border-radius: 10px;
+    padding: 32px;
+    box-shadow: 0px 15px 88px -37px rgba(0, 0, 0, 0.17);
+}
+
+
+form {
+    text-transform: capitalize;
+    font-family: 'Lato', sans-serif;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    margin-bottom: 20px; /* Separación entre los campos */
+    border-radius: 30px;
+    border: 1px solid #DAE2F1;
+    padding: 15px 20px;
+    color: #8498af;
+    font-size: 0.9rem;
+    transition: 0.4s;
+}
+
+[type="submit"] {
+    background: #7F7F7F;
+    border-radius: 30px;
+    padding: 16px 30px;
+    width: 100%;
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    transition: 0.4s;
+    font-family: 'Montserrat', sans-serif;
+    border: none;
+    box-shadow: none;
+}
+
+.sign-up-divider {
+    font-family: 'Montserrat', sans-serif;
+    text-align: center;
+    color: #C4C8D4;
+    font-size: 0.8rem;
+    letter-spacing: 0.1px;
+    padding: 20px 0;
+}
+
+.sign-up-divider::before,
+.sign-up-divider::after {
+    content: '';
+    display: inline-block;
+    width: 27%;
+    margin: 0 5%;
+    height: 1px;
+    background: #DAE2F1;
+}
+
+/* Social Icons */
+
+.social-media-icons {
+    text-align: center;
+    color: #fff;
+}
+
+.social-media-icons li {
+    margin-right: 10px;
+    list-style: none;
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 0.8rem;
+    transition: 0.3s;
+    display: relative;
+    padding-top: 15px;
+}
+
+.social-media-icons li a {
+    color: #fff;
+    vertical-align: middle;
+    text-align: center;
+    top: 10px;
+}
+
+li.google {
+    background: #EA5859;
+}
+
+li.facebook {
+    background: #527ED5;
+}
+
+li.twitter {
+    background: #61BDED;
+}
+
+/* LOGIN */
+
+.login {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 0.8rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.login a {
+    margin-left: 4px;
+    text-decoration: none;
+    color: #7F7F7F;
+    transition: 0.3s;
+}
+
+.login a:hover {
+    color: #ffa500;
+}

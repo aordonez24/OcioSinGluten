@@ -32,4 +32,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
     default Usuario actualizarUsuario(Usuario usuario) {
         return save(usuario);
     }
+
+    @Transactional
+    Optional<Usuario> findOneByEmailAndPassword(String email, String pass);
 }

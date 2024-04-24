@@ -19,10 +19,10 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     @Autowired
-    private UsuarioRepository repository;
+    private static UsuarioRepository repository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public  UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Usuario> usuario  = repository.findByUsername(username);
         Usuario usuario1 = usuario.get();
 

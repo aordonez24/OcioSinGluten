@@ -14,6 +14,16 @@ class UsuarioServicio {
             }
         });
     }
+
+    loginWithParams(email, password) {
+        const queryParams = {
+            email: email,
+            password: password
+        };
+        return axios.post(`${USUARIO_API_BASE_URL}/login`, null, { params: queryParams });
+    }
+
+
 }
 
 export default new UsuarioServicio();

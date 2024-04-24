@@ -1,43 +1,46 @@
 package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
+import com.osc.ociosingluten.controlador.DTO.LoginDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.herramientas.LoginMessage;
 import com.osc.ociosingluten.modelo.Actividad;
 import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
+import com.osc.ociosingluten.seguridad.CodificadorPassword;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
-import org.apache.coyote.Response;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.zip.DeflaterOutputStream;
+
+import com.osc.ociosingluten.seguridad.UserService;
+import com.osc.ociosingluten.seguridad.JwtTokenUtil;
 
 @RestController
 @RequestMapping("/ociosingluten/usuarios")
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin
 public class UsuarioController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private UsuarioRepository repoUsu;
@@ -230,5 +233,10 @@ public class UsuarioController {
     }
 
 
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO){
+        LoginMessage loginMessage = servicio.loginUsuario(loginDTO);
+        return ResponseEntity.ok(loginMessage);
+    }
 
 }

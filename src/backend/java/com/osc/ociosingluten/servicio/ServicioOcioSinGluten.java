@@ -1,6 +1,9 @@
 package com.osc.ociosingluten.servicio;
 
+import com.osc.ociosingluten.controlador.DTO.LoginDTO;
+import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.herramientas.LoginMessage;
 import com.osc.ociosingluten.herramientas.MensajePredefinido;
 import com.osc.ociosingluten.herramientas.Rol;
 import com.osc.ociosingluten.modelo.Actividad;
@@ -555,5 +558,30 @@ public class ServicioOcioSinGluten {
     }
 
 
+    public LoginMessage loginUsuario(LoginDTO loginDTO){
+        String msg = "";
+        Usuario usuario = repoUsuario.findByEmail(loginDTO.getEmail()).get();
+        if(usuario != null){
+            String password = loginDTO.getPassword();
+            String encodedPassword = usuario.getPassword();
+
+            if(bCryptPasswordEncoder.matches(password, encodedPassword)){
+                Optional<Usuario> usu = repoUsuario.findOneByEmailAndPassword(loginDTO.getEmail(), encodedPassword);
+                if(usu.isPresent()){
+                    usu.get().setSesionIniciada(true);
+                    usu.get().setSesionCerrada(false);
+                    repoUsuario.actualizarUsuario(usu.get());
+                    return new LoginMessage("Login success", true);
+                }else{
+                    return new LoginMessage("Login failed", false);
+                }
+            }else{
+                return new LoginMessage("Contraseña no coincide", false);
+
+            }
+        }else{
+            return new LoginMessage("Usuario no existe", false);
+        }
+    }
 
 }

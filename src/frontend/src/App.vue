@@ -1,17 +1,15 @@
 <template>
-  <cabecera-componente />
-  <Vista-Inicio />
+  <Vista-Login/>
 </template>
 
 <script>
-import CabeceraComponente from "@/components/header.vue";
-import VistaInicio from "@/views/Inicio.vue"
+
+import VistaLogin from "@/views/Login.vue";
 
 export default {
   name: 'App',
   components: {
-    CabeceraComponente,
-    VistaInicio
+    VistaLogin
   }
 }
 </script>

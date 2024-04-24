@@ -20,12 +20,7 @@ import javax.sql.DataSource;
 
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig{
-
-    @Autowired
-    private UserService userDetailsService;
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -33,14 +28,4 @@ public class SecurityConfig{
         return bCryptPasswordEncoder;
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception{
-        httpSecurity.authorizeRequests().anyRequest().authenticated().and().httpBasic(Customizer.withDefaults());
-        return httpSecurity.build();
-    }
 }
