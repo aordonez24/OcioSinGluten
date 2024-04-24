@@ -32,4 +32,6 @@ public class ActividadController {
     public List<Actividad> cargarTodasActividades(){
         return repoAct.findAll();
     }
+
+
 }

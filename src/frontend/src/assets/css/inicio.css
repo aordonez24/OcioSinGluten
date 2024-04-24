@@ -31,7 +31,7 @@ body {
 .symptoms-container {
     background-color: #ffffff; /* Color de fondo gris */
     margin-top: 0; /* Espacio entre el section y los síntomas */
-    padding: 30px; /* Aumentar el padding para hacer la sección más grande */
+    padding: 40px; /* Aumentar el padding para hacer la sección más grande */
 }
 
 .symptoms-container h3 {
@@ -45,31 +45,35 @@ body {
 .symptoms-columns {
     display: flex;
     justify-content: center; /* Centrar las columnas horizontalmente */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px; /* Agregar un espacio entre las columnas */
 }
 
 
 .column-container {
-    width: 15%; /* Reducir el ancho de los contenedores para que estén más juntos */
+    width: 20%; /* Reducir el ancho de los contenedores para que estén más juntos */
     margin: 0 20px; /* Agregar un margen entre las columnas */
     text-align: center; /* Centrar el contenido de los contenedores */
 }
 
 .left-column ul,
 .right-column ul {
-    padding-left: 0;
-    list-style-type: none; /* Elimina los puntos de la lista */
+    padding-left: -10px;
+    list-style-type: none; /* Eliminar los puntos de la lista */
+    text-align: left; /* Alinear el texto de la lista a la izquierda */
 }
-
 .left-column ul li,
 .right-column ul li {
     list-style-type: none;
-    font-size: 26px; /* Cambia el tamaño de fuente de los síntomas */
+    font-size: 22px; /* Cambia el tamaño de fuente de los síntomas */
+    white-space: nowrap; /* Evitar el salto de línea */
+
 }
 
 
 .symptoms-column ul li {
     list-style-type: none;
-    font-size: 20px; /* Tamaño de fuente más grande */
+    font-size: 22px; /* Tamaño de fuente más grande */
 }
 
 .footer {
