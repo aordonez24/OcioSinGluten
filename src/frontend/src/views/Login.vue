@@ -12,7 +12,7 @@
       </form>
     </div>
     <div class="login">
-      <p>¿Necesitas una cuenta? <a href="#">Registrarse</a></p>
+      <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Registrarse</router-link> </a></p>
     </div>
   </div>
   <div class="extra-space">
