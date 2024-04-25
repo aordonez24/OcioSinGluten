@@ -14,7 +14,7 @@
       </div>
       <nav>
         <ul class="main-links">
-          <li><router-link :to="{ path: '/inicio' }">Inicio</router-link></li>
+          <li><router-link :to="{ path: '/' }">Inicio</router-link></li>
           <li><a href="#">Establecimientos sin gluten</a></li>
           <li><a href="#">Contacto</a></li>
           <li><router-link :to="{ path: '/iniciaSesion' }">Iniciar Sesión</router-link></li>
