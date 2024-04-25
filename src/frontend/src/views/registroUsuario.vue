@@ -1,5 +1,6 @@
 <template>
-  <div class="container">
+  <cabecera-componente2/>
+  <div class="container2">
     <h1 class="text-center">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
     <p class="subtitle text-center">¡Introduzca sus datos para pasar a formar parte de la comunidad celiaca!</p>
     <form @submit.prevent="agregarUsuario" class="row">
@@ -65,13 +66,19 @@
       </div>
     </form>
   </div>
+  <div class="extra-space">
+    <footer-componente/>
+  </div>
 </template>
 
 <script>
 import UsuarioServicio from "../services/UsuarioServicio";
+import CabeceraComponente2 from "@/components/header2.vue";
+import FooterComponente from "@/components/footer.vue";
 
 export default {
   name: 'AgregarUsuario',
+  components: {FooterComponente, CabeceraComponente2},
   data() {
     return {
       nuevoUsuario: {

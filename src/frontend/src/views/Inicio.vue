@@ -30,7 +30,7 @@
         </div>
       </div>
     </div>
-    <div class="contactin">
+    <div id="contacto" class="contactin">
       <div class="column">
         <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
         <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
@@ -56,22 +56,22 @@
       </div>
     </div>
   </div>
-  <footer class="footer">
-    <p>Ocio Sin Gluten - Todos los derechos reservados. Álvaro Ordóñez Romero</p>
-  </footer>
-
+  <footer-componente/>
 </template>
 
 <script>
 import '@fortawesome/fontawesome-free/css/all.css';
 import CabeceraComponente from "@/components/header.vue";
+import FooterComponente from "@/components/footer.vue";
 
 export default {
   name: 'Vista-Inicio',
   components: {
+    FooterComponente,
     CabeceraComponente
   }
 }
+
 </script>
 
 <style>

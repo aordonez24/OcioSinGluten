@@ -16,17 +16,19 @@ html, body {
 }
 
 body {
-    background: linear-gradient(rgba(220, 234, 237, 0.7), rgba(220, 234, 237, 0.7)), url(http://res.cloudinary.com/jenelle-miller/image/upload/v1518619522/doodles_cuau2z.png) repeat;
+    background-image: url("../images/_93bec00e-8ba7-4efb-9132-607d254c8874.jpg");
 }
 
 .container {
-    height: 100%;
-    text-transform: uppercase;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    width: 24vw; /* Ancho del viewport */
+    margin: 50px auto 100px; /* Centra el contenedor horizontalmente y deja un margen vertical de 50px arriba y 100px abajo */
+    padding: 45px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.1);
+    border: 1px solid #ccc;
 }
+
 
 h1 {
     font-family: 'Montserrat', sans-serif;
@@ -47,10 +49,12 @@ h1 {
 }
 
 .yellow-text {
+    font-size: 40px;
     color: #ffa500;
 }
 
 .black-text {
+    font-size: 40px;
     color: black;
 }
 
@@ -84,7 +88,7 @@ input {
     transition: 0.4s;
 }
 
-[type="submit"] {
+[type="submit2"] {
     background: #7F7F7F;
     border-radius: 30px;
     padding: 16px 30px;
@@ -98,7 +102,7 @@ input {
     box-shadow: none;
 }
 
-[type="submit"]:hover {
+[type="submit2"]:hover {
     color: #ffa500;
 }
 

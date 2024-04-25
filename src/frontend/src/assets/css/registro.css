@@ -1,16 +1,22 @@
 body {
-    background: linear-gradient(to right, #9DD9D2, #7F7F7F);
+    background-image: url("../images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-repeat: no-repeat; /* Evitar que la imagen se repita */
+    background-size: cover;
 }
 
-.container {
-    max-width: 500px;
-    margin: 50px auto;
+.container2 {
+    width: 60vw; /* Ancho del viewport */
+    margin: 50px auto 100px; /* Centra el contenedor horizontalmente y deja un margen vertical de 50px arriba y 100px abajo */
     padding: 45px;
     background-color: #fff;
     border-radius: 20px;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.1);
     border: 1px solid #ccc;
+}
+
+.extra-space {
+    margin-top: 20px;
 }
 
 h1 {

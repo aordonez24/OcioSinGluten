@@ -8,22 +8,27 @@
         <br>
         <input type="password" v-model="password" placeholder="Contraseña">
         <br><br>
-        <button type="submit">Ingresar</button>
+        <button type="submit2">Ingresar</button>
       </form>
     </div>
     <div class="login">
       <p>¿Necesitas una cuenta? <a href="#">Registrarse</a></p>
     </div>
   </div>
+  <div class="extra-space">
+    <footer-componente/>
+  </div>
 </template>
 
 <script>
 import CabeceraComponente2 from "@/components/header2.vue";
+import FooterComponente from "@/components/footer.vue";
 
 export default {
 
   name: 'Vista-Login',
   components: {
+    FooterComponente,
     CabeceraComponente2
   },
   data() {

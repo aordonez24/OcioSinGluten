@@ -8,6 +8,19 @@ const routes = [
     { path: '/', component: Inicio },
     { path: '/iniciaSesion', component: iniciaSesion },
     { path: '/registroUsuario', component: RegistroUsuario },
+    {
+        path: '/contacto',
+        name: 'Contacto',
+        component: Inicio, // El mismo componente que contiene la sección de contacto
+        beforeEnter(to, from, next) {
+            // Desplazarse hasta la sección de contacto cuando se carga la página
+            const elementoContacto = document.getElementById('contacto')
+            if (elementoContacto) {
+                elementoContacto.scrollIntoView({ behavior: 'smooth' })
+            }
+            next()
+        }
+    }
 ];
 
 const router = createRouter({
