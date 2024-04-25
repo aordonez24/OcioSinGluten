@@ -1,16 +1,18 @@
-import { createMemoryHistory, createRouter } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 
-import Usuario from "../views/Usuario.vue";
+import iniciaSesion from "../views/Login.vue";
 import RegistroUsuario from "../views/registroUsuario.vue";
+import Inicio from "../views/Inicio.vue";
 
 const routes = [
-    { path: '/usuarios', component: Usuario },
-    { path: '/registro', component: RegistroUsuario },
-]
+    { path: '/', component: Inicio },
+    { path: '/iniciaSesion', component: iniciaSesion },
+    { path: '/registroUsuario', component: RegistroUsuario },
+];
 
 const router = createRouter({
-    history: createMemoryHistory(),
+    history: createWebHistory(),
     routes,
-})
+});
 
-export default router
+export default router;

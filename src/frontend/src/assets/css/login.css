@@ -1,4 +1,4 @@
-/* login-styles.css */
+/* login.css */
 
 @import url('https://fonts.googleapis.com/css?family=Montserrat');
 @import url('https://fonts.googleapis.com/css?family=Lato');
@@ -46,6 +46,26 @@ h1 {
     box-shadow: 0px 15px 88px -37px rgba(0, 0, 0, 0.17);
 }
 
+.yellow-text {
+    color: #ffa500;
+}
+
+.black-text {
+    color: black;
+}
+
+
+input[type="text"] {
+    width: 100%;
+    margin-bottom: 10px; /* Ajusta el tamaño del espacio según tus preferencias */
+    border-radius: 30px;
+    border: 1px solid #DAE2F1;
+    padding: 15px 20px;
+    color: #8498af;
+    font-size: 0.9rem;
+    transition: 0.4s;
+}
+
 
 form {
     text-transform: capitalize;
@@ -78,64 +98,8 @@ input {
     box-shadow: none;
 }
 
-.sign-up-divider {
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-    color: #C4C8D4;
-    font-size: 0.8rem;
-    letter-spacing: 0.1px;
-    padding: 20px 0;
-}
-
-.sign-up-divider::before,
-.sign-up-divider::after {
-    content: '';
-    display: inline-block;
-    width: 27%;
-    margin: 0 5%;
-    height: 1px;
-    background: #DAE2F1;
-}
-
-/* Social Icons */
-
-.social-media-icons {
-    text-align: center;
-    color: #fff;
-}
-
-.social-media-icons li {
-    margin-right: 10px;
-    list-style: none;
-    display: inline-block;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 1rem;
-    line-height: 0.8rem;
-    transition: 0.3s;
-    display: relative;
-    padding-top: 15px;
-}
-
-.social-media-icons li a {
-    color: #fff;
-    vertical-align: middle;
-    text-align: center;
-    top: 10px;
-}
-
-li.google {
-    background: #EA5859;
-}
-
-li.facebook {
-    background: #527ED5;
-}
-
-li.twitter {
-    background: #61BDED;
+[type="submit"]:hover {
+    color: #ffa500;
 }
 
 /* LOGIN */

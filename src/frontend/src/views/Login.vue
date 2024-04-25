@@ -1,7 +1,8 @@
 <template>
+  <cabecera-componente2/>
   <div class="container">
     <div class="form-background">
-      <h1>Iniciar sesión</h1>
+      <h1><span class="black-text">Inicia sesión en</span> <span class="yellow-text">Ocio Sin Gluten</span></h1>
       <form @submit.prevent="login">
         <input type="text" v-model="email" placeholder="Correo electrónico">
         <br>
@@ -9,14 +10,6 @@
         <br><br>
         <button type="submit">Ingresar</button>
       </form>
-      <p class="sign-up-divider">o inicia con</p>
-      <div class="social-media">
-        <ul class="social-media-icons">
-          <li class="google"><a href="#"><i class="fab fa-google-plus-g"></i></a></li>
-          <li class="facebook"><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-          <li class="twitter"><a href="#"><i class="fab fa-twitter"></i></a></li>
-        </ul>
-      </div>
     </div>
     <div class="login">
       <p>¿Necesitas una cuenta? <a href="#">Registrarse</a></p>
@@ -25,8 +18,14 @@
 </template>
 
 <script>
+import CabeceraComponente2 from "@/components/header2.vue";
+
 export default {
+
   name: 'Vista-Login',
+  components: {
+    CabeceraComponente2
+  },
   data() {
     return {
       email: '',

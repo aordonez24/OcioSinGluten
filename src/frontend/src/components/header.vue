@@ -14,11 +14,11 @@
       </div>
       <nav>
         <ul class="main-links">
-          <li><a href="#">Inicio</a></li>
+          <li><router-link :to="{ path: '/inicio' }">Inicio</router-link></li>
           <li><a href="#">Establecimientos sin gluten</a></li>
           <li><a href="#">Contacto</a></li>
-          <li><router-link to="/usuario" @click="$router.push('/usuario')">Iniciar Sesión</router-link></li>
-          <li><router-link to="/registroUsuario" @click="$router.push('/registroUsuario')">Registrar Usuario</router-link></li>
+          <li><router-link :to="{ path: '/iniciaSesion' }">Iniciar Sesión</router-link></li>
+          <li><router-link :to="{ path: '/registroUsuario' }">Registrar Usuario</router-link></li>
         </ul>
       </nav>
     </header>
@@ -29,6 +29,7 @@
 export default {
   name: 'cabecera-componente'
 }
+
 </script>
 
 <style>

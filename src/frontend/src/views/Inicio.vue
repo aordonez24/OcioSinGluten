@@ -1,4 +1,5 @@
 <template>
+  <cabecera-componente/>
   <div>
     <section class="main-section">
       <h2>¿Qué es la celiaquía?</h2>
@@ -63,9 +64,13 @@
 
 <script>
 import '@fortawesome/fontawesome-free/css/all.css';
+import CabeceraComponente from "@/components/header.vue";
 
 export default {
-  name: 'Vista-Inicio'
+  name: 'Vista-Inicio',
+  components: {
+    CabeceraComponente
+  }
 }
 </script>
 
