@@ -12,7 +12,7 @@
       </form>
     </div>
     <div class="login">
-      <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Registrarse</router-link> </a></p>
+      <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Crea una nueva</router-link> </a></p>
     </div>
   </div>
   <div class="extra-space">
@@ -44,9 +44,9 @@ export default {
         const response = await fetch('http://localhost:8080/ociosingluten/usuarios/login', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/json' // Cambiar el tipo de contenido a application/json
           },
-          body: new URLSearchParams({
+          body: JSON.stringify({
             email: this.email,
             password: this.password
           })
@@ -57,6 +57,15 @@ export default {
           this.errorMessage = ''; // Limpiar el mensaje de error si no hay error
           const data = await response.json();
           console.log(data); // Manejar la respuesta del servidor
+
+          const token = data.token; // Obtener el token de la respuesta
+          const username = data.username; // Obtener el nombre de usuario de la respuesta
+
+          // Almacenar el token de autenticación y el nombre de usuario en localStorage
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', username);
+
+          this.$router.push('/iniciadoSesion'); // Reemplaza '/otra-vista' con la ruta de la vista deseada
         } else if (response.status === 500) {
           // Si la respuesta del servidor es un error 500, mostrar un mensaje de error de credenciales inválidas
           this.errorMessage = 'Credenciales inválidas';

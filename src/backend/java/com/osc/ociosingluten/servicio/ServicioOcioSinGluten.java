@@ -558,7 +558,7 @@ public class ServicioOcioSinGluten {
     }
 
 
-    public LoginMessage loginUsuario(LoginDTO loginDTO){
+    public Usuario loginUsuario(LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         String msg = "";
         Usuario usuario = repoUsuario.findByEmail(loginDTO.getEmail()).get();
         if(usuario != null){
@@ -571,16 +571,15 @@ public class ServicioOcioSinGluten {
                     usu.get().setSesionIniciada(true);
                     usu.get().setSesionCerrada(false);
                     repoUsuario.actualizarUsuario(usu.get());
-                    return new LoginMessage("Login success", true);
+                    return usu.get();
                 }else{
-                    return new LoginMessage("Login failed", false);
+                    throw new UsuarioNoExisteException("El usuario no existe.");
                 }
             }else{
-                return new LoginMessage("Contraseña no coincide", false);
-
+                throw new ContrasenaIncorrectaException("La contraseña no es correcta.");
             }
         }else{
-            return new LoginMessage("Usuario no existe", false);
+            throw new UsuarioNoExisteException("El usuario no existe.");
         }
     }
 

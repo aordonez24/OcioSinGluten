@@ -234,9 +234,13 @@ public class UsuarioController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO){
-        LoginMessage loginMessage = servicio.loginUsuario(loginDTO);
-        return ResponseEntity.ok(loginMessage);
+    public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
+        Optional<Usuario> usuarioLogeado = repoUsu.findByEmail(loginDTO.getEmail());
+        Usuario usu = usuarioLogeado.get();
+        UsuarioDTO usuario = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), usu.getFotoPerfil(), usu.getEmail(), usu.getPassword());
+                //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
+        Usuario usuario1 = servicio.loginUsuario(loginDTO);
+        return ResponseEntity.ok(usuario1);
     }
 
 }

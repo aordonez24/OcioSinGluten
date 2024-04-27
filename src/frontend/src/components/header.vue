@@ -17,8 +17,8 @@
           <li><router-link to="/">Inicio</router-link></li>
           <li><a href="#">Establecimientos sin gluten</a></li>
           <li><router-link :to="{ path: '/contacto' }">Contacto</router-link></li>
-          <li><router-link :to="{ path: '/iniciaSesion' }">Iniciar Sesión</router-link></li>
-          <li><router-link :to="{ path: '/registroUsuario' }">Registrar Usuario</router-link></li>
+          <li><router-link :to="{ path: '/iniciaSesion' }">Inicia Sesión</router-link></li>
+          <li><router-link :to="{ path: '/registroUsuario' }">Crea nueva cuenta</router-link></li>
         </ul>
       </nav>
     </header>
