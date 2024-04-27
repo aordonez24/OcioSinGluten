@@ -11,6 +11,7 @@ import com.osc.ociosingluten.modelo.Usuario;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import com.osc.ociosingluten.seguridad.CodificadorPassword;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ import com.osc.ociosingluten.seguridad.JwtTokenUtil;
 
 @RestController
 @RequestMapping("/ociosingluten/usuarios")
-@CrossOrigin
+@CrossOrigin("/localhost:3000")
 public class UsuarioController {
 
     @Autowired
@@ -75,15 +76,31 @@ public class UsuarioController {
     }
 
     @GetMapping("/perfilUsuarioUsername/{username}")
-    public ResponseEntity<List<UsuarioDTO>> mostrarUsuarioporUsername(@PathVariable String username){
-        List<Usuario> usuarios = repoUsu.findByUsernameContaining(username);
-        if (!usuarios.isEmpty()) {
-            List<UsuarioDTO> usuariosDTO = usuarios.stream()
-                    .map(UsuarioDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(usuariosDTO);
+    public ResponseEntity<UsuarioDTO> mostrarUsuarioporUsername(@PathVariable String username) throws IOException {
+        Optional<Usuario> usuario = repoUsu.findByUsername(username);
+        if (!usuario.isEmpty()) {
+            Usuario usu = usuario.get();
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), descomprimir(usu.getFotoPerfil()), usu.getEmail(), usu.getPassword());
+                    //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
+            return ResponseEntity.ok(usuarioDTO);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Método para descomprimir los datos de la imagen
+    private byte[] descomprimir(byte[] input) throws IOException {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             LZMACompressorInputStream lzmaInputStream = new LZMACompressorInputStream(inputStream)) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = lzmaInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            return outputStream.toByteArray();
         }
     }
 

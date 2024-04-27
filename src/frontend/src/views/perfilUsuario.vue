@@ -1,28 +1,29 @@
-<script setup>
-
-import Header3 from "@/components/headerIniciadoSesion.vue";
-import FooterComponente from "@/components/footer.vue";
-
-</script>
 
 <template>
   <header3/>
   <div class="container-principal">
-
+    <img v-if="fotoPerfilURL" :src="'data:image/jpeg;base64,' + fotoPerfilURL" alt="Foto de perfil">
+    <p v-else>No hay foto de perfil disponible</p>
   </div>
   <footer-componente/>
 </template>
 
 <script>
 import axios from 'axios';
+import Header3 from "@/components/headerIniciadoSesion.vue";
+import FooterComponente from "@/components/footer.vue";
 
 export default {
   name: 'PerfilUsuario',
+  components: {
+    Header3,
+    FooterComponente
+  },
   data() {
     return {
       usuario: null,
       loading: false,
-      fotoPerfilUrl: ''
+      fotoPerfilURL: null
     };
   },
   mounted() {
@@ -39,27 +40,24 @@ export default {
 
         this.usuario = response.data;
 
-        // Convierte la imagen de bytes a una URL de imagen base64
-        const base64String = btoa(String.fromCharCode.apply(null, this.usuario.fotoPerfil.data));
-        const imageUrl = `data:${this.usuario.fotoPerfil.contentType};base64,${base64String}`;
-        this.fotoPerfilUrl = imageUrl;
+        this.fotoPerfilURL = response.data.fotoPerfil;
 
-        this.loading = false;
+
+        console.log(response.data.fotoPerfil);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
-        this.loading = false;
+        this.loading = false; // Desactivar el estado de carga en caso de error
       }
-    }
+    },
   }
 };
 </script>
 
-
 <style scoped>
 .container-principal {
-  width: 70vw; /* Ancho del viewport */
+  width: 70vw;
   height: 35vw;
-  margin: 50px auto 100px; /* Centra el contenedor horizontalmente y deja un margen vertical de 50px arriba y 100px abajo */
+  margin: 50px auto 100px;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;

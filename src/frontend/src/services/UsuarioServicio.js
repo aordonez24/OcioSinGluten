@@ -8,7 +8,7 @@ class UsuarioServicio {
     }
 
     agregarUsuario(datosUsuario) {
-        return axios.post(USUARIO_API_BASE_URL, datosUsuario, {
+        return axios.post('http://localhost:8080/ociosingluten/usuarios/nuevoUsuario', datosUsuario, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

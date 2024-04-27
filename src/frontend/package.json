@@ -12,7 +12,11 @@
     "@popperjs/core": "^2.9.3",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
+    "buffer": "^6.0.3",
     "core-js": "^3.8.3",
+    "lzma": "^2.3.2",
+    "pako": "^2.1.0",
+    "path-browserify": "^1.0.1",
     "vue": "^3.4.23",
     "vue-router": "^4.3.1"
   },
