@@ -6,7 +6,7 @@
       <form @submit.prevent="login">
         <input type="text" v-model="email" placeholder="Correo electrónico">
         <br>
-        <input type="password" v-model="password" placeholder="Contraseña">
+        <input type="password" v-model="password" placeholder="Contraseña" @keyup.enter="login">
         <br><br>
         <button type="submit2">Ingresar</button>
       </form>
