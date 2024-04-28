@@ -122,3 +122,24 @@ input[type="file"]::-webkit-file-upload-button:hover {
     height: 100%;
     object-fit: cover;
 }
+
+.show-password-btn {
+    background-color: #9DD9D2; /* Color del botón */
+    border: none;
+    border-color: transparent; /* Eliminar el borde */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.show-password-btn:hover {
+    background-color: #7F7F7F;
+    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
+    transform: scale(1.05);
+}

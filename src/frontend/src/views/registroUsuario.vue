@@ -37,13 +37,41 @@
           <label for="telefono">Teléfono:</label>
           <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" required>
         </div>
-        <div class="form-group">
+        <div class="form-group position-relative">
           <label for="password">Contraseña:</label>
-          <input type="password" class="form-control" id="password" v-model="nuevoUsuario.password" required>
+          <input
+              :type="showPassword? 'text' : 'password'"
+              class="form-control"
+              id="password"
+              v-model="nuevoUsuario.password"
+              required
+          >
+          <button
+              type="button"
+              class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+              style="width: 40px; height: 40px; padding: 0;"
+              @click="showPassword =!showPassword"
+          >
+            <i :class="showPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
+          </button>
         </div>
-        <div class="form-group">
+        <div class="form-group position-relative">
           <label for="confirmPassword">Confirmar Contraseña:</label>
-          <input type="password" class="form-control" id="confirmPassword" v-model="confirmPassword" required>
+          <input
+              :type="showConfirmPassword? 'text' : 'password'"
+              class="form-control"
+              id="confirmPassword"
+              v-model="confirmPassword"
+              required
+          >
+          <button
+              type="button"
+              class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+              style="width: 40px; height: 40px; padding: 0;"
+              @click="showConfirmPassword =!showConfirmPassword"
+          >
+            <i :class="showConfirmPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
       <!-- Columna derecha -->
@@ -94,7 +122,9 @@ export default {
       },
       confirmPassword: '',
       imagePreview: '',
-      showFormatWarning: false // Mostrar advertencia de formato de imagen
+      showFormatWarning: false, // Mostrar advertencia de formato de imagen
+      showPassword: false,
+      showConfirmPassword: false,
     }
   },
   methods: {
@@ -147,21 +177,14 @@ export default {
       }
       this.showFormatWarning = false; // Ocultar advertencia si el tipo de archivo es válido
 
-      // Crear una URL de objeto de la imagen seleccionada para mostrar la previsualización
-      this.imagePreview = URL.createObjectURL(selectedFile);
-
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        // Convertir la imagen a un arreglo de bytes (byte[])
-        const imageData = new Uint8Array(e.target.result);
-
-        // Asignar los bytes de la imagen al objeto nuevoUsuario
-        this.nuevoUsuario.fotoPerfil = imageData;
+        this.imagePreview = e.target.result; // URL base64 de la imagen para previsualización
+        this.nuevoUsuario.fotoPerfil = e.target.result.split(',')[1]; // Base64 de la imagen
       };
 
-      // Leer el contenido de la imagen como un arreglo de bytes
-      reader.readAsArrayBuffer(selectedFile);
+      reader.readAsDataURL(selectedFile);
     }
 
   }

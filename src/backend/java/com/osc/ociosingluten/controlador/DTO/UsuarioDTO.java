@@ -3,12 +3,14 @@ package com.osc.ociosingluten.controlador.DTO;
 import com.osc.ociosingluten.modelo.Usuario;
 
 import java.time.LocalDate;
+import java.util.Base64;
 
 
-    public record UsuarioDTO(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password){
+
+    public record UsuarioDTO(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, String fotoPerfil, String email, String password){
 
     public UsuarioDTO(Usuario usuario) {
-        this(usuario.getDni(), usuario.getUsername(), usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(), usuario.getTelefono(), usuario.getFotoPerfil(), usuario.getEmail(), usuario.getPassword());
+        this(usuario.getDni(), usuario.getUsername(), usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(), usuario.getTelefono(), Base64.getEncoder().encodeToString(usuario.getFotoPerfil()), usuario.getEmail(), usuario.getPassword());
     }
 
     public String getDni() {
@@ -35,7 +37,7 @@ import java.time.LocalDate;
         return telefono;
     }
 
-    public byte[] getFotoPerfil() {
+    public String getFotoPerfil() {
         return fotoPerfil;
     }
 

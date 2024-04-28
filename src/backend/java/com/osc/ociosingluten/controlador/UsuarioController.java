@@ -32,6 +32,9 @@ import java.util.stream.Collectors;
 import com.osc.ociosingluten.seguridad.UserService;
 import com.osc.ociosingluten.seguridad.JwtTokenUtil;
 
+import java.util.Base64;
+
+
 @RestController
 @RequestMapping("/ociosingluten/usuarios")
 @CrossOrigin("/localhost:3000")
@@ -63,10 +66,11 @@ public class UsuarioController {
                               @RequestParam("apellidos") String apellidos,
                               @RequestParam("fechaNacimiento") LocalDate fechaNacimiento,
                               @RequestParam("telefono") int telefono,
-                              @RequestParam("fotoPerfil") byte[] fotoPerfil,
+                              @RequestParam("fotoPerfil") String  fotoPerfilBase64,
                               @RequestParam("email") String email,
                               @RequestParam("password") String password) throws IOException, UsuarioExisteException {
-        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, compress(fotoPerfil), email, password);
+        byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
+        Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
         if(servicio.registroUsuario(usuario)){
             return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioDTO(usuario));
         }else{
@@ -80,7 +84,8 @@ public class UsuarioController {
         Optional<Usuario> usuario = repoUsu.findByUsername(username);
         if (!usuario.isEmpty()) {
             Usuario usu = usuario.get();
-            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), descomprimir(usu.getFotoPerfil()), usu.getEmail(), usu.getPassword());
+            String fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword());
                     //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
             return ResponseEntity.ok(usuarioDTO);
         } else {
@@ -254,7 +259,8 @@ public class UsuarioController {
     public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         Optional<Usuario> usuarioLogeado = repoUsu.findByEmail(loginDTO.getEmail());
         Usuario usu = usuarioLogeado.get();
-        UsuarioDTO usuario = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), usu.getFotoPerfil(), usu.getEmail(), usu.getPassword());
+        String fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
+        UsuarioDTO usuario = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword());
                 //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
         Usuario usuario1 = servicio.loginUsuario(loginDTO);
         return ResponseEntity.ok(usuario1);
