@@ -18,21 +18,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.osc.ociosingluten.seguridad.UserService;
 import com.osc.ociosingluten.seguridad.JwtTokenUtil;
-
-import java.util.Base64;
 
 
 @RestController
@@ -51,6 +48,9 @@ public class UsuarioController {
 
     @Autowired
     private ServicioOcioSinGluten servicio;
+
+    @Autowired
+    BCryptPasswordEncoder bCryptPasswordEncoder;
 
     //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoUsuarios")
@@ -266,4 +266,96 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario1);
     }
 
+    @PostMapping("/perfilUsuario/{username}/fotoPerfil")
+    public ResponseEntity<String> actualizarFotoPerfil(@PathVariable String username,
+                                                       @RequestBody String fotoPerfilBase64) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            try {
+                byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
+                usuario.setFotoPerfil(fotoPerfil);
+                repoUsu.save(usuario);
+                return ResponseEntity.ok("Foto de perfil actualizada exitosamente");
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("La imagen proporcionada no es válida");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Endpoint para actualizar la foto de perfil y los datos del usuario
+    @PutMapping("/perfilUsuario/{username}/nuevosDatos")
+    public ResponseEntity<String> actualizarPerfilUsuario(@PathVariable String username,
+                                                          @RequestBody UsuarioDTO usuarioDTO) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            try {
+                // Verificar si se proporcionó un nuevo nombre de usuario y asegurarse de que no exista en la base de datos
+                if (usuarioDTO.getUsername() != null && !usuarioDTO.getUsername().equals(username)) {
+                    Optional<Usuario> otroUsuarioOptional = repoUsu.findByUsername(usuarioDTO.getUsername());
+                    if (otroUsuarioOptional.isPresent()) {
+                        return ResponseEntity.badRequest().body("El nuevo nombre de usuario ya está en uso");
+                    }
+                    usuario.setUsername(usuarioDTO.getUsername());
+                }
+
+                // Actualizar los datos del usuario si se han proporcionado
+                if (usuarioDTO.getNombre() != null) {
+                    usuario.setNombre(usuarioDTO.getNombre());
+                }
+                if (usuarioDTO.getApellidos() != null) {
+                    usuario.setApellidos(usuarioDTO.getApellidos());
+                }
+                if (usuarioDTO.getFechaNacimiento() != null) {
+                    usuario.setFechaNacimiento(usuarioDTO.getFechaNacimiento());
+                }
+                if (usuarioDTO.getTelefono() != 0) {
+                    usuario.setTelefono(usuarioDTO.getTelefono());
+                }
+
+                // Guardar los cambios en la base de datos
+                repoUsu.save(usuario);
+
+                return ResponseEntity.ok("Perfil de usuario actualizado exitosamente");
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Datos proporcionados inválidos");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    @PutMapping("/perfilUsuario/{username}/nuevaPassword")
+    public ResponseEntity<String> cambiarContrasena(@PathVariable String username,
+                                                    @RequestBody Map<String, String> data) {
+        String nuevaContrasena = data.get("nuevaContrasena");
+
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            try {
+                usuario.setPassword(bCryptPasswordEncoder.encode(nuevaContrasena));
+                repoUsu.save(usuario);
+
+                return ResponseEntity.ok("Contraseña cambiada exitosamente");
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("La contraseña proporcionada no es válida");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
 }
+
+
+
+
+
+
