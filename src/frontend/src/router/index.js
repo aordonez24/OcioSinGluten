@@ -5,6 +5,8 @@ import RegistroUsuario from "../views/registroUsuario.vue";
 import Inicio from "../views/Inicio.vue";
 import VistaDespuesLogin from "@/views/InicioSesionIniciada.vue";
 import VistaPerfil from "../views/perfilUsuario.vue";
+import SeguidoresYSeguidosUsuario from "@/views/seguidores-y-seguidos-Usuario.vue";
+import perfilUsuario from "@/views/visitarPerfilDeUsuario.vue";
 
 const routes = [
     { path: '/', component: Inicio },
@@ -45,6 +47,16 @@ const routes = [
         path: '/perfil/:username', // Agrega el parámetro dinámico ':username'
         name: 'Perfil',
         component: VistaPerfil,
+    },
+    {
+        path: '/seguidosyseguidores/:username',
+        name: 'SeguidosSeguidores',
+        component: SeguidoresYSeguidosUsuario,
+    },
+    {
+        path: '/perfilUsuario/:username',
+        name: 'perfilOtroUsuario',
+        component: perfilUsuario,
     },
 ];
 

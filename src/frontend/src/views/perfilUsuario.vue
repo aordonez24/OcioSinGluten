@@ -17,11 +17,11 @@
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
-                <p class="pulsable" @click="obtenerSeguidores">Seguidores</p>
+                <p class="pulsable" @click="verSeguidores">Seguidores</p>
                 <span>{{ numSeguidores }}</span>
               </div>
               <div class="seguidor-seguido">
-                <p class="pulsable" @click="obtenerSeguidos">Seguidos</p>
+                <p class="pulsable" @click="verSeguidos">Seguidos</p>
                 <span>{{ numSeguidos }}</span>
               </div>
             </div>
@@ -159,6 +159,7 @@ export default {
     async cerrarSesion() {
       try {
         localStorage.removeItem('token');
+        localStorage.removeItem('username');
         this.$router.push('/');
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
@@ -258,7 +259,15 @@ export default {
       const username = this.$route.params.username;
       const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
       this.numSeguidos = response.data.length;
-    }
+    },
+    verSeguidores() {
+      const username = this.$route.params.username;
+      this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
+    },
+    verSeguidos() {
+      const username = this.$route.params.username;
+      this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
+    },
   }
 };
 </script>

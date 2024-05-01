@@ -2,6 +2,7 @@ package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
 import com.osc.ociosingluten.controlador.DTO.LoginDTO;
+import com.osc.ociosingluten.controlador.DTO.SeguirDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.LoginMessage;
@@ -169,14 +170,24 @@ public class UsuarioController {
     public ResponseEntity<List<UsuarioDTO>> obtenerSeguidos(@PathVariable String username) {
         Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
         if (usuarioOptional.isPresent()) {
-            List<UsuarioDTO> seguidosDTO = usuarioOptional.get().getSeguidos().stream()
-                    .map(UsuarioDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(seguidosDTO);
+            Usuario usuario = usuarioOptional.get();
+            List<Usuario> seguidos = usuario.getSeguidos();
+            if (seguidos != null) {
+                List<UsuarioDTO> seguidosDTO = seguidos.stream()
+                        .map(seguido -> {
+                            String fotoPerfil = seguido.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguido.getFotoPerfil()) : null;
+                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword());
+                        })
+                        .collect(Collectors.toList());
+                return ResponseEntity.ok(seguidosDTO);
+            } else {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     // En el controlador UsuarioController
 
@@ -369,7 +380,48 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/perfilUsuario/{username}/nuevoSeguidor")
+    public ResponseEntity<?> seguirUsuario(@PathVariable String username, @RequestBody SeguirDTO seguirDTO) throws UsuarioNoExisteException {
+        //Primero va el que desea seguir
+        //Segundo el que va a ser seguido
+        Optional<Usuario> usuarioquesigue = repoUsu.findByUsername(seguirDTO.getUsernameQueSigueA());
+        Optional<Usuario> usuarioSeguido = repoUsu.findByUsername(seguirDTO.getUsernameAQuienSigue());
 
+        if(usuarioquesigue.isPresent() && usuarioSeguido.isPresent()){
+            Usuario sigueA = usuarioquesigue.get();
+            Usuario Aeste = usuarioSeguido.get();
+
+            sigueA.seguirUsuario(Aeste);
+            repoUsu.actualizarUsuario(sigueA);
+            Aeste.anadirSeguidor(sigueA);
+            repoUsu.save(Aeste);
+
+            return ResponseEntity.ok("Ahora estás siguiendo a " + Aeste.getUsername());
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
+    @DeleteMapping("/perfilUsuario/{username}/seguidorMenos")
+    public ResponseEntity<?> dejardeseguirUsuario(@PathVariable String username, @RequestBody SeguirDTO seguirDTO) throws UsuarioNoExisteException {
+        //Primero va el que desea seguir
+        //Segundo el que va a ser seguido
+        Optional<Usuario> usuarioquesigue = repoUsu.findByUsername(seguirDTO.getUsernameQueSigueA());
+        Optional<Usuario> usuarioSeguido = repoUsu.findByUsername(seguirDTO.getUsernameAQuienSigue());
+
+        if(usuarioquesigue.isPresent() && usuarioSeguido.isPresent()){
+            Usuario sigueA = usuarioquesigue.get();
+            Usuario Aeste = usuarioSeguido.get();
+
+            sigueA.dejarSeguir(Aeste);
+            repoUsu.actualizarUsuario(sigueA);
+            repoUsu.save(Aeste);
+
+            return ResponseEntity.ok("Ahora estás siguiendo a " + Aeste.getUsername());
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
 
 }
 
