@@ -16,7 +16,7 @@
         <ul class="main-links">
           <li><router-link to="/">Inicio</router-link></li>
           <li><a href="#">Establecimientos sin gluten</a></li>
-          <li><router-link :to="{ path: '/contacto' }">Contacto</router-link></li>
+          <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
           <li><router-link :to="{ path: '/iniciaSesion' }">Inicia Sesión</router-link></li>
           <li><router-link :to="{ path: '/registroUsuario' }">Crea nueva cuenta</router-link></li>
         </ul>
@@ -27,11 +27,33 @@
 
 <script>
 export default {
-  name: 'cabecera-componente'
+  name: 'cabecera-componente',
+  methods: {
+    scrollToContacto() {
+      const elementoContacto = document.getElementById('contacto');
+      if (elementoContacto) {
+        elementoContacto.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
 }
 
 </script>
 
 <style>
 @import "../assets/css/header.css";
+
+.cerrar-sesion-button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: black;
+  background-color: transparent;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cerrar-sesion-button:hover {
+  background-color: #9DD9D2;
+}
 </style>

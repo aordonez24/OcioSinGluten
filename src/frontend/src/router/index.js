@@ -13,7 +13,7 @@ const routes = [
     {
         path: '/contacto',
         name: 'Contacto',
-        component: Inicio, // El mismo componente que contiene la sección de contacto
+        component: Inicio, // Cambiado a Inicio, que contiene la sección de contacto
         beforeEnter(to, from, next) {
             // Desplazarse hasta la sección de contacto cuando se carga la página
             const elementoContacto = document.getElementById('contacto')
@@ -26,7 +26,7 @@ const routes = [
     {
         path: '/contactoIniciadoSesion',
         name: 'Contacto',
-        component: VistaDespuesLogin, // El mismo componente que contiene la sección de contacto
+        component: VistaDespuesLogin, // Cambiado a VistaDespuesLogin, que contiene la sección de contacto
         beforeEnter(to, from, next) {
             // Desplazarse hasta la sección de contacto cuando se carga la página
             const elementoContacto = document.getElementById('contacto')
