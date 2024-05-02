@@ -337,6 +337,14 @@ public class Usuario {
         }
     }
 
+    public void dejarSeguir(Usuario usuario){
+        seguidos.remove(usuario);
+    }
+
+    public void eliminarSeguidor(Usuario usuario){
+        seguidos.remove(usuario);
+    }
+
     public boolean isArchivado() {
         return archivado;
     }

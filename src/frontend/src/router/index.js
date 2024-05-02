@@ -5,6 +5,9 @@ import RegistroUsuario from "../views/registroUsuario.vue";
 import Inicio from "../views/Inicio.vue";
 import VistaDespuesLogin from "@/views/InicioSesionIniciada.vue";
 import VistaPerfil from "../views/perfilUsuario.vue";
+import SeguidoresYSeguidosUsuario from "@/views/seguidores-y-seguidos-Usuario.vue";
+import perfilUsuario from "@/views/visitarPerfilDeUsuario.vue";
+import comunidad from "@/views/Comunidad.vue";
 
 const routes = [
     { path: '/', component: Inicio },
@@ -13,7 +16,7 @@ const routes = [
     {
         path: '/contacto',
         name: 'Contacto',
-        component: Inicio, // El mismo componente que contiene la sección de contacto
+        component: Inicio, // Cambiado a Inicio, que contiene la sección de contacto
         beforeEnter(to, from, next) {
             // Desplazarse hasta la sección de contacto cuando se carga la página
             const elementoContacto = document.getElementById('contacto')
@@ -26,7 +29,7 @@ const routes = [
     {
         path: '/contactoIniciadoSesion',
         name: 'Contacto',
-        component: VistaDespuesLogin, // El mismo componente que contiene la sección de contacto
+        component: VistaDespuesLogin, // Cambiado a VistaDespuesLogin, que contiene la sección de contacto
         beforeEnter(to, from, next) {
             // Desplazarse hasta la sección de contacto cuando se carga la página
             const elementoContacto = document.getElementById('contacto')
@@ -46,6 +49,22 @@ const routes = [
         name: 'Perfil',
         component: VistaPerfil,
     },
+    {
+        path: '/seguidosyseguidores/:username',
+        name: 'SeguidosSeguidores',
+        component: SeguidoresYSeguidosUsuario,
+    },
+    {
+        path: '/perfilUsuario/:username',
+        name: 'perfilOtroUsuario',
+        component: perfilUsuario,
+    },
+    {
+        path: '/comunidad',
+        name: 'comunidad',
+        component: comunidad,
+    },
+
 ];
 
 const router = createRouter({

@@ -2,6 +2,7 @@ package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
 import com.osc.ociosingluten.controlador.DTO.LoginDTO;
+import com.osc.ociosingluten.controlador.DTO.SeguirDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.LoginMessage;
@@ -82,16 +83,20 @@ public class UsuarioController {
     @GetMapping("/perfilUsuarioUsername/{username}")
     public ResponseEntity<UsuarioDTO> mostrarUsuarioporUsername(@PathVariable String username) throws IOException {
         Optional<Usuario> usuario = repoUsu.findByUsername(username);
-        if (!usuario.isEmpty()) {
+        if (usuario.isPresent()) {
             Usuario usu = usuario.get();
-            String fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
+            //String fotoPerfil = usu.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(usu.getFotoPerfil()) : null;
+            String fotoPerfil = "";
+            if(usu.getFotoPerfil() != null){
+                fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
+            }
             UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword());
-                    //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
             return ResponseEntity.ok(usuarioDTO);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     // Método para descomprimir los datos de la imagen
     private byte[] descomprimir(byte[] input) throws IOException {
@@ -138,27 +143,51 @@ public class UsuarioController {
     public ResponseEntity<List<UsuarioDTO>> obtenerSeguidores(@PathVariable String username) {
         Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
         if (usuarioOptional.isPresent()) {
-            List<UsuarioDTO> seguidoresDTO = usuarioOptional.get().getSeguidores().stream()
-                    .map(UsuarioDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(seguidoresDTO);
+            Usuario usuario = usuarioOptional.get();
+            List<Usuario> seguidores = usuario.getSeguidores();
+            if (seguidores != null) {
+                List<UsuarioDTO> seguidoresDTO = seguidores.stream()
+                        .map(seguidor -> {
+                            // Verificar si el seguidor tiene una foto de perfil antes de mapearlo a UsuarioDTO
+                            String fotoPerfil = seguidor.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguidor.getFotoPerfil()) : null;
+                            return new UsuarioDTO(seguidor.getDni(), seguidor.getUsername(), seguidor.getNombre(), seguidor.getApellidos(), seguidor.getFechaNacimiento(), seguidor.getTelefono(), fotoPerfil, seguidor.getEmail(), seguidor.getPassword());
+                        })
+                        .collect(Collectors.toList());
+                return ResponseEntity.ok(seguidoresDTO);
+            } else {
+                // Si la lista de seguidores es null, devolver una lista vacía
+                return ResponseEntity.ok(Collections.emptyList());
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
+
+
+
     @GetMapping("/perfilUsuario/{username}/seguidos")
     public ResponseEntity<List<UsuarioDTO>> obtenerSeguidos(@PathVariable String username) {
         Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
         if (usuarioOptional.isPresent()) {
-            List<UsuarioDTO> seguidosDTO = usuarioOptional.get().getSeguidos().stream()
-                    .map(UsuarioDTO::new)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(seguidosDTO);
+            Usuario usuario = usuarioOptional.get();
+            List<Usuario> seguidos = usuario.getSeguidos();
+            if (seguidos != null) {
+                List<UsuarioDTO> seguidosDTO = seguidos.stream()
+                        .map(seguido -> {
+                            String fotoPerfil = seguido.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguido.getFotoPerfil()) : null;
+                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword());
+                        })
+                        .collect(Collectors.toList());
+                return ResponseEntity.ok(seguidosDTO);
+            } else {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     // En el controlador UsuarioController
 
@@ -258,12 +287,13 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         Optional<Usuario> usuarioLogeado = repoUsu.findByEmail(loginDTO.getEmail());
-        Usuario usu = usuarioLogeado.get();
-        String fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
-        UsuarioDTO usuario = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword());
                 //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
-        Usuario usuario1 = servicio.loginUsuario(loginDTO);
-        return ResponseEntity.ok(usuario1);
+        if(usuarioLogeado.isPresent()) {
+            Usuario usuario1 = servicio.loginUsuario(loginDTO);
+            return ResponseEntity.ok(usuario1);
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
     }
 
     @PostMapping("/perfilUsuario/{username}/fotoPerfil")
@@ -350,7 +380,48 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/perfilUsuario/{username}/nuevoSeguidor")
+    public ResponseEntity<?> seguirUsuario(@PathVariable String username, @RequestBody SeguirDTO seguirDTO) throws UsuarioNoExisteException {
+        //Primero va el que desea seguir
+        //Segundo el que va a ser seguido
+        Optional<Usuario> usuarioquesigue = repoUsu.findByUsername(seguirDTO.getUsernameQueSigueA());
+        Optional<Usuario> usuarioSeguido = repoUsu.findByUsername(seguirDTO.getUsernameAQuienSigue());
 
+        if(usuarioquesigue.isPresent() && usuarioSeguido.isPresent()){
+            Usuario sigueA = usuarioquesigue.get();
+            Usuario Aeste = usuarioSeguido.get();
+
+            sigueA.seguirUsuario(Aeste);
+            repoUsu.actualizarUsuario(sigueA);
+            Aeste.anadirSeguidor(sigueA);
+            repoUsu.save(Aeste);
+
+            return ResponseEntity.ok("Ahora estás siguiendo a " + Aeste.getUsername());
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
+    @DeleteMapping("/perfilUsuario/{username}/seguidorMenos")
+    public ResponseEntity<?> dejardeseguirUsuario(@PathVariable String username, @RequestBody SeguirDTO seguirDTO) throws UsuarioNoExisteException {
+        //Primero va el que desea seguir
+        //Segundo el que va a ser seguido
+        Optional<Usuario> usuarioquesigue = repoUsu.findByUsername(seguirDTO.getUsernameQueSigueA());
+        Optional<Usuario> usuarioSeguido = repoUsu.findByUsername(seguirDTO.getUsernameAQuienSigue());
+
+        if(usuarioquesigue.isPresent() && usuarioSeguido.isPresent()){
+            Usuario sigueA = usuarioquesigue.get();
+            Usuario Aeste = usuarioSeguido.get();
+
+            sigueA.dejarSeguir(Aeste);
+            repoUsu.actualizarUsuario(sigueA);
+            repoUsu.save(Aeste);
+
+            return ResponseEntity.ok("Ahora estás siguiendo a " + Aeste.getUsername());
+        }else{
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
 
 }
 

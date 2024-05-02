@@ -5,38 +5,51 @@
       <div class="profile-container">
         <div class="left-column">
           <div class="profile-picture-container">
-            <img
-                v-if="fotoPerfilURL"
-                :src="'data:image/jpeg;base64,' + fotoPerfilURL"
-                alt="Foto de perfil"
-                class="profile-picture"
-            />
-            <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
-            <button @click="openFileInput" class="change-profile-picture-button">Cambiar foto de perfil</button>
+            <div class="picture-button-container">
+              <img
+                  v-if="fotoPerfilURL"
+                  :src="'data:image/jpeg;base64,' + fotoPerfilURL"
+                  alt="Foto de perfil"
+                  class="profile-picture"
+              />
+              <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
+              <button @click="openFileInput" class="change-profile-picture-button">Sustituir foto de perfil</button>
+            </div>
+            <div class="seguidores-seguidos">
+              <div class="seguidor-seguido">
+                <p class="pulsable" @click="verSeguidores">Seguidores</p>
+                <span>{{ numSeguidores }}</span>
+              </div>
+              <div class="seguidor-seguido">
+                <p class="pulsable" @click="verSeguidos">Seguidos</p>
+                <span>{{ numSeguidos }}</span>
+              </div>
+            </div>
           </div>
+
           <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
         </div>
         <div class="right-column">
           <div class="datosDeUsuario">
             <p><strong>DNI:</strong> {{ dni }}</p>
             <p><strong>Nombre de usuario:</strong>
-              <span v-if="!editing">{{ username }}</span>
+              <span v-if="!editing"> {{ username }}</span>
               <input v-else v-model="editedUsername" type="text">
             </p>
             <p><strong>Nombre:</strong>
-              <span v-if="!editing">{{ nombre }}</span>
+              <span v-if="!editing"> {{ nombre }}</span>
               <input v-else v-model="editedNombre" type="text">
             </p>
             <p><strong>Apellidos:</strong>
-              <span v-if="!editing">{{ apellidos }}</span>
+              <span v-if="!editing"> {{ apellidos }}</span>
               <input v-else v-model="editedApellidos" type="text">
             </p>
             <p><strong>Fecha de nacimiento:</strong>
-              <span v-if="!editing">{{ fechaNacimiento }}</span>
+              <span v-if="!editing"> {{ fechaNacimiento }}</span>
               <input v-else v-model="editedFechaNacimiento" type="date">
             </p>
             <p><strong>Teléfono:</strong>
-              <span v-if="!editing">{{ telefono }}</span>
+              <span v-if="!editing"> {{ telefono }}</span>
               <input v-else v-model="editedTelefono" type="text">
             </p>
             <p><strong>Email:</strong> {{ email }}</p>
@@ -64,9 +77,8 @@
                 <button @click="cancelarCambioContrasena" class="change-password-button3">Cancelar</button>
               </form>
             </div>
-
-
           </div>
+
         </div>
       </div>
     </div>
@@ -108,11 +120,15 @@ export default {
       changingPassword: false,
       currentPassword: '',
       newPassword: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      numSeguidos: '',
+      numSeguidores: '',
     };
   },
   mounted() {
     this.obtenerUsuario();
+    this.obtenerSeguidores();
+    this.obtenerSeguidos();
   },
   methods: {
     async obtenerUsuario() {
@@ -143,6 +159,7 @@ export default {
     async cerrarSesion() {
       try {
         localStorage.removeItem('token');
+        localStorage.removeItem('username');
         this.$router.push('/');
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
@@ -192,7 +209,7 @@ export default {
         console.error('Error al guardar los cambios:', error);
       }
     },
-    async iniciarCambioContrasena() {
+    async iniciarCambioContrasena() { //Async por operacion asincrona
       this.changingPassword = true;
     },
     cancelarCambioContrasena() {
@@ -232,7 +249,25 @@ export default {
         console.error('Error al cambiar la contraseña:', error);
         alert("Error al cambiar la contraseña");
       }
-    }
+    },
+    async obtenerSeguidores(){
+      const username = this.$route.params.username;
+      const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidores`);
+      this.numSeguidores = response.data.length;
+    },
+    async obtenerSeguidos(){
+      const username = this.$route.params.username;
+      const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
+      this.numSeguidos = response.data.length;
+    },
+    verSeguidores() {
+      const username = this.$route.params.username;
+      this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
+    },
+    verSeguidos() {
+      const username = this.$route.params.username;
+      this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
+    },
   }
 };
 </script>
@@ -264,6 +299,8 @@ export default {
 
 .profile-picture-container {
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .profile-picture {
@@ -271,6 +308,35 @@ export default {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
+  margin-right: 20px;
+}
+
+.seguidores-seguidos {
+  margin-left: 75px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.seguidor-seguido {
+  text-align: center;
+  margin-bottom: 120px; /* Agrega un margen inferior */
+}
+
+.seguidor-seguido:first-child {
+  margin-right: 20px;
+}
+
+.seguidor-seguido p {
+  margin-bottom: 20px;
+}
+
+.seguidor-seguido span {
+  font-weight: bold;
+}
+
+.pulsable {
+  cursor: pointer;
+  font-size: 20px;
 }
 
 .change-profile-picture-button {
@@ -304,6 +370,7 @@ export default {
 }
 
 .datosDeUsuario {
+  margin-left: 75px;
   background-color: #9DD9D2;
   padding: 20px;
   border-radius: 10px;
@@ -325,7 +392,7 @@ export default {
 }
 
 .cerrar-sesion-button2:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 .button-group {
@@ -363,7 +430,7 @@ export default {
 }
 
 .change-password-form button:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 .white-label {
@@ -389,6 +456,6 @@ export default {
 }
 
 .change-password-button3:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 </style>

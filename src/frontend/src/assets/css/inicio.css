@@ -154,7 +154,7 @@ body {
 }
 
 .contactin form button:hover {
-    background-color: #ffa500; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
+    background-color: #ffcc74; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
 }
 
 .social-icons {
@@ -171,7 +171,7 @@ body {
 
 
 .social-icons a:hover {
-    color: #ffa500; /* Cambiar el color al pasar el cursor */
+    color: #ffcc74; /* Cambiar el color al pasar el cursor */
 }
 
 
