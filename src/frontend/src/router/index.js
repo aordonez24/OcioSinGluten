@@ -7,6 +7,7 @@ import VistaDespuesLogin from "@/views/InicioSesionIniciada.vue";
 import VistaPerfil from "../views/perfilUsuario.vue";
 import SeguidoresYSeguidosUsuario from "@/views/seguidores-y-seguidos-Usuario.vue";
 import perfilUsuario from "@/views/visitarPerfilDeUsuario.vue";
+import comunidad from "@/views/Comunidad.vue";
 
 const routes = [
     { path: '/', component: Inicio },
@@ -58,6 +59,12 @@ const routes = [
         name: 'perfilOtroUsuario',
         component: perfilUsuario,
     },
+    {
+        path: '/comunidad',
+        name: 'comunidad',
+        component: comunidad,
+    },
+
 ];
 
 const router = createRouter({

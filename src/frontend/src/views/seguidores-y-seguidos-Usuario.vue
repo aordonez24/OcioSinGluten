@@ -193,7 +193,7 @@ input[type="text"] {
 }
 
 .seguir-boton:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 footer-componente {
@@ -222,7 +222,7 @@ footer-componente {
 }
 
 .username-link:hover {
-  text-decoration: #ffa500; /* Subraya el texto al pasar el ratón */
+  text-decoration: #ffcc74; /* Subraya el texto al pasar el ratón */
 }
 
 </style>

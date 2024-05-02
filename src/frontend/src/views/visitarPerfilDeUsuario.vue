@@ -178,7 +178,7 @@ export default {
         const username = localStorage.getItem('username');
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
         for (let i = 0; i < response.data.length; i++) {
-          if(buscado == response.data[i].username){
+          if(buscado === response.data[i].username){
             this.siguiendo = true; //Lo está siguiendo
           }
         }
@@ -331,7 +331,7 @@ export default {
 }
 
 .change-password-form button:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 
@@ -346,7 +346,7 @@ export default {
 }
 
 .change-password-button3:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 footer-componente {

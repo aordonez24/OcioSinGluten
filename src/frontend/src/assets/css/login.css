@@ -50,7 +50,7 @@ h1 {
 
 .yellow-text {
     font-size: 40px;
-    color: #ffa500;
+    color: #ffcc74;
 }
 
 .black-text {
@@ -103,7 +103,7 @@ input {
 }
 
 [type="submit2"]:hover {
-    color: #ffa500;
+    color: #ffcc74;
 }
 
 /* LOGIN */
@@ -132,7 +132,7 @@ input {
 }
 
 .login a:hover {
-    color: #ffa500;
+    color: #ffcc74;
 }
 
 input[type="password"] {

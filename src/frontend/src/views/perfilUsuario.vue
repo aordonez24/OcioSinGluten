@@ -392,7 +392,7 @@ export default {
 }
 
 .cerrar-sesion-button2:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 .button-group {
@@ -430,7 +430,7 @@ export default {
 }
 
 .change-password-form button:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 
 .white-label {
@@ -456,6 +456,6 @@ export default {
 }
 
 .change-password-button3:hover {
-  background-color: #ffa500;
+  background-color: #ffcc74;
 }
 </style>

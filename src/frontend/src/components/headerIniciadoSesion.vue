@@ -42,6 +42,7 @@ export default {
         <ul class="main-links">
           <li><router-link to="/iniciadoSesion">Inicio</router-link></li>
           <li><a href="#">Establecimientos sin gluten</a></li>
+          <li><router-link to="/comunidad">Comunidad</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
           <li v-if="username">
             <span class="welcome-message">Bienvenido
