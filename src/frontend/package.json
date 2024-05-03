@@ -10,6 +10,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.5.2",
     "@popperjs/core": "^2.9.3",
+    "@stomp/stompjs": "^7.0.0",
+    "agora-rtm-sdk": "^2.1.9",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
@@ -17,6 +19,9 @@
     "lzma": "^2.3.2",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
+    "socket.io-client": "^4.7.5",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3",
     "vue": "^3.4.23",
     "vue-router": "^4.3.1"
   },
@@ -41,7 +46,9 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "vue/multi-word-component-names": "off"
+    }
   },
   "browserslist": [
     "> 1%",

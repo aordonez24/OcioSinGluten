@@ -8,6 +8,7 @@ import VistaPerfil from "../views/perfilUsuario.vue";
 import SeguidoresYSeguidosUsuario from "@/views/seguidores-y-seguidos-Usuario.vue";
 import perfilUsuario from "@/views/visitarPerfilDeUsuario.vue";
 import comunidad from "@/views/Comunidad.vue";
+import chat from "@/views/Chat-Vista.vue";
 
 const routes = [
     { path: '/', component: Inicio },
@@ -63,6 +64,11 @@ const routes = [
         path: '/comunidad',
         name: 'comunidad',
         component: comunidad,
+    },
+    {
+        path: '/chatCon/:username',
+        name: 'chatCon',
+        component: chat,
     },
 
 ];

@@ -21,6 +21,14 @@ body {
 
 }
 
+.main-section h3 {
+    color: #ffcc74; /* Color de texto blanco */
+    text-align: center; /* Centrar el título de los síntomas */
+    margin-top: 40px;
+    font-size: 30px; /* Tamaño de fuente más grande */
+    font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+}
+
 .main-section p {
     font-size: 26px; /* Tamaño de fuente más pequeño */
     line-height: 1.4; /* Espaciado entre líneas más compacto */

@@ -4,6 +4,7 @@
     <section class="main-section">
       <h2>¿Qué es la celiaquía?</h2>
       <p>La enfermedad celíaca es una afección en la que el cuerpo no puede tolerar el gluten. El gluten es una proteína que se encuentra en el trigo, la cebada y el centeno. Cuando las personas con celiaquía consumen gluten, su sistema inmunológico ataca el revestimiento del intestino delgado, lo que puede causar una serie de síntomas y problemas de salud.</p>
+      <h3>¡Inicia sesión o crea una cuenta nueva para pertenecer a la comunidad de Ocio Sin Gluten!</h3>
     </section>
     <div class="symptoms-container">
       <h3>Síntomas de la celiaquía</h3>

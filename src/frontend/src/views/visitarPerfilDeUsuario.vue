@@ -133,11 +133,10 @@ export default {
       const username = this.$route.params.username;
       this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
     },
-    // Método para iniciar un chat con el usuario
     iniciarChat() {
-      // Implementa la lógica para iniciar un chat con el usuario
+      const username = this.$route.params.username; // Nombre de usuario del perfil visitado
+      this.$router.push({ name: 'chatCon', params: { username: username } }); // Navegar al chat con ese usuario
     },
-    // Método para seguir o dejar de seguir al usuario
     async toggleSeguir() {
       try {
         const username = this.$route.params.username;
