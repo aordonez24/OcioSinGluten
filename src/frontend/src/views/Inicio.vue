@@ -1,5 +1,10 @@
 <template>
-  <cabecera-componente/>
+  <template v-if="token">
+    <header3/>
+  </template>
+  <template v-else>
+    <cabecera-componente/>
+  </template>
   <div>
     <section class="main-section">
       <h2>¿Qué es la celiaquía?</h2>
@@ -64,12 +69,19 @@
 import '@fortawesome/fontawesome-free/css/all.css';
 import CabeceraComponente from "@/components/header.vue";
 import FooterComponente from "@/components/footer.vue";
+import Header3 from "@/components/headerIniciadoSesion.vue";
 
 export default {
   name: 'Vista-Inicio',
   components: {
+    Header3,
     FooterComponente,
     CabeceraComponente
+  },
+  data() {
+    return {
+      token: localStorage.getItem('token')
+    };
   }
 }
 

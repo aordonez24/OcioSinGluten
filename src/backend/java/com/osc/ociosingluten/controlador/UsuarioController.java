@@ -98,22 +98,6 @@ public class UsuarioController {
     }
 
 
-    // Método para descomprimir los datos de la imagen
-    private byte[] descomprimir(byte[] input) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             LZMACompressorInputStream lzmaInputStream = new LZMACompressorInputStream(inputStream)) {
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = lzmaInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            return outputStream.toByteArray();
-        }
-    }
-
 
     @GetMapping("/perfilUsuarioDni/{dni}")
     public ResponseEntity<UsuarioDTO> mostrarUsuarioporDni(@PathVariable String dni){
@@ -250,39 +234,6 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
-    @PostMapping("/usuarios/{dni}/nuevoEstablecimiento")
-    public ResponseEntity<EstablecimientoDTO> anadirEstablecimiento(@RequestParam("nombre") String nombre,
-                                                                    @RequestParam("localidad") String localidad,
-                                                                    @RequestParam("provincia") String provincia,
-                                                                    @RequestParam("calle") String calle,
-                                                                    @RequestParam("codPostal") int codPostal,
-                                                                    @RequestParam("telefono") int telefono,
-                                                                    @RequestParam("fotos") List<byte[]> imagenes,
-                                                                    @RequestParam("pais") String pais, @PathVariable String dni) throws IOException, UsuarioExisteException, UsuarioNoExisteException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException {
-        Optional<Usuario> usuQueAnade = repoUsu.findByDni(dni);
-        if(usuQueAnade.isPresent()) {
-            Usuario usuario = usuQueAnade.get();
-            if(usuario.isSesionIniciada()) {
-                List<byte[]> imagenesComprimidas = new ArrayList<>();
-                for (int i = 0; i < imagenes.size(); i++) {
-                    imagenesComprimidas.add(compress(imagenes.get(i)));
-                }
-
-                Establecimiento establecimiento = new Establecimiento(nombre, telefono, localidad, provincia, calle, codPostal, pais, imagenesComprimidas);
-                if (servicio.publicarEstablecimiento(usuario, establecimiento)) {
-                    return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(establecimiento));
-                } else {
-                    return ResponseEntity.status(HttpStatus.CONFLICT).build();
-                }
-            }
-        }else{
-            throw new UsuarioNoExisteException("El usuario no existe");
-        }
-        return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {

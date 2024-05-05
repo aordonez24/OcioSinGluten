@@ -3,13 +3,11 @@ package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
-import com.osc.ociosingluten.excepciones.UsuarioExisteException;
-import com.osc.ociosingluten.modelo.Actividad;
-import com.osc.ociosingluten.modelo.Comentario;
-import com.osc.ociosingluten.modelo.Establecimiento;
-import com.osc.ociosingluten.modelo.Usuario;
+import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.modelo.*;
 import com.osc.ociosingluten.repositorio.ActividadRepository;
 import com.osc.ociosingluten.repositorio.EstablecimientoRepository;
+import com.osc.ociosingluten.repositorio.ImagenRepository;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
@@ -22,9 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ociosingluten/establecimientos")
@@ -35,9 +32,11 @@ public class EstablecimientoController {
     private EstablecimientoRepository repoEst;
 
     @Autowired
+    private ImagenRepository repoImg;
+
+    @Autowired
     private ServicioOcioSinGluten servicio;
 
-    //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoEstablecimientos")
     public List<Establecimiento> cargarTodosLosEstablecimientos(){
         return repoEst.findAll();
@@ -46,6 +45,75 @@ public class EstablecimientoController {
     @GetMapping("/establecimientos/{nombre}")
     public List<Establecimiento> cargarEstxNombre(@PathVariable String nombre){
         return repoEst.findByNombreContaining(nombre);
+    }
+
+    @GetMapping("/establecimiento/{id}")
+    public ResponseEntity<EstablecimientoDTO> cargarEstxId(@PathVariable int id) {
+        Optional<Establecimiento> establecimientoOptional = repoEst.findByIdEstablecimiento(id);
+        if (establecimientoOptional.isPresent()) {
+            Establecimiento establecimiento = establecimientoOptional.get();
+            // Verificar si el establecimiento tiene imágenes
+            if (!establecimiento.getImagenes().isEmpty()) {
+                // Convertir las imágenes a cadenas Base64
+                List<String> imagenesBase64 = establecimiento.getImagenes().stream()
+                        .map(imagen -> convertirBytesAStringBase64(imagen.getImagen()))
+                        .collect(Collectors.toList());
+                // Crear el EstablecimientoDTO con las imágenes en Base64
+                EstablecimientoDTO establecimientoDTO = new EstablecimientoDTO(establecimiento.getIdEstablecimiento(),
+                        establecimiento.getNombre(), establecimiento.getTelefono(), establecimiento.getLocalidad(),
+                        establecimiento.getProvincia(), establecimiento.getCalle(), establecimiento.getCodPostal(),
+                        establecimiento.getPais(), establecimiento.getNumLikes(), imagenesBase64);
+                return ResponseEntity.ok(establecimientoDTO);
+            } else {
+                // Si el establecimiento no tiene imágenes, devolver el DTO sin las imágenes
+                EstablecimientoDTO establecimientoDTO = new EstablecimientoDTO(establecimiento.getIdEstablecimiento(),
+                        establecimiento.getNombre(), establecimiento.getTelefono(), establecimiento.getLocalidad(),
+                        establecimiento.getProvincia(), establecimiento.getCalle(), establecimiento.getCodPostal(),
+                        establecimiento.getPais(), establecimiento.getNumLikes(), Collections.emptyList());
+                return ResponseEntity.ok(establecimientoDTO);
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private String convertirBytesAStringBase64(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+
+    @PostMapping("/establecimientoFoto/{id}/nuevaFoto")
+    public ResponseEntity<?> cargarEstxId(@PathVariable int id, @RequestBody String  fotoPerfilBase64){
+        byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
+
+        Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
+        Imagen img = new Imagen(fotoPerfil, est.get());
+        repoImg.save(img);
+
+        est.get().anadirImagen(img);
+        repoEst.actualizar(est.get());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(est.get()));
+    }
+
+    @PostMapping("/nuevoEstablecimiento")
+    public ResponseEntity<EstablecimientoDTO> anadirEstablecimiento(@RequestParam("nombre") String nombre,
+                                                    @RequestParam("telefono") int telefono,
+                                                    @RequestParam("localidad") String localidad,
+                                                    @RequestParam("provincia") String provincia,
+                                                    @RequestParam("calle") String calle,
+                                                    @RequestParam("codPostal") int codPostal,
+                                                    @RequestParam("pais") String  pais,
+                                                    @RequestParam String username) throws IOException, UsuarioExisteException, UsuarioNoExisteException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException {
+        //Username es el usuario con el que he iniciado sesión para que introduzca el establecimiento
+        Usuario usuarioqueAnade = servicio.buscarUsuarioXUsername(username);
+        Establecimiento est = new Establecimiento(nombre, telefono, localidad, provincia, calle, codPostal, pais);
+
+        if(servicio.publicarEstablecimiento(usuarioqueAnade, est)){
+            return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(est));
+        }else{
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
     }
 
     @GetMapping("/establecimientosProvincia/{provincia}")

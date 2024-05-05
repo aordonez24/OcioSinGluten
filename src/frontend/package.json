@@ -16,15 +16,20 @@
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
     "core-js": "^3.8.3",
+    "esri-loader": "^3.7.0",
+    "leaflet": "^1.9.4",
     "lzma": "^2.3.2",
+    "ol": "^9.1.0",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "socket.io-client": "^4.7.5",
     "sockjs-client": "^1.6.1",
     "stompjs": "^2.3.3",
     "vue": "^3.4.23",
+    "vue-carousel": "^0.18.0",
     "vue-router": "^4.3.1",
-    "vue-slick-carousel": "^1.0.6"
+    "vue-slick-carousel": "^1.0.6",
+    "vue2-google-maps": "^0.10.7"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

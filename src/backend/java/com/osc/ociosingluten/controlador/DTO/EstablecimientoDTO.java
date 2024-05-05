@@ -1,16 +1,19 @@
 package com.osc.ociosingluten.controlador.DTO;
 
 import com.osc.ociosingluten.modelo.Establecimiento;
+import com.osc.ociosingluten.modelo.Imagen;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record EstablecimientoDTO(int idEstablecimiento, String nombre,
                                  int telefono, String localidad,
                                  String provincia, String calle, int codPostal,
-                                 String pais, int numLikes, List<byte[]> imagenes) {
+                                 String pais, int numLikes, List<String> imagenesBase64) {
     public EstablecimientoDTO(Establecimiento est){
         this(est.getIdEstablecimiento(), est.getNombre(), est.getTelefono(), est.getLocalidad(), est.getProvincia(), est.getCalle(),
-                est.getCodPostal(), est.getPais(), est.getNumLikes(), est.getImagenes());
+                est.getCodPostal(), est.getPais(), est.getNumLikes(), convertirImagenesBytes(est.getImagenes()));
     }
 
     public int idEstablecimiento() {
@@ -49,9 +52,14 @@ public record EstablecimientoDTO(int idEstablecimiento, String nombre,
         return numLikes;
     }
 
+    private static List<String> convertirImagenesBytes(List<Imagen> imagenes) {
+        return imagenes.stream()
+                .map(Imagen::getImagen)
+                .map(EstablecimientoDTO::convertirBytesAStringBase64)
+                .collect(Collectors.toList());
+    }
 
-    @Override
-    public List<byte[]> imagenes() {
-        return imagenes;
+    public static String convertirBytesAStringBase64(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
     }
 }

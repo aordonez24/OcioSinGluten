@@ -62,10 +62,9 @@ public class Establecimiento {
     @NotNull
     private boolean archivada; //Si un establecimiento esta archivado, no estará eliminado de la base de datos pero tampoco aparecerá a los usuarios
 
-    @ElementCollection
-    @CollectionTable(name = "imagenes_establecimiento", joinColumns = @JoinColumn(name = "id_establecimiento"))
-    @Column(name = "imagen")
-    private List<byte[]> imagenes;
+    @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL)
+    private List<Imagen> imagenes;
+
 
     public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
         this.nombre = nombre;
@@ -80,21 +79,6 @@ public class Establecimiento {
         this.visitantes = new ArrayList<>();
         this.archivada = false;
         this.imagenes = new ArrayList<>();
-    }
-
-    public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais, List<byte[]> imagenes) {
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.localidad = localidad;
-        this.provincia = provincia;
-        this.calle = calle;
-        this.codPostal = codPostal;
-        this.pais = pais;
-        this.numLikes = 0;
-        this.comentarios = new ArrayList<>();
-        this.visitantes = new ArrayList<>();
-        this.archivada = false;
-        this.imagenes = imagenes;
     }
 
     public Establecimiento() {
@@ -142,25 +126,6 @@ public class Establecimiento {
     }
 
     public void anadirComentario(Comentario comentario){comentarios.add(comentario);}
-
-    public static int generarIdUnico(String str1, String str2, int num) {
-        try {
-            String input = str1 + str2 + num;
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-
-            int result = 0;
-            for (int i = 0; i < 4; i++) {
-                result += (hash[i] & 0xFF) << (8 * (3 - i));
-            }
-            // Asegurarse de que el resultado sea positivo
-            return Math.abs(result);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
 
     public int getIdEstablecimiento() {
         return idEstablecimiento;
@@ -242,19 +207,15 @@ public class Establecimiento {
         this.archivada = archivada;
     }
 
-    public List<byte[]> getImagenes() {
-        return imagenes;
-    }
-
-    public void setImagenes(List<byte[]> imagenes) {
-        this.imagenes = imagenes;
-    }
-
-    public void anadirImagen(byte[] imagen){
-        imagenes.add(imagen);
+    public void anadirImagen(Imagen img){
+        imagenes.add(img);
     }
 
     public void quitarImagen(byte[] imagen){
         imagenes.remove(imagen);
+    }
+
+    public List<Imagen> getImagenes() {
+        return imagenes;
     }
 }

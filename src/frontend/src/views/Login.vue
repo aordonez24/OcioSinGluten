@@ -65,7 +65,7 @@ export default {
           localStorage.setItem('token', token);
           localStorage.setItem('username', username);
 
-          this.$router.push('/iniciadoSesion'); // Reemplaza '/otra-vista' con la ruta de la vista deseada
+          this.$router.push('/');
         } else if (response.status === 500) {
           // Si la respuesta del servidor es un error 500, mostrar un mensaje de error de credenciales inválidas
           this.errorMessage = 'Credenciales inválidas';

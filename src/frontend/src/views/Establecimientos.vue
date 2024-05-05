@@ -1,5 +1,10 @@
 <template>
-  <cabecera-componente/>
+  <template v-if="token">
+    <header3/>
+  </template>
+  <template v-else>
+    <cabecera-componente/>
+  </template>
   <div class="container-principal-establecimientos">
     <div class="titulo-subtitulo">
       <h1>Establecimientos sin gluten</h1>
@@ -13,7 +18,7 @@
     <div class="establecimientos">
       <div v-for="establecimiento in establecimientosFiltrados" :key="establecimiento.idEstablecimiento" class="establecimiento">
         <h3>
-          <router-link :to="'/establecimientos/' + establecimiento.idEstablecimiento" class="nombre">{{ establecimiento.nombre }}</router-link>
+          <router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre">{{ establecimiento.nombre }}</router-link>
           <i class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento)"></i>
         </h3>
         <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}</p>
@@ -26,40 +31,41 @@
     <div class="titulo-subtitulo-nuevoEstablecimiento">
       <h1 class="titulo-nuevoEstablecimiento">¿Has encontrado un nuevo establecimiento con alimentación sin gluten y no aparece aquí?</h1>
       <p class="subtitulo-nuevoEstablecimiento">Si has visitado un nuevo establecimiento que no figura en esta web, no te olvides de rellenar el formulario para añadir dicho establecimiento, así harás crecer aún mas la comunidad!</p>
-      <router-link to="/comunidad" class="cerrar-sesion-button">FORMULARIO</router-link>
     </div>
+    <router-link to="/nuevoEstablecimiento" class="cerrar-sesion-button2">FORMULARIO</router-link>
   </div>
-  <div id="contacto" class="contactin">
-    <div class="column">
-      <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-      <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-    </div>
-    <div class="column">
-      <form action="/submit-message" method="post">
-        <label for="name">Nombre y apellidos:</label>
-        <input type="text" id="name" name="name" required>
-        <label for="email">Correo:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="message">Escribe tu mensaje:</label>
-        <textarea id="message" name="message" required></textarea>
-        <button type="submit">Enviar</button>
-      </form>
-    </div>
-    <div class="column">
-      <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-      <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
+    <div id="contacto" class="contactin">
+      <div class="column">
+        <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
+        <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
+      </div>
+      <div class="column">
+        <form action="/submit-message" method="post">
+          <label for="name">Nombre y apellidos:</label>
+          <input type="text" id="name" name="name" required>
+          <label for="email">Correo:</label>
+          <input type="email" id="email" name="email" required>
+          <label for="message">Escribe tu mensaje:</label>
+          <textarea id="message" name="message" required></textarea>
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+      <div class="column">
+        <p>¡También puedes seguirnos en nuestras redes sociales!</p>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+        </div>
       </div>
     </div>
-  </div>
   <footer-componente/>
 </template>
 
 <script>
 import '@fortawesome/fontawesome-free/css/all.css';
 import FooterComponente from "@/components/footer.vue";
+import Header3 from "@/components/headerIniciadoSesion.vue";
 import axios from 'axios';
 import CabeceraComponente from "@/components/header.vue";
 
@@ -67,10 +73,12 @@ export default {
   name: 'Vista-Inicio',
   components: {
     CabeceraComponente,
+    Header3,
     FooterComponente,
   },
   data() {
     return {
+      token: localStorage.getItem('token'),
       establecimientos: [],
       establecimientosFiltrados: [],
       searchQuery: ''
@@ -115,9 +123,24 @@ export default {
 
 <style scoped>
 
+.cerrar-sesion-button2 {
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: black;
+  background-color: white;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-decoration: none; /* Elimina el subrayado */
+
+}
+
+.cerrar-sesion-button2:hover {
+  background-color: #ffcc74;
+}
+
 .container-principal-establecimientos {
   padding: 30px;
-  height: 500px; /* Ajusta esta altura según tus necesidades */
   background-image: linear-gradient(120deg, #ffcc74 0%, #da1b60 100%);
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -144,7 +167,7 @@ export default {
 
 .nuevoEstablecimiento {
   padding: 30px;
-  height: 400px; /* Ajusta esta altura según tus necesidades */
+  height: 300px; /* Ajusta esta altura según tus necesidades */
   background-color: white;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   display: flex;

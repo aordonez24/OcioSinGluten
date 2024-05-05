@@ -173,6 +173,15 @@ public class ServicioOcioSinGluten {
         }
     }
 
+    public Usuario buscarUsuarioXUsername(String username) throws UsuarioNoExisteException {
+        Optional<Usuario> usuarios = repoUsuario.findByUsername(username);
+        if(usuarios.isPresent() && !usuarios.get().isArchivado()) {
+            return usuarios.get(); // Por ejemplo, podrías devolver el primer usuario de la lista
+        } else {
+            throw new UsuarioNoExisteException("El usuario no existe.");
+        }
+    }
+
     public List<Establecimiento> buscarEstablecimiento(Establecimiento establecimiento) throws UsuarioNoExisteException {
         List<Establecimiento> establecimientos = repoEst.findByNombre(establecimiento.getNombre());
         if(!establecimientos.isEmpty()) {
@@ -212,22 +221,17 @@ public class ServicioOcioSinGluten {
     }
 
     public boolean publicarEstablecimiento(Usuario anadeEst, Establecimiento est) throws SesionNoIniciadaException, EstablecimientoExistenteException, ActividadNoCreada {
-        if(anadeEst.isSesionIniciada()){
-            Optional<Establecimiento> establecimiento = repoEst.findByNombreAndCodPostal(est.getNombre(), est.getCodPostal());
-            if(establecimiento.isPresent()){
-                throw new EstablecimientoExistenteException("El establecimiento ya existe.");
-            }else{
-                repoEst.save(est);
-                Actividad act = new Actividad(anadeEst, est, MensajePredefinido.HA_PUBLICADO);
-                crearActividad(act);
-                anadeEst.anadirActividad(act);
-                repoUsuario.actualizarUsuario(anadeEst);
-                return true;
-            }
+        Optional<Establecimiento> establecimiento = repoEst.findByNombreAndCodPostal(est.getNombre(), est.getCodPostal());
+        if(establecimiento.isPresent()){
+            throw new EstablecimientoExistenteException("El establecimiento ya existe.");
         }else{
-            throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
+            repoEst.save(est);
+            Actividad act = new Actividad(anadeEst, est, MensajePredefinido.HA_PUBLICADO);
+            crearActividad(act);
+            anadeEst.anadirActividad(act);
+            repoUsuario.actualizarUsuario(anadeEst);
+            return true;
         }
-
     }
 
     public boolean eliminarEstablecimiento(Usuario usuGestor, Establecimiento est) throws EstablecimientoNoExistenteException, ActividadNoCreada, SesionNoIniciadaException, NoPermisosException, UsuarioNoExisteException {

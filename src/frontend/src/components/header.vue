@@ -11,7 +11,7 @@
       <nav>
         <ul class="main-links">
           <li><router-link to="/">Inicio</router-link></li>
-          <li><router-link :to="{ path: '/establecimientosNoToken' }">Establecimientos sin gluten</router-link></li>
+          <li><router-link :to="{ path: '/establecimientos' }">Establecimientos sin gluten</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
           <li><router-link :to="{ path: '/iniciaSesion' }">Inicia Sesión</router-link></li>
           <li><router-link :to="{ path: '/registroUsuario' }">Crea nueva cuenta</router-link></li>
