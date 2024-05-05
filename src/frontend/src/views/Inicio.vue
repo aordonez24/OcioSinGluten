@@ -36,19 +36,19 @@
         </div>
       </div>
     </div>
-    <div id="contacto" class="contactin">
+    <div id="contacto" class="contactin" v-if="!mensajeEnviado">
       <div class="column">
         <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
         <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
       </div>
-      <div class="column">
-        <form action="/submit-message" method="post">
+      <div class="column" v-if="!mensajeEnviado">
+        <form @submit.prevent="handleSubmit">
           <label for="name">Nombre y apellidos:</label>
-          <input type="text" id="name" name="name" required>
+          <input type="text" id="name" v-model="name" required>
           <label for="email">Correo:</label>
-          <input type="email" id="email" name="email" required>
+          <input type="email" id="email" v-model="email" required>
           <label for="message">Escribe tu mensaje:</label>
-          <textarea id="message" name="message" required></textarea>
+          <textarea id="message" v-model="message" required></textarea>
           <button type="submit">Enviar</button>
         </form>
       </div>
@@ -61,6 +61,9 @@
         </div>
       </div>
     </div>
+    <div v-else class="contactin">
+      <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
+    </div>
   </div>
   <footer-componente/>
 </template>
@@ -70,6 +73,7 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import CabeceraComponente from "@/components/header.vue";
 import FooterComponente from "@/components/footer.vue";
 import Header3 from "@/components/headerIniciadoSesion.vue";
+import axios from "axios";
 
 export default {
   name: 'Vista-Inicio',
@@ -80,8 +84,33 @@ export default {
   },
   data() {
     return {
-      token: localStorage.getItem('token')
+      name: '',
+      email: '',
+      message: '',
+      token: localStorage.getItem('token'),
+      mensajeEnviado: false
     };
+  },
+  methods: {
+    handleSubmit() {
+      // Envío del formulario al servidor
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: this.name,
+        email: this.email,
+        mensaje: this.message
+      })
+          .then(response => {
+            // Manejar la respuesta del servidor en caso de éxito
+            console.log('Mensaje enviado con éxito:', response.data);
+            // Actualizar el estado para mostrar el mensaje de confirmación
+            this.mensajeEnviado = true;
+          })
+          .catch(error => {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al enviar el mensaje:', error);
+            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+          });
+    }
   }
 }
 

@@ -135,13 +135,8 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-  margin-left: 20px;
+  margin-left: 30px;
   margin-right: 20px;
-}
-
-/* Estilo para ocultar la atribución de Esri */
-.esri-attribution {
-  display: none !important; /* Oculta la atribución */
 }
 
 </style>
@@ -187,7 +182,11 @@ export default {
       this.imagenes = this.establecimiento.imagenesBase64.map(base64 => 'data:image/png;base64,' + base64);
     },
     openFileInput() {
-      this.$refs.fileInput.click();
+      if (this.token) {
+        this.$refs.fileInput.click();
+      } else {
+        this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
+      }
     },
     async onFileChange(event) {
       const file = event.target.files[0];
@@ -229,8 +228,6 @@ export default {
           const resultado = response.data[0];
           const latitud = parseFloat(resultado.lat);
           const longitud = parseFloat(resultado.lon);
-          console.log('Latitud:', latitud);
-          console.log('Longitud:', longitud);
           return [latitud, longitud];
         } else {
           console.error('No se encontraron resultados para la dirección proporcionada.');
