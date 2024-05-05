@@ -1,7 +1,3 @@
-<script setup>
-
-</script>
-
 <template>
   <div>
     <header>
@@ -15,7 +11,7 @@
       <nav>
         <ul class="main-links">
           <li><router-link to="/">Inicio</router-link></li>
-          <li><a href="#">Establecimientos sin gluten</a></li>
+          <li><router-link :to="{ path: '/establecimientosNoToken' }">Establecimientos sin gluten</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
           <li><router-link :to="{ path: '/iniciaSesion' }">Inicia Sesión</router-link></li>
           <li><router-link :to="{ path: '/registroUsuario' }">Crea nueva cuenta</router-link></li>
@@ -25,19 +21,25 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'cabecera-componente',
-  methods: {
-    scrollToContacto() {
-      const elementoContacto = document.getElementById('contacto');
-      if (elementoContacto) {
-        elementoContacto.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+<script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+router.beforeEach((to, from, next) => {
+  if (to.path === '/establecimientos') {
+    // Limpiar la sesión
+    sessionStorage.removeItem('token');
+  }
+  next();
+});
+
+const scrollToContacto = () => {
+  const elementoContacto = document.getElementById('contacto');
+  if (elementoContacto) {
+    elementoContacto.scrollIntoView({ behavior: 'smooth' });
   }
 }
-
 </script>
 
 <style>

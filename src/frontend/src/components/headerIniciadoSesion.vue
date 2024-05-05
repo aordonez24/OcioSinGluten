@@ -40,9 +40,10 @@ export default {
       </div>
       <nav>
         <ul class="main-links">
-          <li><router-link to="/iniciadoSesion">Inicio</router-link></li>
-          <li><a href="#">Establecimientos sin gluten</a></li>
-          <li><router-link to="/comunidad">Comunidad</router-link></li>
+          <li><router-link to="/iniciadoSesion" class="cerrar-sesion-button">Inicio</router-link></li>
+          <li><router-link to="/establecimientos" class="cerrar-sesion-button">Establecimientos sin gluten</router-link></li>
+          <li><router-link to="/actividades" class="cerrar-sesion-button">Actividades</router-link></li>
+          <li><router-link to="/comunidad" class="cerrar-sesion-button">Comunidad</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
           <li v-if="username">
             <span class="welcome-message">Bienvenido

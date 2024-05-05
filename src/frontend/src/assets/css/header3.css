@@ -88,9 +88,15 @@ nav ul li a:hover {
 }
 
 .welcome-link {
-    color: #007bff; /* Color del enlace */
-    text-decoration: none; /* Subrayado para indicar que es un enlace */
-    cursor: pointer; /* Cambio de cursor al pasar el ratón sobre el enlace */
+    text-decoration: none;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 20px;
+    color: white;
+    background-color: #666666;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: inline; /* Hacer que el elemento sea en línea */
 }
 

@@ -7,10 +7,10 @@ import java.util.List;
 public record EstablecimientoDTO(int idEstablecimiento, String nombre,
                                  int telefono, String localidad,
                                  String provincia, String calle, int codPostal,
-                                 String pais, int numLikes, boolean archivada, List<byte[]> imagenes) {
+                                 String pais, int numLikes, List<byte[]> imagenes) {
     public EstablecimientoDTO(Establecimiento est){
         this(est.getIdEstablecimiento(), est.getNombre(), est.getTelefono(), est.getLocalidad(), est.getProvincia(), est.getCalle(),
-                est.getCodPostal(), est.getPais(), est.getNumLikes(), est.isArchivada(), est.getImagenes());
+                est.getCodPostal(), est.getPais(), est.getNumLikes(), est.getImagenes());
     }
 
     public int idEstablecimiento() {
@@ -49,9 +49,6 @@ public record EstablecimientoDTO(int idEstablecimiento, String nombre,
         return numLikes;
     }
 
-    public boolean archivada() {
-        return archivada;
-    }
 
     @Override
     public List<byte[]> imagenes() {
