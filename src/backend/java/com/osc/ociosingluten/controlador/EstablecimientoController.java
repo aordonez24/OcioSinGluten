@@ -2,12 +2,11 @@ package com.osc.ociosingluten.controlador;
 
 
 import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
+import com.osc.ociosingluten.controlador.DTO.NuevoComentarioDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.modelo.*;
-import com.osc.ociosingluten.repositorio.ActividadRepository;
-import com.osc.ociosingluten.repositorio.EstablecimientoRepository;
-import com.osc.ociosingluten.repositorio.ImagenRepository;
+import com.osc.ociosingluten.repositorio.*;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
@@ -36,6 +35,12 @@ public class EstablecimientoController {
 
     @Autowired
     private ServicioOcioSinGluten servicio;
+
+    @Autowired
+    private ComentarioRepository comRe;
+
+    @Autowired
+    private UsuarioRepository repoUsu;
 
     @GetMapping("/listadoEstablecimientos")
     public List<Establecimiento> cargarTodosLosEstablecimientos(){
@@ -83,7 +88,7 @@ public class EstablecimientoController {
 
 
     @PostMapping("/establecimientoFoto/{id}/nuevaFoto")
-    public ResponseEntity<?> cargarEstxId(@PathVariable int id, @RequestBody String  fotoPerfilBase64){
+    public ResponseEntity<?> nuevaFoto(@PathVariable int id, @RequestBody String  fotoPerfilBase64){
         byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
 
         Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
@@ -116,23 +121,13 @@ public class EstablecimientoController {
 
     }
 
-    @GetMapping("/establecimientosProvincia/{provincia}")
-    public List<Establecimiento> cargarEstxProvincia(@PathVariable String provincia){
-        return repoEst.findByProvinciaContaining(provincia);
-    }
-
-    @GetMapping("/establecimientosLocalidad/{localidad}")
-    public List<Establecimiento> cargarEstxLocalidad(@PathVariable String localidad){
-        return repoEst.findByProvinciaContaining(localidad);
-    }
-
-    @GetMapping("/establecimientos/{nombre}/comentarios")
-    public ResponseEntity<List<Comentario>> cargarComentariosEst(@PathVariable String nombre){
+    @GetMapping("/establecimientos/{id}/comentarios")
+    public ResponseEntity<List<Comentario>> cargarComentariosEst(@PathVariable int id){
         // Buscar el establecimiento por nombre
-        List<Establecimiento> establecimientos = repoEst.findByNombreContaining(nombre);
+        Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
 
-        if (!establecimientos.isEmpty()) {
-            Establecimiento establecimiento = establecimientos.get(0); // Suponiendo que solo obtienes un establecimiento
+        if (!est.isEmpty()) {
+            Establecimiento establecimiento = est.get(); // Suponiendo que solo obtienes un establecimiento
 
             // Obtener la lista de comentarios del establecimiento
             List<Comentario> comentarios = establecimiento.getComentarios();
@@ -142,6 +137,63 @@ public class EstablecimientoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/{id}/nuevoLike")
+    public ResponseEntity<?> agregarLike(@PathVariable int id) {
+        Optional<Establecimiento> establecimiento = repoEst.findById(id);
+
+        if (establecimiento.isPresent()) {
+            Establecimiento com = establecimiento.get();
+            com.setNumLikes(com.getNumLikes() + 1);
+            repoEst.actualizar(com);
+            return ResponseEntity.ok("Like con exito.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/favorito")
+    public ResponseEntity<?> agregarFavorito(@PathVariable int id, @RequestBody String username) {
+        Optional<Establecimiento> establecimiento = repoEst.findById(id);
+        Optional<Usuario> usu = repoUsu.findByUsername(username);
+
+        if (establecimiento.isPresent()) {
+            usu.get().anadirEstablecimientoFavorito(establecimiento.get());
+            repoUsu.actualizarUsuario(usu.get());
+            return ResponseEntity.ok("Favorito con exito.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/visitado")
+    public ResponseEntity<?> agregarVisitado(@PathVariable int id, @RequestBody String username) {
+        Optional<Establecimiento> establecimiento = repoEst.findById(id);
+        Optional<Usuario> usu = repoUsu.findByUsername(username);
+
+        if (establecimiento.isPresent()) {
+            usu.get().visitarEstablecimiento(establecimiento.get());
+            repoUsu.actualizarUsuario(usu.get());
+            return ResponseEntity.ok("Visitado con exito.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}/nofavorito")
+    public ResponseEntity<?> eliminarFavorito(@PathVariable int id, @RequestParam String username) {
+        Optional<Establecimiento> establecimiento = repoEst.findById(id);
+        Optional<Usuario> usu = repoUsu.findByUsername(username);
+
+        if (establecimiento.isPresent()) {
+            usu.get().eliminarEstablecimientoFavorito(establecimiento.get());
+            repoUsu.actualizarUsuario(usu.get());
+            return ResponseEntity.ok("Favorito con exito.");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
     @PutMapping("/establecimientos/{id}/modEstablecimiento")
     public ResponseEntity<EstablecimientoDTO> modificarUsuarioDesdeFormulario(@PathVariable int id,
@@ -166,40 +218,27 @@ public class EstablecimientoController {
         }
     }
 
+    @PostMapping("/establecimientos/{id}/nuevoComentario")
+    public ResponseEntity<EstablecimientoDTO> agregarComentario(@PathVariable int id,
+                                                                @RequestBody NuevoComentarioDTO comentario) {
+        Optional<Establecimiento> establecimientoOptional = repoEst.findByIdEstablecimiento(id);
+        if (establecimientoOptional.isPresent()) {
+            Establecimiento establecimiento = establecimientoOptional.get();
 
-
-    private byte[] compress(byte[] input) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             LZMACompressorOutputStream lzmaOutputStream = new LZMACompressorOutputStream(outputStream)) {
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                lzmaOutputStream.write(buffer, 0, bytesRead);
+            Optional<Usuario> usu = repoUsu.findByUsername(comentario.getUsername());
+            if(usu.isPresent()) {
+                Comentario com = new Comentario(comentario.getMensaje(), usu.get());
+                comRe.save(com);
+                establecimiento.anadirComentario(com);
+                repoEst.actualizar(establecimiento);
+                usu.get().anadirComentario(com);
+                repoUsu.actualizarUsuario(usu.get());
             }
-            lzmaOutputStream.finish();
-
-            return outputStream.toByteArray();
+            return ResponseEntity.ok(new EstablecimientoDTO(establecimiento));
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
-
-        @PostMapping("/establecimientos/{id}/nuevoComentario")
-        public ResponseEntity<EstablecimientoDTO> agregarComentario(@PathVariable int id,
-                                                                    @RequestBody Comentario comentario) {
-            Optional<Establecimiento> establecimientoOptional = repoEst.findByIdEstablecimiento(id);
-            if (establecimientoOptional.isPresent()) {
-                Establecimiento establecimiento = establecimientoOptional.get();
-
-                establecimiento.anadirComentario(comentario);
-                repoEst.save(establecimiento);
-
-                // Devolver el establecimiento con el comentario agregado
-                return ResponseEntity.ok(new EstablecimientoDTO(establecimiento));
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        }
 
 
 }

@@ -39,12 +39,6 @@ import com.osc.ociosingluten.seguridad.JwtTokenUtil;
 public class UsuarioController {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
     private UsuarioRepository repoUsu;
 
     @Autowired

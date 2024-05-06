@@ -285,6 +285,10 @@ public class Usuario {
             establecimientosFavoritos.add(est);
     }
 
+    public void eliminarEstablecimientoFavorito(Establecimiento est){
+            establecimientosFavoritos.remove(est);
+    }
+
     public void visitarEstablecimiento(Establecimiento est){
         establecimientosVisitados.add(est);
     }
@@ -355,6 +359,10 @@ public class Usuario {
 
     public void anadirComentario(Comentario com){
         comentariosRealizados.add(com);
+    }
+
+    public void eliminarCom(Comentario com){
+        comentariosRealizados.remove(com);
     }
 
     public boolean claveValida(String clave){

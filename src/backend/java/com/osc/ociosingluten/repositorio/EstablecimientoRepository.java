@@ -30,6 +30,7 @@ public interface EstablecimientoRepository extends JpaRepository<Establecimiento
     @Transactional
     List<Establecimiento> findByNombre(String nombre);
 
+
     @Transactional
     default Establecimiento actualizar(Establecimiento est) {
         return save(est);

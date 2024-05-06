@@ -19,7 +19,13 @@
       <div v-for="establecimiento in establecimientosFiltrados" :key="establecimiento.idEstablecimiento" class="establecimiento">
         <h3>
           <router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre">{{ establecimiento.nombre }}</router-link>
-          <i class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento)"></i>
+          <template v-if="token">
+            <i class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)"> {{establecimiento.numLikes}}</i>
+          </template>
+          <!-- Mostrar solo el número de likes si el usuario no ha iniciado sesión -->
+          <template v-else>
+            <i class="far fa-thumbs-up like-icon"> {{establecimiento.numLikes}}</i>
+          </template>
         </h3>
         <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}</p>
         <p>{{ establecimiento.calle }}</p>
@@ -34,31 +40,34 @@
     </div>
     <router-link to="/nuevoEstablecimiento" class="cerrar-sesion-button2">FORMULARIO</router-link>
   </div>
-    <div id="contacto" class="contactin">
-      <div class="column">
-        <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-        <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-      </div>
-      <div class="column">
-        <form action="/submit-message" method="post">
-          <label for="name">Nombre y apellidos:</label>
-          <input type="text" id="name" name="name" required>
-          <label for="email">Correo:</label>
-          <input type="email" id="email" name="email" required>
-          <label for="message">Escribe tu mensaje:</label>
-          <textarea id="message" name="message" required></textarea>
-          <button type="submit">Enviar</button>
-        </form>
-      </div>
-      <div class="column">
-        <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-facebook"></i></a>
-        </div>
+  <div id="contacto" class="contactin" v-if="!mensajeEnviado">
+    <div class="column">
+      <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
+      <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
+    </div>
+    <div class="column" v-if="!mensajeEnviado">
+      <form @submit.prevent="handleSubmit">
+        <label for="name">Nombre y apellidos:</label>
+        <input type="text" id="name" v-model="name" required>
+        <label for="email">Correo:</label>
+        <input type="email" id="email" v-model="email" required>
+        <label for="message">Escribe tu mensaje:</label>
+        <textarea id="message" v-model="message" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+    <div class="column">
+      <p>¡También puedes seguirnos en nuestras redes sociales!</p>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-facebook"></i></a>
       </div>
     </div>
+  </div>
+  <div v-else class="contactin">
+    <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
+  </div>
   <footer-componente/>
 </template>
 
@@ -81,7 +90,8 @@ export default {
       token: localStorage.getItem('token'),
       establecimientos: [],
       establecimientosFiltrados: [],
-      searchQuery: ''
+      searchQuery: '',
+      mensajeEnviado: false
     }
   },
   methods: {
@@ -104,15 +114,34 @@ export default {
           establecimiento.calle.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     },
-    async likeEstablecimiento(establecimiento) {
-      // Lógica para manejar el "me gusta" del establecimiento
-      // Puedes implementar la lógica aquí, por ejemplo, enviar una solicitud al servidor para guardar el "me gusta"
-      console.log('Me gusta:', establecimiento.nombre);
+    async likeEstablecimiento(id) {
+        axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`)
+            .then(() => {
+              this.cargarEstablecimientos()
+            })
+            .catch(error => {
+              console.error('Error al enviar el like:', error);
+            });
+
     },
-    async comentarEstablecimiento(idEstablecimiento) {
-      // Lógica para manejar el "me gusta" del establecimiento
-      // Puedes implementar la lógica aquí, por ejemplo, enviar una solicitud al servidor para guardar el "me gusta"
-      console.log(idEstablecimiento);
+    handleSubmit() {
+      // Envío del formulario al servidor
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: this.name,
+        email: this.email,
+        mensaje: this.message
+      })
+          .then(response => {
+            // Manejar la respuesta del servidor en caso de éxito
+            console.log('Mensaje enviado con éxito:', response.data);
+            // Actualizar el estado para mostrar el mensaje de confirmación
+            this.mensajeEnviado = true;
+          })
+          .catch(error => {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al enviar el mensaje:', error);
+            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
+          });
     }
   },
   mounted() {

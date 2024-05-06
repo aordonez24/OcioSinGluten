@@ -218,4 +218,5 @@ public class Establecimiento {
     public List<Imagen> getImagenes() {
         return imagenes;
     }
+
 }

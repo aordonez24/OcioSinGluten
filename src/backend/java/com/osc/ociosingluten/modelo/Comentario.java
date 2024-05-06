@@ -121,4 +121,8 @@ public class Comentario {
     public void setComentarioPadre(Comentario comentarioPadre) {
         this.comentarioPadre = comentarioPadre;
     }
+
+    public void eliminarComentariosAsociados(){
+        this.comentarios.clear();
+    }
 }
