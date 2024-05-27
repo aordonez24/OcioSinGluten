@@ -3,6 +3,7 @@
   <div class="container-principal">
     <h2 class="welcome-text">¡Bienvenido a la comunidad de Ocio Sin Gluten!</h2>
     <p class="subtext">Busque a conocidos y comparta experiencias con ellos</p>
+    <button @click="iniciarChat" class="cerrar-sesion-button">Acceda a nuestro chat grupal!</button>
     <input type="text" v-model="searchQuery" placeholder="Buscar usuario..." @input="filterUsers" class="search-input">
     <div class="user-grid">
       <div v-for="user in filteredUsers" :key="user.username" class="user-card">
@@ -61,17 +62,11 @@ export default {
       users: [], // Aquí se almacenarán todos los usuarios
       filteredUsers: [], // Lista de usuarios filtrados por la barra de búsqueda
       searchQuery: '', // Almacena el texto ingresado en la barra de búsqueda
+      rol:''
     };
   },
-  created() {
-    axios.get('http://localhost:3000/ociosingluten/usuarios/listadoUsuarios')
-        .then(response => {
-          this.users = response.data;
-          this.filterUsers();
-        })
-        .catch(error => {
-          console.error('Error al obtener la lista de usuarios:', error);
-        });
+  mounted() {
+    this.obtenerUsuarios();
   },
   methods: {
     filterUsers() {
@@ -81,8 +76,24 @@ export default {
           user.username.toLowerCase().includes(this.searchQuery.toLowerCase()) && user.username !== loggedInUsername
       );
     },
+    async obtenerUsuarios() {
+      const yo = localStorage.getItem('username')
+      const response2 =  await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
+      this.rol = response2.data.rol;
+      let response = "";
+      if (this.rol === 'ADMIN') {
+        response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/listadoUsuariosadmin`);
+      } else {
+        response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/listadoUsuarioscomun`);
+      }
+      this.users = response.data;
+      this.filterUsers();
+    },
     irAPerfil(username) {
       this.$router.push({ name: 'perfilOtroUsuario', params: { username: username } });
+    },
+    iniciarChat() {
+      this.$router.push({ name: 'chatGrupal'}); // Navegar al chat con ese usuario
     },
   }
 };
@@ -270,6 +281,21 @@ export default {
 
 .social-icons a:hover {
   color: #ffcc74; /* Cambiar el color al pasar el cursor */
+}
+
+.cerrar-sesion-button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  margin-bottom: 20px; /* Espacio entre el botón y la barra de búsqueda */
+  color: black;
+  background-color: white;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cerrar-sesion-button:hover {
+  background-color: #9DD9D2;
 }
 
 </style>

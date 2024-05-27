@@ -9,6 +9,7 @@
         <div class="form-group">
           <label for="dni">DNI:</label>
           <input type="text" class="form-control" id="dni" v-model="nuevoUsuario.dni" required>
+          <span v-if="!dniValido" class="text-danger">DNI no válido.</span>
         </div>
         <div class="form-group">
           <label for="username">Nombre de Usuario:</label>
@@ -24,18 +25,21 @@
         </div>
         <div class="form-group">
           <label for="fechaNacimiento">Fecha de Nacimiento:</label>
-          <input type="date" class="form-control" id="fechaNacimiento" v-model="nuevoUsuario.fechaNacimiento" required>
+          <input type="date" class="form-control" id="fechaNacimiento" v-model="nuevoUsuario.fechaNacimiento" @change="validarEdad" required>
+          <span v-if="!mayorDeEdad" class="text-danger">Debes ser mayor de edad para registrarte.</span>
         </div>
       </div>
       <!-- Columna central -->
       <div class="col-md-4">
         <div class="form-group">
           <label for="email">Email:</label>
-          <input type="email" class="form-control" id="email" v-model="nuevoUsuario.email" required>
+          <input type="email" class="form-control" id="email" v-model="nuevoUsuario.email" @input="validarEmail" required>
+          <span v-if="!emailValido" class="text-danger">Email no válido.</span>
         </div>
         <div class="form-group">
           <label for="telefono">Teléfono:</label>
           <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" required>
+          <span v-if="!telefonoValido" class="text-danger">Teléfono no válido.</span>
         </div>
         <div class="form-group position-relative">
           <label for="password">Contraseña:</label>
@@ -54,6 +58,7 @@
           >
             <i :class="showPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
           </button>
+          <span v-if="!passwordValida" class="text-danger">Contraseña incorrecta. Introduzca al menos 8 caracteres con una mayúscula.</span>
         </div>
         <div class="form-group position-relative">
           <label for="confirmPassword">Confirmar Contraseña:</label>
@@ -72,6 +77,7 @@
           >
             <i :class="showConfirmPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
           </button>
+          <span v-if="!passwordsCoinciden" class="text-danger ">Las contraseñas no coinciden.</span>
         </div>
       </div>
       <!-- Columna derecha -->
@@ -125,15 +131,43 @@ export default {
       showFormatWarning: false, // Mostrar advertencia de formato de imagen
       showPassword: false,
       showConfirmPassword: false,
+      dniValido: false,
+      emailValido: false,
+      telefonoValido: false,
+      passwordValida: false,
+      passwordsCoinciden: false,
+      mayorDeEdad: false
     }
   },
   methods: {
     agregarUsuario() {
-      if (this.nuevoUsuario.password !== this.confirmPassword) {
+      // Validaciones
+      if (!this.dniValido) {
+        alert('DNI no válido');
+        return;
+      }
+      if (!this.emailValido) {
+        alert('Email no válido');
+        return;
+      }
+      if (!this.telefonoValido) {
+        alert('Teléfono no válido');
+        return;
+      }
+      if (!this.passwordValida) {
+        alert('La contraseña no cumple con los requisitos');
+        return;
+      }
+      if (!this.passwordsCoinciden) {
         alert('Las contraseñas no coinciden');
         return;
       }
+      if (!this.mayorDeEdad) {
+        alert('Debes ser mayor de edad para registrarte');
+        return;
+      }
 
+      // Proceso de agregar usuario
       const formData = new FormData();
       formData.append('dni', this.nuevoUsuario.dni);
       formData.append('username', this.nuevoUsuario.username);
@@ -159,13 +193,30 @@ export default {
               email: '',
               password: ''
             };
-            this.confirmPassword= '';
+            this.confirmPassword = '';
             // Actualizar la lista de usuarios después de agregar uno nuevo
             this.$emit('usuario-agregado');
           })
           .catch(error => {
             console.error('Error al agregar usuario:', error);
           });
+    },
+    validarEmail() {
+      this.emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.nuevoUsuario.email);
+    },
+    validarEdad() {
+      const fechaNacimiento = new Date(this.nuevoUsuario.fechaNacimiento);
+      const edadMinima = 18; // Edad mínima para registrarse
+
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+      const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+
+      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+        edad = edad - 1;
+      }
+
+      this.mayorDeEdad = edad >= edadMinima;
     },
     onFileChange(event) {
       const selectedFile = event.target.files[0];
@@ -186,7 +237,6 @@ export default {
 
       reader.readAsDataURL(selectedFile);
     }
-
   }
 }
 </script>

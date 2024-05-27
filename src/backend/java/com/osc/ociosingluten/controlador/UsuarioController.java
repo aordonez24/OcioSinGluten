@@ -7,8 +7,12 @@ import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.LoginMessage;
 import com.osc.ociosingluten.modelo.Actividad;
+import com.osc.ociosingluten.modelo.Comentario;
 import com.osc.ociosingluten.modelo.Establecimiento;
 import com.osc.ociosingluten.modelo.Usuario;
+import com.osc.ociosingluten.repositorio.ActividadRepository;
+import com.osc.ociosingluten.repositorio.ComentarioRepository;
+import com.osc.ociosingluten.repositorio.EstablecimientoRepository;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
 import com.osc.ociosingluten.seguridad.CodificadorPassword;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
@@ -20,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
@@ -42,15 +47,36 @@ public class UsuarioController {
     private UsuarioRepository repoUsu;
 
     @Autowired
+    private ComentarioRepository repoCom;
+
+    @Autowired
+    private ActividadRepository repoAct;
+
+    @Autowired
+    private EstablecimientoRepository repoEst;
+
+    @Autowired
     private ServicioOcioSinGluten servicio;
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
-    @GetMapping("/listadoUsuarios")
-    public List<Usuario> cargarTodosUsuarios(){
-        return repoUsu.findAll();
+    @GetMapping("/listadoUsuarioscomun")
+    public List<Usuario> cargarTodosUsuariosComun() {
+        List<Usuario> usuarios = repoUsu.findAll();
+
+        List<Usuario> usuariosActivos = usuarios.stream()
+                .filter(usuario -> !usuario.isArchivado())
+                .collect(Collectors.toList());
+
+        return usuariosActivos;
+    }
+
+    @GetMapping("/listadoUsuariosadmin")
+    public List<Usuario> cargarTodosUsuariosAdmin() {
+        List<Usuario> usuarios = repoUsu.findAll();
+        return usuarios;
     }
 
     //Añadir el usuario
@@ -84,7 +110,7 @@ public class UsuarioController {
             if(usu.getFotoPerfil() != null){
                 fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
             }
-            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword());
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword(), usu.getRol().toString());
             return ResponseEntity.ok(usuarioDTO);
         } else {
             return ResponseEntity.notFound().build();
@@ -128,7 +154,7 @@ public class UsuarioController {
                         .map(seguidor -> {
                             // Verificar si el seguidor tiene una foto de perfil antes de mapearlo a UsuarioDTO
                             String fotoPerfil = seguidor.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguidor.getFotoPerfil()) : null;
-                            return new UsuarioDTO(seguidor.getDni(), seguidor.getUsername(), seguidor.getNombre(), seguidor.getApellidos(), seguidor.getFechaNacimiento(), seguidor.getTelefono(), fotoPerfil, seguidor.getEmail(), seguidor.getPassword());
+                            return new UsuarioDTO(seguidor.getDni(), seguidor.getUsername(), seguidor.getNombre(), seguidor.getApellidos(), seguidor.getFechaNacimiento(), seguidor.getTelefono(), fotoPerfil, seguidor.getEmail(), seguidor.getPassword(), seguidor.getRol().toString());
                         })
                         .collect(Collectors.toList());
                 return ResponseEntity.ok(seguidoresDTO);
@@ -154,7 +180,7 @@ public class UsuarioController {
                 List<UsuarioDTO> seguidosDTO = seguidos.stream()
                         .map(seguido -> {
                             String fotoPerfil = seguido.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguido.getFotoPerfil()) : null;
-                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword());
+                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword(), seguido.getRol().toString());
                         })
                         .collect(Collectors.toList());
                 return ResponseEntity.ok(seguidosDTO);
@@ -367,6 +393,91 @@ public class UsuarioController {
             throw new UsuarioNoExisteException("El usuario no existe.");
         }
     }
+
+    @PostMapping("/perfilUsuario/{username}/oculto")
+    public ResponseEntity<?> ocultar(@PathVariable String username) throws UsuarioNoExisteException {
+        Optional<Usuario> usuario = repoUsu.findByUsername(username);
+        if(usuario.isPresent()){
+            usuario.get().setArchivado(true);
+            repoUsu.actualizarUsuario(usuario.get());
+            return ResponseEntity.ok("Usuario eliminado"
+            );
+        }else{
+            return ResponseEntity.ok("Usuario no eliminado");
+        }
+    }
+
+    @PostMapping("/perfilUsuario/{username}/desOculto")
+    public ResponseEntity<?> desocultar(@PathVariable String username) throws UsuarioNoExisteException {
+        Optional<Usuario> usuario = repoUsu.findByUsername(username);
+        if(usuario.isPresent()){
+            usuario.get().setArchivado(false);
+            repoUsu.actualizarUsuario(usuario.get());
+            return ResponseEntity.ok("Usuario eliminado"
+            );
+        }else{
+            return ResponseEntity.ok("Usuario no eliminado");
+        }
+    }
+
+    @DeleteMapping("/perfilUsuario/{username}/usuarioMenos")
+    @Transactional
+    public ResponseEntity<String> eliminarUsuario(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+
+            // 1. Eliminar todas las actividades del usuario
+            List<Actividad> actividades = usuario.getActividades();
+            if (actividades != null) {
+                repoAct.deleteAll(actividades);
+            }
+
+            // 2. Eliminar comentarios asociados y comentario principal
+            List<Comentario> comentarios = usuario.getComentariosRealizados();
+            if (comentarios != null) {
+                for (Comentario comentario : comentarios) {
+                    eliminarComentariosAsociados(comentario);
+                    repoCom.delete(comentario); // Eliminar el comentario principal
+                }
+            }
+
+            // 3. Eliminar al usuario de las listas de seguidos y seguidores de otros usuarios
+            List<Usuario> seguidos = usuario.getSeguidos();
+            List<Usuario> seguidores = usuario.getSeguidores();
+            if (seguidos != null) {
+                seguidos.forEach(seguido -> seguido.getSeguidores().remove(usuario));
+                seguidos.clear();
+            }
+            if (seguidores != null) {
+                seguidores.forEach(seguidor -> seguidor.getSeguidos().remove(usuario));
+                seguidores.clear();
+            }
+
+            // 4. Limpiar las listas de establecimientos favoritos y visitados por el usuario
+            usuario.getEstablecimientosFavoritos().clear();
+            usuario.getEstablecimientosVisitados().clear();
+
+            // 5. Eliminar al usuario de la base de datos
+            repoUsu.delete(usuario);
+
+            return ResponseEntity.ok("Usuario eliminado exitosamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private void eliminarComentariosAsociados(Comentario comentario) {
+        List<Comentario> respuestas = comentario.getComentarios();
+        if (respuestas != null) {
+            for (Comentario respuesta : respuestas) {
+                eliminarComentariosAsociados(respuesta);
+                repoCom.delete(respuesta);
+            }
+        }
+    }
+
+
 
 }
 

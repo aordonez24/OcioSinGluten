@@ -19,13 +19,8 @@ import java.util.List;
 public class ActividadController {
 
     @Autowired
-    private UsuarioRepository repoUsu;
-
-    @Autowired
     private ActividadRepository repoAct;
 
-    @Autowired
-    private ServicioOcioSinGluten servicio;
 
     //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoActividades")

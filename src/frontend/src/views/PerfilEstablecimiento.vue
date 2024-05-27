@@ -565,7 +565,7 @@ export default {
           });
     },
     async likeEstablecimiento(id) {
-      axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`)
+      axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`, localStorage.getItem('username'))
           .then(() => {
             location.reload();
           })

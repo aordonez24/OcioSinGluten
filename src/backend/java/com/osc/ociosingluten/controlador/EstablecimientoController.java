@@ -5,6 +5,7 @@ import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
 import com.osc.ociosingluten.controlador.DTO.NuevoComentarioDTO;
 import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
 import com.osc.ociosingluten.excepciones.*;
+import com.osc.ociosingluten.herramientas.MensajePredefinido;
 import com.osc.ociosingluten.modelo.*;
 import com.osc.ociosingluten.repositorio.*;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
@@ -41,6 +42,9 @@ public class EstablecimientoController {
 
     @Autowired
     private UsuarioRepository repoUsu;
+
+    @Autowired
+    private ActividadRepository repoAct;
 
     @GetMapping("/listadoEstablecimientos")
     public List<Establecimiento> cargarTodosLosEstablecimientos(){
@@ -139,13 +143,17 @@ public class EstablecimientoController {
     }
 
     @PostMapping("/{id}/nuevoLike")
-    public ResponseEntity<?> agregarLike(@PathVariable int id) {
+    public ResponseEntity<?> agregarLike(@PathVariable int id, @RequestBody String username) throws ActividadNoCreada {
         Optional<Establecimiento> establecimiento = repoEst.findById(id);
-
+        Optional<Usuario> usuario = repoUsu.findByUsername(username);
         if (establecimiento.isPresent()) {
             Establecimiento com = establecimiento.get();
             com.setNumLikes(com.getNumLikes() + 1);
             repoEst.actualizar(com);
+            Usuario visitante = usuario.get();
+            Actividad actividad = new Actividad(visitante, com, MensajePredefinido.HA_DADO_LIKE);
+            crearActividad(actividad);
+            visitante.anadirActividad(actividad);
             return ResponseEntity.ok("Like con exito.");
         } else {
             return ResponseEntity.notFound().build();
@@ -167,13 +175,16 @@ public class EstablecimientoController {
     }
 
     @PostMapping("/{id}/visitado")
-    public ResponseEntity<?> agregarVisitado(@PathVariable int id, @RequestBody String username) {
+    public ResponseEntity<?> agregarVisitado(@PathVariable int id, @RequestBody String username) throws ActividadNoCreada {
         Optional<Establecimiento> establecimiento = repoEst.findById(id);
         Optional<Usuario> usu = repoUsu.findByUsername(username);
 
         if (establecimiento.isPresent()) {
             usu.get().visitarEstablecimiento(establecimiento.get());
             repoUsu.actualizarUsuario(usu.get());
+            Actividad act = new Actividad(usu.get(), establecimiento.get(), MensajePredefinido.HA_VISITADO);
+            crearActividad(act);
+            usu.get().anadirActividad(act);
             return ResponseEntity.ok("Visitado con exito.");
         } else {
             return ResponseEntity.notFound().build();
@@ -220,7 +231,7 @@ public class EstablecimientoController {
 
     @PostMapping("/establecimientos/{id}/nuevoComentario")
     public ResponseEntity<EstablecimientoDTO> agregarComentario(@PathVariable int id,
-                                                                @RequestBody NuevoComentarioDTO comentario) {
+                                                                @RequestBody NuevoComentarioDTO comentario) throws ActividadNoCreada {
         Optional<Establecimiento> establecimientoOptional = repoEst.findByIdEstablecimiento(id);
         if (establecimientoOptional.isPresent()) {
             Establecimiento establecimiento = establecimientoOptional.get();
@@ -233,6 +244,10 @@ public class EstablecimientoController {
                 repoEst.actualizar(establecimiento);
                 usu.get().anadirComentario(com);
                 repoUsu.actualizarUsuario(usu.get());
+
+                Actividad act = new Actividad(usu.get(), establecimiento, MensajePredefinido.HA_COMENTADO);
+                crearActividad(act);
+                usu.get().anadirActividad(act);
             }
             return ResponseEntity.ok(new EstablecimientoDTO(establecimiento));
         } else {
@@ -240,6 +255,13 @@ public class EstablecimientoController {
         }
     }
 
+    public boolean crearActividad(Actividad actividad) throws ActividadNoCreada {
+        Actividad acti = repoAct.save(actividad);
+        if(acti == null)
+            throw new ActividadNoCreada("La actividad no se pudo crear.");
+        return true;
+
+    }
 
 }
 

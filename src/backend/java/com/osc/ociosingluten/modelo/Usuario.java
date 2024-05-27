@@ -70,15 +70,16 @@ public class Usuario {
     @JsonIgnore
     private List<Establecimiento> establecimientosVisitados;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnore
-    private List<Actividad> actividades;
-
     @Enumerated(EnumType.STRING)
     @NotNull
     private Rol rol;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "autor", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Actividad> actividades;
+
+
+    @OneToMany( orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Comentario> comentariosRealizados;
 

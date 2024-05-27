@@ -27,12 +27,14 @@
             </div>
           </div>
 
-          <!-- Botón de chat -->
-          <button @click="iniciarChat" class="cerrar-sesion-button">Chat con usuario</button>
+          <!-- Contenedor para los botones de acción -->
+          <div class="action-buttons-container">
+            <button @click="toggleSeguir" class="cerrar-sesion-button">{{ siguiendo ? 'Dejar de seguir' : 'Seguir usuario' }}</button>
+            <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
+            <button v-if="rol === 'ADMIN'" @click="suspenderUsuario" class="cerrar-sesion-button2">Suspender usuario</button> <!-- Botón de eliminación para administradores -->
+            <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="cerrar-sesion-button2">Eliminar usuario</button> <!-- Botón de eliminación para administradores -->
 
-          <!-- Botón de seguir usuario -->
-          <button @click="toggleSeguir" class="cerrar-sesion-button">{{ siguiendo ? 'Dejar de seguir' : 'Seguir usuario' }}</button>
-
+          </div>
 
         </div>
         <div class="right-column">
@@ -50,7 +52,6 @@
               <input v-else v-model="editedApellidos" type="text">
             </p>
           </div>
-
         </div>
       </div>
     </div>
@@ -59,6 +60,8 @@
     <footer-componente/>
   </div>
 </template>
+
+
 
 <script>
 import axios from 'axios';
@@ -85,7 +88,8 @@ export default {
       email: '',
       numSeguidos: '',
       numSeguidores: '',
-      siguiendo: false, // Nuevo dato para controlar si se está siguiendo al usuario
+      siguiendo: false,
+      rol: ''// Nuevo dato para controlar si se está siguiendo al usuario
     };
   },
   mounted() {
@@ -109,7 +113,10 @@ export default {
         this.nombre = response.data.nombre;
         this.apellidos = response.data.apellidos;
         this.telefono = response.data.telefono;
-        console.log(this.usuario);
+        const yo = localStorage.getItem('username')
+        const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
+        this.rol = response2.data.rol;
+        console.log(this.rol);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;
@@ -133,9 +140,9 @@ export default {
       const username = this.$route.params.username;
       this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
     },
-    iniciarChat() {
+    iniciarVisitadosYFavs() {
       const username = this.$route.params.username; // Nombre de usuario del perfil visitado
-      this.$router.push({ name: 'chatCon', params: { username: username } }); // Navegar al chat con ese usuario
+      this.$router.push({ name: 'FavoritosYVisitados', params: { username: username } }); // Navegar al chat con ese usuario
     },
     async toggleSeguir() {
       try {
@@ -184,7 +191,47 @@ export default {
         } catch (error) {
         console.error('Error al verificar si se sigue al usuario:', error);
       }
+    },
+    async suspenderUsuario() {
+      try {
+        const username = this.$route.params.username;
+        console.log(username);
+        await axios.post(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/oculto`);
+
+        const emailUsuario = this.email; // Obtener el correo electrónico del usuario
+        const asunto = 'Tu cuenta ha sido suspendida temporalmente';
+        const cuerpo = 'Hola,\n\nTu cuenta ha sido suspendida temporalmente por violar nuestras políticas durante 24 horas.\n\nAtentamente,\nOcio Sin Gluten';
+
+        // Crear el enlace para enviar el correo electrónico
+        const mailtoLink = `mailto:${emailUsuario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+
+        window.location.href = mailtoLink;
+
+        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+      } catch (error) {
+        console.error('Error al eliminar el usuario:', error);
+      }
+    },
+    async eliminarUsuario() {
+      try {
+        const username = this.$route.params.username;
+        console.log(username);
+        await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/usuarioMenos`);
+
+        const emailUsuario = this.email; // Obtener el correo electrónico del usuario
+        const asunto = 'Tu cuenta ha sido eliminada';
+        const cuerpo = 'Hola,\n\nTu cuenta ha sido eliminada permanentemente por violar nuestras políticas. Para recuperarla, regístrese de nuevo.\n\nAtentamente,\nOcio Sin Gluten';
+
+        const mailtoLink = `mailto:${emailUsuario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+
+        window.location.href = mailtoLink;
+
+        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+      } catch (error) {
+        console.error('Error al eliminar el usuario:', error);
+      }
     }
+
   }
 };
 </script>
@@ -270,7 +317,6 @@ export default {
   font-size: 20px;
 }
 
-
 .cerrar-sesion-button {
   padding: 8px 12px;
   border-radius: 20px;
@@ -283,6 +329,20 @@ export default {
 
 .cerrar-sesion-button:hover {
   background-color: #9DD9D2;
+}
+
+.cerrar-sesion-button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: black;
+  background-color: transparent;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cerrar-sesion-button2:hover {
+  background-color: #ff0000;
 }
 
 .datosDeUsuario {
@@ -306,7 +366,6 @@ export default {
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 
 .change-password-form label {
   display: block;
@@ -334,22 +393,15 @@ export default {
 }
 
 
-.change-password-button3 {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 20px;
-  color: white;
-  background-color: #9DD9D2;
-  border: none;
-  cursor: pointer;
-}
-
-.change-password-button3:hover {
-  background-color: #ffcc74;
-}
-
 footer-componente {
   margin-top: auto; /* Empuja el pie de página al final de la página */
+}
+
+/* Clase para el contenedor de botones de acción */
+.action-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Espacio entre los botones */
 }
 
 </style>

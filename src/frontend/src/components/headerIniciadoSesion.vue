@@ -11,9 +11,12 @@ export default {
   },
   methods: {
     async cerrarSesion() {
+      console.log("cerrarSesion method called");
       try {
         localStorage.removeItem('token');
+        console.log("Token removed from localStorage");
         this.$router.push('/');
+        console.log("Redirecting to home");
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
       }

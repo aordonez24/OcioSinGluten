@@ -35,4 +35,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, String> {
 
     @Transactional
     Optional<Usuario> findOneByEmailAndPassword(String email, String pass);
+
+    @Transactional
+    void delete(Usuario usuario);
 }

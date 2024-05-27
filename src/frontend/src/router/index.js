@@ -11,6 +11,8 @@ import chat from "@/views/Chat-Vista.vue";
 import establecimientos from "@/views/Establecimientos.vue";
 import establecimiento from "@/views/PerfilEstablecimiento.vue";
 import nuevoEstablecimiento from "@/views/NuevoEstablecimiento.vue";
+import actividad from "@/views/Actividades.vue";
+import visitadosYFavoritos from "@/views/VisitadosYFavoritos.vue";
 
 const routes = [
     { path: '/', component: Inicio },
@@ -31,7 +33,7 @@ const routes = [
         }
     },
     {
-        path: '/perfil/:username', // Agrega el parámetro dinámico ':username'
+        path: '/perfil/:username',
         name: 'Perfil',
         component: VistaPerfil,
     },
@@ -39,6 +41,11 @@ const routes = [
         path: '/seguidosyseguidores/:username',
         name: 'SeguidosSeguidores',
         component: SeguidoresYSeguidosUsuario,
+    },
+    {
+        path: '/favoritosyvisitados/:username',
+        name: 'FavoritosYVisitados',
+        component: visitadosYFavoritos,
     },
     {
         path: '/perfilUsuario/:username',
@@ -51,8 +58,8 @@ const routes = [
         component: comunidad,
     },
     {
-        path: '/chatCon/:username',
-        name: 'chatCon',
+        path: '/chatOcioSinGluten',
+        name: 'chatGrupal',
         component: chat,
     },
     {
@@ -64,6 +71,11 @@ const routes = [
         path: '/nuevoEstablecimiento',
         name: 'nuevoEstablecimiento',
         component: nuevoEstablecimiento,
+    },
+    {
+        path: '/actividades',
+        name: 'actividades',
+        component: actividad,
     },
 
 ];

@@ -4,6 +4,7 @@ import CabeceraComponente2 from "@/components/header2.vue";
 import FooterComponente from "@/components/footer.vue";
 </script>
 
+
 <template>
   <cabecera-componente2/>
   <div class="container-principal">
@@ -11,23 +12,30 @@ import FooterComponente from "@/components/footer.vue";
     <form @submit.prevent="agregarEstablecimiento" class="form-container">
       <div class="form-column">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" v-model="nombre">
+        <input type="text" id="nombre" v-model="nombre" :class="{ 'is-invalid': !nombreValido }">
+        <span v-if="!nombreValido" class="text-danger">Nombre no válido (máximo 30 caracteres).</span>
         <label for="telefono">Teléfono:</label>
-        <input type="number" id="telefono" v-model="telefono">
+        <input type="number" id="telefono" v-model="telefono" :class="{ 'is-invalid': !telefonoValido }">
+        <span v-if="!telefonoValido" class="text-danger">Teléfono no válido (9 dígitos).</span>
       </div>
       <div class="form-column">
         <label for="localidad">Localidad:</label>
-        <input type="text" id="localidad" v-model="localidad">
+        <input type="text" id="localidad" v-model="localidad" :class="{ 'is-invalid': !localidadValida }">
+        <span v-if="!localidadValida" class="text-danger">Localidad no válida.</span>
         <label for="provincia">Provincia:</label>
-        <input type="text" id="provincia" v-model="provincia">
+        <input type="text" id="provincia" v-model="provincia" :class="{ 'is-invalid': !provinciaValida }">
+        <span v-if="!provinciaValida" class="text-danger">Provincia no válida.</span>
         <label for="calle">Calle:</label>
-        <input type="text" id="calle" v-model="calle">
+        <input type="text" id="calle" v-model="calle" :class="{ 'is-invalid': !calleValida }">
+        <span v-if="!calleValida" class="text-danger">Calle no válida.</span>
       </div>
       <div class="form-column">
         <label for="codPostal">Código Postal:</label>
-        <input type="number" id="codPostal" v-model="codPostal">
+        <input type="number" id="codPostal" v-model="codPostal" :class="{ 'is-invalid': !codPostalValido }">
+        <span v-if="!codPostalValido" class="text-danger">Código Postal no válido.</span>
         <label for="pais">País:</label>
-        <input type="text" id="pais" v-model="pais">
+        <input type="text" id="pais" v-model="pais" :class="{ 'is-invalid': !paisValido }">
+        <span v-if="!paisValido" class="text-danger">País no válido.</span>
       </div>
     </form>
     <button @click="agregarEstablecimiento" class="botonagregar">Agregar Establecimiento</button>
@@ -48,14 +56,38 @@ export default {
       calle: '',
       codPostal: null,
       pais: '',
-      username:'',
+      username: '',
+      nombreValido: true,
+      telefonoValido: true,
+      localidadValida: true,
+      provinciaValida: true,
+      calleValida: true,
+      codPostalValido: true,
+      paisValido: true
     };
   },
   mounted() {
     this.username = localStorage.getItem('username');
   },
   methods: {
+    validarFormulario() {
+      this.nombreValido = this.nombre.length > 0 && this.nombre.length <= 30;
+      this.telefonoValido = /^\d{9}$/.test(this.telefono);
+      this.localidadValida = this.localidad.length > 0;
+      this.provinciaValida = this.provincia.length > 0;
+      this.calleValida = this.calle.length > 0;
+      this.codPostalValido = /^\d+$/.test(this.codPostal);
+      this.paisValido = this.pais.length > 0;
+
+      return this.nombreValido && this.telefonoValido && this.localidadValida &&
+          this.provinciaValida && this.calleValida && this.codPostalValido && this.paisValido;
+    },
     async agregarEstablecimiento() {
+      if (!this.validarFormulario()) {
+        console.error('Error en la validación del formulario');
+        return;
+      }
+
       try {
         const formData = new FormData();
         formData.append('nombre', this.nombre);
@@ -65,7 +97,7 @@ export default {
         formData.append('calle', this.calle);
         formData.append('codPostal', this.codPostal);
         formData.append('pais', this.pais);
-        formData.append('username', this.username); // Obtener el nombre de usuario de la sesión actual
+        formData.append('username', this.username);
 
         const response = await axios.post('http://localhost:8080/ociosingluten/establecimientos/nuevoEstablecimiento', formData);
 
@@ -80,22 +112,20 @@ export default {
         this.codPostal = null;
         this.pais = '';
 
-        this.$router.push({ name: 'establecimientos'});
+        this.$router.push({ name: 'establecimientos' });
 
       } catch (error) {
         console.error('Error al agregar establecimiento:', error);
       }
     }
-
   }
 };
 </script>
 
 <style scoped>
-
 .container-principal {
-  width: 60vw; /* Ancho del viewport */
-  margin: 50px auto 100px; /* Centra el contenedor horizontalmente y deja un margen vertical de 50px arriba y 100px abajo */
+  width: 60vw;
+  margin: 50px auto 100px;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
@@ -110,11 +140,11 @@ export default {
 
 .form-column {
   flex: 1;
-  margin-right: 20px; /* Espacio entre las columnas */
+  margin-right: 20px;
 }
 
 .form-column:last-child {
-  margin-right: 0; /* Elimina el margen derecho de la última columna */
+  margin-right: 0;
 }
 
 label {
@@ -123,22 +153,29 @@ label {
 }
 
 .botonagregar {
-  background-color: #7F7F7F; /* Color de fondo del botón */
-  color: white; /* Color del texto del botón */
-  border: none; /* Eliminar el borde del botón */
-  padding: 12px 24px; /* Aumentar el relleno del botón */
-  cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
-  font-size: 16px; /* Tamaño de fuente */
-  border-radius: 4px; /* Agregar bordes redondeados */
-  transition: background-color 0.3s ease; /* Agregar una transición suave al color de fondo */
-  display: block; /* Convertir el botón en un elemento de bloque */
-  margin: 0 auto; /* Centrar horizontalmente */
+  background-color: #7F7F7F;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 0 auto;
   margin-top: 20px;
 }
 
 .botonagregar:hover {
-  background-color: #ffcc74; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
+  background-color: #ffcc74;
 }
 
+.is-invalid {
+  border-color: red;
+}
+
+.text-danger {
+  color: red;
+}
 </style>

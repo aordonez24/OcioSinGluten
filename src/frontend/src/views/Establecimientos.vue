@@ -20,7 +20,7 @@
         <h3>
           <router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre">{{ establecimiento.nombre }}</router-link>
           <template v-if="token">
-            <i class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)"> {{establecimiento.numLikes}}</i>
+            <i class="far fa-thumbs-up like-icon"> {{establecimiento.numLikes}}</i>
           </template>
           <!-- Mostrar solo el número de likes si el usuario no ha iniciado sesión -->
           <template v-else>
@@ -113,16 +113,6 @@ export default {
           establecimiento.provincia.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           establecimiento.calle.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
-    },
-    async likeEstablecimiento(id) {
-        axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`)
-            .then(() => {
-              this.cargarEstablecimientos()
-            })
-            .catch(error => {
-              console.error('Error al enviar el like:', error);
-            });
-
     },
     handleSubmit() {
       // Envío del formulario al servidor

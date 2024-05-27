@@ -52,7 +52,7 @@ public class Establecimiento {
     private int numLikes;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<Comentario> comentarios;
 
     @ManyToMany

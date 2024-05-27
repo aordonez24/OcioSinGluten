@@ -10,6 +10,7 @@
         <br><br>
         <button type="submit2">Ingresar</button>
       </form>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </div>
     <div class="login">
       <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Crea una nueva</router-link> </a></p>
@@ -84,5 +85,13 @@ export default {
 
 <style scoped>
 @import "../assets/css/login.css";
+
+.error-message {
+  color: #ff0000; /* Color rojo para el mensaje de error */
+  font-size: 20px; /* Tamaño de fuente */
+  margin-top: 5px; /* Espacio superior */
+  text-align: center;
+}
+
 
 </style>
