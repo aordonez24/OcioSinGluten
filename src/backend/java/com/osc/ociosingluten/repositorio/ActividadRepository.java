@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface ActividadRepository extends JpaRepository<Actividad, Integer> {
 
     @Transactional
-    Optional<Actividad> findByEstablecimiento(Establecimiento establecimiento);
+    List<Actividad> findByEstablecimiento(Establecimiento establecimiento);
 
     @Transactional
     Optional<Actividad> findByEstablecimientoAndMensajePredefinidoAndAutor(Establecimiento establecimiento, MensajePredefinido msg, Usuario autor);
@@ -32,7 +32,7 @@ public interface ActividadRepository extends JpaRepository<Actividad, Integer> {
     @Transactional
     void delete(Actividad actividad);
 
-
+    void deleteByEstablecimiento(Establecimiento establecimiento);
 
 
 

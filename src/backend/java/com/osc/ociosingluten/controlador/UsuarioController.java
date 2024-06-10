@@ -258,7 +258,6 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody LoginDTO loginDTO) throws UsuarioNoExisteException, ContrasenaIncorrectaException {
         Optional<Usuario> usuarioLogeado = repoUsu.findByEmail(loginDTO.getEmail());
-                //String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, byte[] fotoPerfil, String email, String password
         if(usuarioLogeado.isPresent()) {
             Usuario usuario1 = servicio.loginUsuario(loginDTO);
             return ResponseEntity.ok(usuario1);
@@ -468,13 +467,7 @@ public class UsuarioController {
     }
 
     private void eliminarComentariosAsociados(Comentario comentario) {
-        List<Comentario> respuestas = comentario.getComentarios();
-        if (respuestas != null) {
-            for (Comentario respuesta : respuestas) {
-                eliminarComentariosAsociados(respuesta);
-                repoCom.delete(respuesta);
-            }
-        }
+        repoCom.delete(comentario);
     }
 
 

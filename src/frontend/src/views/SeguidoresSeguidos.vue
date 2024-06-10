@@ -15,8 +15,6 @@
               <div>
                 <p @click="irAPerfil(follower.username)" class="username-link"><strong>{{ follower.username }}</strong></p>
                 <p>{{ follower.nombre }} {{ follower.apellidos }}</p>
-                <button class="seguir-boton" @click="seguirUsuario(follower.username)" v-if="!yaSiguiendo(follower)">Seguir</button>
-                <button class="seguir-boton" disabled v-else>Se siguen mutuamente!</button>
               </div>
             </div>
           </div>
@@ -113,13 +111,13 @@ export default {
       } catch (error) {
         console.error('Error al seguir al usuario:', error);
       }
-    }
-    ,
-    yaSiguiendo(follower) {
-      return this.followedUsers.some(followed => followed.username === follower.username);
     },
     irAPerfil(username) {
-      this.$router.push({ name: 'perfilOtroUsuario', params: { username: username } });
+      if(username === localStorage.getItem('username')) {
+        this.$router.push({name: 'Perfil', params: {username: username}});
+      }else{
+        this.$router.push({name: 'perfilOtroUsuario', params: {username: username}});
+      }
     }
   },
 };
@@ -206,13 +204,20 @@ footer-componente {
   width: 100px;
   height: 100px;
   border-radius: 50%;
+  background-color: #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px; /* Tamaño del icono */
-  background-color: #ccc; /* Color de fondo predeterminado */
-  color: white; /* Color del icono */
   margin-right: 30px;
+  overflow: hidden;
+}
+
+.profile-pic img {
+  width: 110%;
+  height: 110%;
+  object-fit: cover; /* Ajusta la imagen al contenedor, recortando si es necesario */
+  object-position: center; /* Añade esta línea */
+  border-radius: 50%; /* Mantén el borde circular */
 }
 
 .username-link {
@@ -224,5 +229,6 @@ footer-componente {
 .username-link:hover {
   text-decoration: #ffcc74; /* Subraya el texto al pasar el ratón */
 }
+
 
 </style>

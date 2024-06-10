@@ -39,15 +39,15 @@
         <div class="right-column">
           <div class="datosDeUsuario">
             <p><strong>Nombre de usuario:</strong>
-              <span v-if="!editing"> {{ username }}</span>
+              <span v-if="!editing">{{ }} {{ username }}</span>
               <input v-else v-model="editedUsername" type="text">
             </p>
             <p><strong>Nombre:</strong>
-              <span v-if="!editing"> {{ nombre }}</span>
+              <span v-if="!editing">{{ }} {{ nombre }}</span>
               <input v-else v-model="editedNombre" type="text">
             </p>
             <p><strong>Apellidos:</strong>
-              <span v-if="!editing"> {{ apellidos }}</span>
+              <span v-if="!editing">{{ }} {{ apellidos }}</span>
               <input v-else v-model="editedApellidos" type="text">
             </p>
           </div>

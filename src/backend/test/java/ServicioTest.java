@@ -310,30 +310,6 @@ public class ServicioTest {
 
     }
 
-    @Test
-    public void comentarComentario() throws UsuarioNoExisteException, ContrasenaIncorrectaException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException, EstablecimientoNoExistenteException, UsuarioExisteException, ComentarioNoExiste {
-        Establecimiento establecimiento = new Establecimiento("Taberna Don Sancho", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "España");
-        byte[] fotoPerfil = null;
-        Usuario comentador = new Usuario("78162640S", "aor00039", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@gmail.com", contrasena);
-
-        Usuario usu = servicio.loginUsuario(comentador.getEmail(), contrasena);
-        Comentario com = new Comentario("Que bien se come ahí, además te atienden muy rapido. Un gustazo!", comentador);
-
-        Assert.assertTrue(servicio.publicarEstablecimiento(usu, establecimiento));
-        Assert.assertTrue(servicio.comentarEstablecimiento(usu, establecimiento, com));
-
-        Usuario comentador2 = new Usuario(generarDNIAleatorio(), "aor00770", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, generarCorreoAleatorio(), contrasena);
-        servicio.registroUsuario(comentador2);
-        Usuario usu2 = servicio.loginUsuario(comentador2.getEmail(), contrasena);
-
-        Comentario respuesta = new Comentario("Si, la verdad es que sí, tienen muchísima variedad!", comentador2);
-
-        Assert.assertTrue(servicio.comentarComentario(usu2, com, respuesta, 1, ""));
-
-
-    }
 
     @Test
     public void testGestionUsuario() throws UsuarioExisteException, UsuarioNoExisteException, ContrasenaIncorrectaException, NoPermisosException, SesionNoIniciadaException {

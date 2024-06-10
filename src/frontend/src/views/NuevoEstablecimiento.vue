@@ -12,29 +12,33 @@ import FooterComponente from "@/components/footer.vue";
     <form @submit.prevent="agregarEstablecimiento" class="form-container">
       <div class="form-column">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" v-model="nombre" :class="{ 'is-invalid': !nombreValido }">
+        <input type="text" id="nombre" v-model="nombre" @input="validarNombre" :class="{ 'is-invalid': !nombreValido }">
         <span v-if="!nombreValido" class="text-danger">Nombre no válido (máximo 30 caracteres).</span>
+
         <label for="telefono">Teléfono:</label>
-        <input type="number" id="telefono" v-model="telefono" :class="{ 'is-invalid': !telefonoValido }">
+        <input type="number" id="telefono" v-model="telefono" @input="validarTelefono" :class="{ 'is-invalid': !telefonoValido }">
         <span v-if="!telefonoValido" class="text-danger">Teléfono no válido (9 dígitos).</span>
       </div>
       <div class="form-column">
         <label for="localidad">Localidad:</label>
-        <input type="text" id="localidad" v-model="localidad" :class="{ 'is-invalid': !localidadValida }">
+        <input type="text" id="localidad" v-model="localidad" @input="validarLocalidad" :class="{ 'is-invalid': !localidadValida }">
         <span v-if="!localidadValida" class="text-danger">Localidad no válida.</span>
+
         <label for="provincia">Provincia:</label>
-        <input type="text" id="provincia" v-model="provincia" :class="{ 'is-invalid': !provinciaValida }">
+        <input type="text" id="provincia" v-model="provincia" @input="validarProvincia" :class="{ 'is-invalid': !provinciaValida }">
         <span v-if="!provinciaValida" class="text-danger">Provincia no válida.</span>
+
         <label for="calle">Calle:</label>
-        <input type="text" id="calle" v-model="calle" :class="{ 'is-invalid': !calleValida }">
+        <input type="text" id="calle" v-model="calle" @input="validarCalle" :class="{ 'is-invalid': !calleValida }">
         <span v-if="!calleValida" class="text-danger">Calle no válida.</span>
       </div>
       <div class="form-column">
         <label for="codPostal">Código Postal:</label>
-        <input type="number" id="codPostal" v-model="codPostal" :class="{ 'is-invalid': !codPostalValido }">
+        <input type="number" id="codPostal" v-model="codPostal" @input="validarCodPostal" :class="{ 'is-invalid': !codPostalValido }">
         <span v-if="!codPostalValido" class="text-danger">Código Postal no válido.</span>
+
         <label for="pais">País:</label>
-        <input type="text" id="pais" v-model="pais" :class="{ 'is-invalid': !paisValido }">
+        <input type="text" id="pais" v-model="pais" @input="validarPais" :class="{ 'is-invalid': !paisValido }">
         <span v-if="!paisValido" class="text-danger">País no válido.</span>
       </div>
     </form>
@@ -42,6 +46,7 @@ import FooterComponente from "@/components/footer.vue";
   </div>
   <footer-componente/>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -70,21 +75,42 @@ export default {
     this.username = localStorage.getItem('username');
   },
   methods: {
-    validarFormulario() {
+    validarNombre() {
       this.nombreValido = this.nombre.length > 0 && this.nombre.length <= 30;
+    },
+    validarTelefono() {
       this.telefonoValido = /^\d{9}$/.test(this.telefono);
+    },
+    validarLocalidad() {
       this.localidadValida = this.localidad.length > 0;
+    },
+    validarProvincia() {
       this.provinciaValida = this.provincia.length > 0;
+    },
+    validarCalle() {
       this.calleValida = this.calle.length > 0;
+    },
+    validarCodPostal() {
       this.codPostalValido = /^\d+$/.test(this.codPostal);
+    },
+    validarPais() {
       this.paisValido = this.pais.length > 0;
+    },
+    validarFormulario() {
+      this.validarNombre();
+      this.validarTelefono();
+      this.validarLocalidad();
+      this.validarProvincia();
+      this.validarCalle();
+      this.validarCodPostal();
+      this.validarPais();
 
       return this.nombreValido && this.telefonoValido && this.localidadValida &&
           this.provinciaValida && this.calleValida && this.codPostalValido && this.paisValido;
     },
     async agregarEstablecimiento() {
       if (!this.validarFormulario()) {
-        console.error('Error en la validación del formulario');
+        alert('Error en la validación del formulario');
         return;
       }
 

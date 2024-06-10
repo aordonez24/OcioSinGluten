@@ -14,7 +14,7 @@ public class Actividad {
     @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
     private int id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "dni")
     private Usuario autor;
 

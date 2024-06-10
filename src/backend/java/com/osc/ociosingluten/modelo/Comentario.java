@@ -1,5 +1,6 @@
 package com.osc.ociosingluten.modelo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -30,33 +31,15 @@ public class Comentario {
 
     private int numLikes;
 
-    @OneToMany(mappedBy = "comentarioPadre", fetch = FetchType.EAGER)
-    private List<Comentario> comentarios;
-
-    /*
-    La idea de tener un atributo comentarioPadre en la clase Comentario es permitir la creación de una estructura de comentarios anidados o comentarios secundarios. Esto es útil en escenarios donde se permite a los usuarios responder a comentarios existentes.
-
-    Por ejemplo, supongamos que un usuario deja un comentario inicial en una publicación, y otros usuarios pueden responder a ese comentario original. Cada respuesta sería un comentario secundario y estaría asociado al comentario padre al que está respondiendo.
-
-    Al tener un atributo comentarioPadre, puedes establecer fácilmente las relaciones entre comentarios principales y sus respuestas. Esto facilita la navegación a través de la estructura de comentarios y permite mostrar los comentarios de manera jerárquica en la interfaz de usuario, si es necesario.
-     */
-    @ManyToOne
-    private Comentario comentarioPadre;
+    @ManyToMany
+    @JsonIgnore
+    private List<Usuario> usuariosQueDieronLike;
 
     public Comentario(String mensaje, Usuario autor) {
         this.mensaje = mensaje;
         this.autor = autor;
         this.numLikes = 0;
         this.fecha = LocalDate.now();
-        this.comentarios = new ArrayList<>();
-    }
-
-    public Comentario(String mensaje, Usuario autor, int numLikes, LocalDate fecha, ArrayList<Comentario> comentarios) {
-        this.mensaje = mensaje;
-        this.autor = autor;
-        this.numLikes = numLikes;
-        this.fecha = fecha;
-        this.comentarios = comentarios;
     }
 
     public Comentario() {
@@ -95,13 +78,6 @@ public class Comentario {
         this.fecha = fecha;
     }
 
-    public List<Comentario> getComentarios() {
-        return comentarios;
-    }
-
-    public void setComentarios(List<Comentario> comentarios) {
-        this.comentarios = comentarios;
-    }
 
     public int getId() {
         return id;
@@ -111,18 +87,20 @@ public class Comentario {
         this.id = id;
     }
 
-    public void anadirComentario(Comentario comentario){
-        comentarios.add(comentario);
-    }
-    public void quitarComentario(Comentario comentario){
-        comentarios.remove(comentario);
-    }
-
-    public void setComentarioPadre(Comentario comentarioPadre) {
-        this.comentarioPadre = comentarioPadre;
+    public void setNumLikes(int numLikes, Usuario usuario, int modo) {
+        this.numLikes = numLikes;
+        if(modo == 1){
+            this.getUsuariosQueDieronLike().add(usuario);
+        }else{
+            this.getUsuariosQueDieronLike().remove(usuario);
+        }
     }
 
-    public void eliminarComentariosAsociados(){
-        this.comentarios.clear();
+    public void sumarLike() {
+        this.numLikes += 1;
+    }
+
+    public List<Usuario> getUsuariosQueDieronLike() {
+        return usuariosQueDieronLike;
     }
 }

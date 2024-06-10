@@ -459,54 +459,6 @@ public class ServicioOcioSinGluten {
     }
 
 
-    public boolean comentarComentario(Usuario comentador, Comentario comPadre, Comentario comHijo, int modo, String nuevoMensaje) throws SesionNoIniciadaException, UsuarioNoExisteException, ComentarioNoExiste {
-        Optional<Usuario> usu = repoUsuario.findByDni(comentador.getDni());
-        if(usu.isPresent()){
-            if(comentador.isSesionIniciada()){
-                Optional<Comentario> comen = repoCom.findById(comPadre.getId());
-                if(comen.isPresent()){
-                    if(modo == 1) {
-                        //AñadirComentario
-                        comPadre.anadirComentario(comHijo);
-                        comHijo.setComentarioPadre(comPadre);
-                        comentador.anadirComentario(comHijo);
-                        repoCom.actualizar(comHijo);
-                        repoCom.actualizar(comPadre);
-                        return true;
-                    } else if (modo == 2) {
-                        //EliminarComentario
-                        Optional<Comentario> comen2 = repoCom.findById(comHijo.getId());
-                        if(comen2.isPresent()) {
-                            comPadre.quitarComentario(comHijo);
-                            repoCom.save(comPadre);
-                            repoCom.delete(comHijo);
-                        }else{
-                            throw new ComentarioNoExiste("El comentario no eiste.");
-                        }
-                    } else if (modo == 3) {
-                        Optional<Comentario> comen2 = repoCom.findById(comHijo.getId());
-                        if(comen2.isPresent()) {
-                            if(comHijo.getMensaje()!=nuevoMensaje) {
-                                comHijo.setMensaje(nuevoMensaje);
-                                repoCom.save(comHijo);
-                                return true;
-                            }
-                        }else{
-                            throw new ComentarioNoExiste("El comentario no eiste.");
-                        }
-                    }
-                }else{
-                    throw new ComentarioNoExiste("El comentario no eiste.");
-                }
-            }else{
-                throw new SesionNoIniciadaException("El usuario no ha iniciado sesión.");
-            }
-        }else{
-            throw new UsuarioNoExisteException("El usuario no está registrado.");
-        }
-        return false;
-    }
-
     public boolean gestionUsuario(Usuario usu, int modo, Usuario gestionado, String nombre, String apellidos, String email, String password, LocalDate fnac) throws UsuarioNoExisteException, SesionNoIniciadaException, NoPermisosException {
         Optional<Usuario> usuarioGestor = repoUsuario.findByDni(usu.getDni());
         Optional<Usuario> usuarioGestionado = repoUsuario.findByDni(gestionado.getDni());

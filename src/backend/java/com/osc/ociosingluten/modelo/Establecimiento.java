@@ -52,7 +52,7 @@ public class Establecimiento {
     private int numLikes;
 
     @JsonIgnore
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comentario> comentarios;
 
     @ManyToMany
@@ -65,6 +65,9 @@ public class Establecimiento {
     @OneToMany(mappedBy = "establecimiento", cascade = CascadeType.ALL)
     private List<Imagen> imagenes;
 
+    @ManyToMany
+    @JsonIgnore
+    private List<Usuario> usuariosQueDieronLike;
 
     public Establecimiento(String nombre, int telefono, String localidad, String provincia, String calle, int codPostal, String pais) {
         this.nombre = nombre;
@@ -79,6 +82,7 @@ public class Establecimiento {
         this.visitantes = new ArrayList<>();
         this.archivada = false;
         this.imagenes = new ArrayList<>();
+        this.usuariosQueDieronLike = new ArrayList<>();
     }
 
     public Establecimiento() {
@@ -105,8 +109,13 @@ public class Establecimiento {
         return numLikes;
     }
 
-    public void setNumLikes(int numLikes) {
+    public void setNumLikes(int numLikes, Usuario usuario, int modo) {
         this.numLikes = numLikes;
+        if(modo == 1){
+            this.getUsuariosQueDieronLike().add(usuario);
+        }else{
+            this.getUsuariosQueDieronLike().remove(usuario);
+        }
     }
 
     public void sumarLike() {
@@ -219,4 +228,15 @@ public class Establecimiento {
         return imagenes;
     }
 
+    public void setImagenes(List<Imagen> imagenes) {
+        this.imagenes = imagenes;
+    }
+
+    public List<Usuario> getUsuariosQueDieronLike() {
+        return usuariosQueDieronLike;
+    }
+
+    public void setUsuariosQueDieronLike(List<Usuario> usuariosQueDieronLike) {
+        this.usuariosQueDieronLike = usuariosQueDieronLike;
+    }
 }

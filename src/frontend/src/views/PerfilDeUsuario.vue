@@ -26,30 +26,27 @@
               </div>
             </div>
           </div>
-
+          <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
           <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
         </div>
         <div class="right-column">
           <div class="datosDeUsuario">
             <p><strong>DNI:</strong> {{ dni }}</p>
-            <p><strong>Nombre de usuario:</strong>
-              <span v-if="!editing"> {{ username }}</span>
-              <input v-else v-model="editedUsername" type="text">
-            </p>
+            <p><strong>Nombre de usuario:</strong> {{ username }}</p>
             <p><strong>Nombre:</strong>
-              <span v-if="!editing"> {{ nombre }}</span>
+              <span v-if="!editing">{{ }} {{ nombre }}</span>
               <input v-else v-model="editedNombre" type="text">
             </p>
             <p><strong>Apellidos:</strong>
-              <span v-if="!editing"> {{ apellidos }}</span>
+              <span v-if="!editing">{{ }} {{ apellidos }}</span>
               <input v-else v-model="editedApellidos" type="text">
             </p>
             <p><strong>Fecha de nacimiento:</strong>
-              <span v-if="!editing"> {{ fechaNacimiento }}</span>
+              <span v-if="!editing">{{ }} {{ fechaNacimiento }}</span>
               <input v-else v-model="editedFechaNacimiento" type="date">
             </p>
             <p><strong>Teléfono:</strong>
-              <span v-if="!editing"> {{ telefono }}</span>
+              <span v-if="!editing">{{ }} {{ telefono }}</span>
               <input v-else v-model="editedTelefono" type="text">
             </p>
             <p><strong>Email:</strong> {{ email }}</p>
@@ -201,13 +198,26 @@ export default {
           fechaNacimiento: this.editedFechaNacimiento,
           telefono: this.editedTelefono
         };
+
+        // Validar el número de teléfono
+        if (!this.validarTelefono(nuevosDatos.telefono)) {
+          alert('El número de teléfono no es válido.');
+          return;
+        }
+
+        // Si pasa la validación, realizar la solicitud de actualización
         await axios.put(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/nuevosDatos`, nuevosDatos);
-        this.editing = false; // Cambia a modo de visualización después de guardar los cambios
+        this.editing = false; // Cambiar al modo de visualización después de guardar los cambios
         this.$router.push('/iniciaSesion');
 
       } catch (error) {
         console.error('Error al guardar los cambios:', error);
+        alert("Error al guardar los cambios. Por favor, inténtalo de nuevo más tarde.");
       }
+    },
+    iniciarVisitadosYFavs() {
+      const username = this.$route.params.username; // Nombre de usuario del perfil visitado
+      this.$router.push({ name: 'FavoritosYVisitados', params: { username: username } }); // Navegar al chat con ese usuario
     },
     async iniciarCambioContrasena() { //Async por operacion asincrona
       this.changingPassword = true;
@@ -267,6 +277,9 @@ export default {
     verSeguidos() {
       const username = this.$route.params.username;
       this.$router.push({ name: 'SeguidosSeguidores', params: { username: username } });
+    },
+    validarTelefono(telefono) {
+      return /^\d{9}$/.test(telefono);
     },
   }
 };
@@ -450,7 +463,7 @@ export default {
   padding: 8px 12px;
   border-radius: 20px;
   color: white;
-  background-color: #9DD9D2;
+  background-color: white;
   border: none;
   cursor: pointer;
 }

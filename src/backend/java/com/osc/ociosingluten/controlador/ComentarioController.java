@@ -43,57 +43,6 @@ public class ComentarioController {
         return comentario.map(c -> ResponseEntity.ok(new ComentarioDTO(c))).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{id}/respuestas")
-    public ResponseEntity<List<ComentarioDTO>> obtenerRespuestas(@PathVariable int id){
-        Optional<Comentario> comentarioOptional = comRe.findById(id);
-
-        if (comentarioOptional.isPresent()) {
-            Comentario comentario = comentarioOptional.get();
-            List<Comentario> respuestas = comentario.getComentarios();
-
-            List<ComentarioDTO> respuestasDTO = respuestas.stream()
-                    .map(ComentarioDTO::new)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(respuestasDTO);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/{id}/nuevaRespuesta")
-    public ResponseEntity<ComentarioDTO> agregarRespuesta(@PathVariable int id, @RequestBody NuevoComentarioDTO respuestaDTO) {
-        Optional<Comentario> comentarioOptional = comRe.findById(id);
-
-        if (comentarioOptional.isPresent()) {
-            Comentario comentarioPadre = comentarioOptional.get();
-            Optional<Usuario> usuario = repoUsu.findByUsername(respuestaDTO.getUsername());
-            Comentario respuesta = new Comentario(respuestaDTO.getMensaje(), usuario.get());
-            respuesta.setComentarioPadre(comentarioPadre);
-            Comentario respuestaGuardada = comRe.save(respuesta);
-            comentarioPadre.anadirComentario(respuestaGuardada);
-            comRe.save(comentarioPadre);
-
-            return ResponseEntity.ok(new ComentarioDTO(respuestaGuardada));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/{id}/nuevoLike")
-    public ResponseEntity<?> agregarLike(@PathVariable int id) {
-        Optional<Comentario> comentarioOptional = comRe.findById(id);
-
-        if (comentarioOptional.isPresent()) {
-            Comentario com = comentarioOptional.get();
-            com.setNumLikes(com.getNumLikes() + 1);
-            comRe.save(com);
-            return ResponseEntity.ok("Like con exito.");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarComentario(@PathVariable int id, @RequestParam String username, @RequestParam int idEstablecimiento) throws ComentarioNoExiste {
         Optional<Comentario> comentarioOptional = comRe.findById(id);
@@ -102,12 +51,11 @@ public class ComentarioController {
 
         if (comentarioOptional.isPresent() && est.isPresent() && usu.isPresent()) {
             Comentario com = comentarioOptional.get();
-            com.eliminarComentariosAsociados();
-            comRe.save(com);
             est.get().eliminarComentario(com);
             repoEst.actualizar(est.get());
             usu.get().eliminarComentario(com);
             repoUsu.actualizarUsuario(usu.get());
+            comRe.delete(com);
 
             return ResponseEntity.ok("Eliminado con éxito.");
         } else {

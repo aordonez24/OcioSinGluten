@@ -18,7 +18,7 @@
         <div class="contenido-actividad">
           <div>
             <strong @click="irAPerfil(actividad.autor.username)" class="nombre-usuario">{{ actividad.autor.username }}</strong>
-            : {{ traducirMensaje(actividad.mensajePredefinido) }} {{ actividad.establecimiento.nombre }}
+            : {{ traducirMensaje(actividad.mensajePredefinido) }} {{ actividad.establecimiento.nombre }}, {{actividad.establecimiento.localidad }}, {{actividad.establecimiento.provincia }}
           </div>
           <div class="fecha">{{ actividad.fechaContribucion }}</div>
         </div>

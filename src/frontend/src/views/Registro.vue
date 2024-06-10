@@ -8,7 +8,7 @@
       <div class="col-md-4">
         <div class="form-group">
           <label for="dni">DNI:</label>
-          <input type="text" class="form-control" id="dni" v-model="nuevoUsuario.dni" required>
+          <input type="text" class="form-control" id="dni" v-model="nuevoUsuario.dni" @change="validarDni" required>
           <span v-if="!dniValido" class="text-danger">DNI no válido.</span>
         </div>
         <div class="form-group">
@@ -38,7 +38,7 @@
         </div>
         <div class="form-group">
           <label for="telefono">Teléfono:</label>
-          <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" required>
+          <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" @change="validarTelefono" required>
           <span v-if="!telefonoValido" class="text-danger">Teléfono no válido.</span>
         </div>
         <div class="form-group position-relative">
@@ -48,6 +48,7 @@
               class="form-control"
               id="password"
               v-model="nuevoUsuario.password"
+              @change="validarPassword"
               required
           >
           <button
@@ -67,6 +68,7 @@
               class="form-control"
               id="confirmPassword"
               v-model="confirmPassword"
+              @change="contrasenaCoincide"
               required
           >
           <button
@@ -194,15 +196,40 @@ export default {
               password: ''
             };
             this.confirmPassword = '';
-            // Actualizar la lista de usuarios después de agregar uno nuevo
             this.$emit('usuario-agregado');
           })
           .catch(error => {
             console.error('Error al agregar usuario:', error);
           });
+      this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
     },
     validarEmail() {
       this.emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.nuevoUsuario.email);
+    },
+    validarDni() {
+      this.dniValido = /\d{8}[A-HJ-NP-TV-Z]/.test(this.nuevoUsuario.dni);
+    },
+    validarTelefono() {
+      if (this.nuevoUsuario.telefono) {
+        // Validación del formato del teléfono
+        const telefonoValido = /^\d{9}$/.test(this.nuevoUsuario.telefono);
+        // Validación adicional utilizando la anotación @Digits
+        const telefonoConAnnotacionValido = /^\d{9}$/.test(this.nuevoUsuario.telefono);
+        this.telefonoValido = telefonoValido && telefonoConAnnotacionValido;
+      } else {
+        this.telefonoValido = false;
+      }
+    },
+    validarPassword() {
+      if (this.nuevoUsuario.password) {
+        // Verificar si la contraseña tiene al menos 8 caracteres y al menos una mayúscula
+        this.passwordValida = /^(?=.*[A-Z]).{8,}$/.test(this.nuevoUsuario.password);
+      } else {
+        this.passwordValida = false;
+      }
+    },
+    contrasenaCoincide() {
+      this.passwordsCoinciden = this.nuevoUsuario.password === this.confirmPassword;
     },
     validarEdad() {
       const fechaNacimiento = new Date(this.nuevoUsuario.fechaNacimiento);
