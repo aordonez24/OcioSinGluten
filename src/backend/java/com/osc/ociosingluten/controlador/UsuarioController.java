@@ -110,7 +110,7 @@ public class UsuarioController {
             if(usu.getFotoPerfil() != null){
                 fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
             }
-            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword(), usu.getRol().toString());
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usu.getDni(), usu.getUsername(), usu.getNombre(), usu.getApellidos(), usu.getFechaNacimiento(), usu.getTelefono(), fotoPerfil, usu.getEmail(), usu.getPassword(), usu.getRol().toString(), usu.isArchivado());
             return ResponseEntity.ok(usuarioDTO);
         } else {
             return ResponseEntity.notFound().build();
@@ -154,7 +154,7 @@ public class UsuarioController {
                         .map(seguidor -> {
                             // Verificar si el seguidor tiene una foto de perfil antes de mapearlo a UsuarioDTO
                             String fotoPerfil = seguidor.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguidor.getFotoPerfil()) : null;
-                            return new UsuarioDTO(seguidor.getDni(), seguidor.getUsername(), seguidor.getNombre(), seguidor.getApellidos(), seguidor.getFechaNacimiento(), seguidor.getTelefono(), fotoPerfil, seguidor.getEmail(), seguidor.getPassword(), seguidor.getRol().toString());
+                            return new UsuarioDTO(seguidor.getDni(), seguidor.getUsername(), seguidor.getNombre(), seguidor.getApellidos(), seguidor.getFechaNacimiento(), seguidor.getTelefono(), fotoPerfil, seguidor.getEmail(), seguidor.getPassword(), seguidor.getRol().toString(), usuario.isArchivado());
                         })
                         .collect(Collectors.toList());
                 return ResponseEntity.ok(seguidoresDTO);
@@ -180,7 +180,7 @@ public class UsuarioController {
                 List<UsuarioDTO> seguidosDTO = seguidos.stream()
                         .map(seguido -> {
                             String fotoPerfil = seguido.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(seguido.getFotoPerfil()) : null;
-                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword(), seguido.getRol().toString());
+                            return new UsuarioDTO(seguido.getDni(), seguido.getUsername(), seguido.getNombre(), seguido.getApellidos(), seguido.getFechaNacimiento(), seguido.getTelefono(), fotoPerfil, seguido.getEmail(), seguido.getPassword(), seguido.getRol().toString(), seguido.isArchivado());
                         })
                         .collect(Collectors.toList());
                 return ResponseEntity.ok(seguidosDTO);

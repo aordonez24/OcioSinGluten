@@ -61,7 +61,7 @@
         </div>
       </div>
     </div>
-    <div v-else class="contactin">
+    <div v-else class="contactin mensaje-enviado">
       <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
     </div>
   </div>
@@ -100,15 +100,12 @@ export default {
         mensaje: this.message
       })
           .then(response => {
-            // Manejar la respuesta del servidor en caso de éxito
             console.log('Mensaje enviado con éxito:', response.data);
-            // Actualizar el estado para mostrar el mensaje de confirmación
             this.mensajeEnviado = true;
           })
           .catch(error => {
             // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
-            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
           });
     }
   }

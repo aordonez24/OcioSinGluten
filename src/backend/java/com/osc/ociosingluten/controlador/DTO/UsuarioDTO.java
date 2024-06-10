@@ -7,10 +7,10 @@ import java.util.Base64;
 
 
 
-    public record UsuarioDTO(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, String fotoPerfil, String email, String password, String rol){
+    public record UsuarioDTO(String dni, String username, String nombre, String apellidos, LocalDate fechaNacimiento, int telefono, String fotoPerfil, String email, String password, String rol, boolean archivado){
 
     public UsuarioDTO(Usuario usuario) {
-        this(usuario.getDni(), usuario.getUsername(), usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(), usuario.getTelefono(), Base64.getEncoder().encodeToString(usuario.getFotoPerfil()), usuario.getEmail(), usuario.getPassword(), usuario.getRol().toString());
+        this(usuario.getDni(), usuario.getUsername(), usuario.getNombre(), usuario.getApellidos(), usuario.getFechaNacimiento(), usuario.getTelefono(), Base64.getEncoder().encodeToString(usuario.getFotoPerfil()), usuario.getEmail(), usuario.getPassword(), usuario.getRol().toString(), usuario.isArchivado());
     }
 
     public String getDni() {

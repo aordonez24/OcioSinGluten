@@ -31,9 +31,8 @@
           <div class="action-buttons-container">
             <button @click="toggleSeguir" class="cerrar-sesion-button">{{ siguiendo ? 'Dejar de seguir' : 'Seguir usuario' }}</button>
             <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
-            <button v-if="rol === 'ADMIN'" @click="suspenderUsuario" class="cerrar-sesion-button2">Suspender usuario</button> <!-- Botón de eliminación para administradores -->
+            <button v-if="rol === 'ADMIN'" @click="archivado ? restaurarUsuario() : suspenderUsuario()" class="cerrar-sesion-button2">{{ archivado ? 'Restaurar usuario' : 'Suspender usuario' }}</button>
             <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="cerrar-sesion-button2">Eliminar usuario</button> <!-- Botón de eliminación para administradores -->
-
           </div>
 
         </div>
@@ -62,7 +61,6 @@
 </template>
 
 
-
 <script>
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
@@ -89,7 +87,8 @@ export default {
       numSeguidos: '',
       numSeguidores: '',
       siguiendo: false,
-      rol: ''// Nuevo dato para controlar si se está siguiendo al usuario
+      rol: '',
+      archivado: '' // Nuevo dato para controlar si el usuario está archivado
     };
   },
   mounted() {
@@ -113,6 +112,7 @@ export default {
         this.nombre = response.data.nombre;
         this.apellidos = response.data.apellidos;
         this.telefono = response.data.telefono;
+        this.archivado = response.data.archivado;
         const yo = localStorage.getItem('username')
         const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
         this.rol = response2.data.rol;
@@ -122,12 +122,12 @@ export default {
         this.loading = false;
       }
     },
-    async obtenerSeguidores(){
+    async obtenerSeguidores() {
       const username = this.$route.params.username;
       const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidores`);
       this.numSeguidores = response.data.length;
     },
-    async obtenerSeguidos(){
+    async obtenerSeguidos() {
       const username = this.$route.params.username;
       const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
       this.numSeguidos = response.data.length;
@@ -184,11 +184,11 @@ export default {
         const username = localStorage.getItem('username');
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
         for (let i = 0; i < response.data.length; i++) {
-          if(buscado === response.data[i].username){
-            this.siguiendo = true; //Lo está siguiendo
+          if (buscado === response.data[i].username) {
+            this.siguiendo = true; // Lo está siguiendo
           }
         }
-        } catch (error) {
+      } catch (error) {
         console.error('Error al verificar si se sigue al usuario:', error);
       }
     },
@@ -209,7 +209,26 @@ export default {
 
         this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
       } catch (error) {
-        console.error('Error al eliminar el usuario:', error);
+        console.error('Error al suspender el usuario:', error);
+      }
+    },
+    async restaurarUsuario() {
+      try {
+        const username = this.$route.params.username;
+        console.log(username);
+        await axios.post(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/desOculto`);
+
+        const emailUsuario = this.email; // Obtener el correo electrónico del usuario
+        const asunto = 'Tu cuenta ha sido restaurada';
+        const cuerpo = 'Hola,\n\nTu cuenta ha sido restaurada y ya puedes acceder nuevamente.\n\nAtentamente,\nOcio Sin Gluten';
+
+        const mailtoLink = `mailto:${emailUsuario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+
+        window.location.href = mailtoLink;
+
+        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+      } catch (error) {
+        console.error('Error al restaurar el usuario:', error);
       }
     },
     async eliminarUsuario() {
@@ -235,6 +254,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .container-principal {
@@ -394,10 +414,9 @@ export default {
 
 
 footer-componente {
-  margin-top: auto; /* Empuja el pie de página al final de la página */
+  margin-top: auto;
 }
 
-/* Clase para el contenedor de botones de acción */
 .action-buttons-container {
   display: flex;
   flex-direction: column;

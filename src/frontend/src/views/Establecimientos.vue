@@ -65,7 +65,7 @@
       </div>
     </div>
   </div>
-  <div v-else class="contactin">
+  <div v-else class="contactin mensaje-enviado">
     <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
   </div>
   <footer-componente/>
@@ -325,5 +325,17 @@ export default {
 
 .nombre:hover {
   color: inherit; /* Utiliza el color heredado del elemento padre */
+}
+
+.mensaje-enviado {
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  background-color: #353535; /* Mantener el fondo gris oscuro */
+}
+
+.mensaje-enviado h2 {
+  color: white; /* Cambiar el color del texto a blanco */
+  text-align: center; /* Asegurarse de que el texto esté centrado */
 }
 </style>

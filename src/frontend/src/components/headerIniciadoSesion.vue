@@ -52,7 +52,6 @@ export default {
             <span class="welcome-message">Bienvenido
               <router-link :to="'/perfil/' + username" class="welcome-link">{{ username }}</router-link>
             </span>
-            <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
           </li>
         </ul>
       </nav>

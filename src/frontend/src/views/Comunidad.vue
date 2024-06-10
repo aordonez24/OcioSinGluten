@@ -20,19 +20,19 @@
       </div>
     </div>
   </div>
-  <div id="contacto" class="contactin">
+  <div id="contacto" class="contactin" v-if="!mensajeEnviado">
     <div class="column">
       <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
       <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
     </div>
-    <div class="column">
-      <form action="/submit-message" method="post">
+    <div class="column" v-if="!mensajeEnviado">
+      <form @submit.prevent="handleSubmit">
         <label for="name">Nombre y apellidos:</label>
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" v-model="name" required>
         <label for="email">Correo:</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" v-model="email" required>
         <label for="message">Escribe tu mensaje:</label>
-        <textarea id="message" name="message" required></textarea>
+        <textarea id="message" v-model="message" required></textarea>
         <button type="submit">Enviar</button>
       </form>
     </div>
@@ -44,6 +44,9 @@
         <a href="#"><i class="fab fa-facebook"></i></a>
       </div>
     </div>
+  </div>
+  <div v-else class="contactin mensaje-enviado">
+    <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
   </div>
   <footer-componente/>
 </template>
@@ -298,4 +301,15 @@ export default {
   background-color: #9DD9D2;
 }
 
+.mensaje-enviado {
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  background-color: #353535; /* Mantener el fondo gris oscuro */
+}
+
+.mensaje-enviado h2 {
+  color: white; /* Cambiar el color del texto a blanco */
+  text-align: center; /* Asegurarse de que el texto esté centrado */
+}
 </style>

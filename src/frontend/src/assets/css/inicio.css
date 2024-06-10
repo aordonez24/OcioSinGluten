@@ -182,6 +182,18 @@ body {
     color: #ffcc74; /* Cambiar el color al pasar el cursor */
 }
 
+.mensaje-enviado {
+    display: flex;
+    align-items: center; /* Centrar verticalmente */
+    justify-content: center; /* Centrar horizontalmente */
+    background-color: #353535; /* Mantener el fondo gris oscuro */
+}
+
+.mensaje-enviado h2 {
+    color: white; /* Cambiar el color del texto a blanco */
+    text-align: center; /* Asegurarse de que el texto esté centrado */
+}
+
 
 
 
