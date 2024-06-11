@@ -1,5 +1,5 @@
 <template>
-  <template v-if="token">
+  <template v-if="isAuthenticated">
     <header3/>
   </template>
   <template v-else>
@@ -19,7 +19,7 @@
       <div v-for="establecimiento in establecimientosFiltrados" :key="establecimiento.idEstablecimiento" class="establecimiento">
         <h3>
           <router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre">{{ establecimiento.nombre }}</router-link>
-          <template v-if="token">
+          <template v-if="isAuthenticated">
             <i class="far fa-thumbs-up like-icon"> {{establecimiento.numLikes}}</i>
           </template>
           <!-- Mostrar solo el número de likes si el usuario no ha iniciado sesión -->
@@ -77,6 +77,7 @@ import FooterComponente from "@/components/footer.vue";
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import axios from 'axios';
 import CabeceraComponente from "@/components/header.vue";
+import {mapGetters} from "vuex";
 
 export default {
   name: 'Vista-Inicio',
@@ -87,12 +88,14 @@ export default {
   },
   data() {
     return {
-      token: localStorage.getItem('token'),
       establecimientos: [],
       establecimientosFiltrados: [],
       searchQuery: '',
       mensajeEnviado: false
     }
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated'])
   },
   methods: {
     async cargarEstablecimientos() {

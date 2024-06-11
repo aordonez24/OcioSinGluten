@@ -1,26 +1,43 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { createStore } from 'vuex';
 
-Vue.use(Vuex);
-
-export default new Vuex.Store({
+const store = createStore({
     state: {
-        user: null // Estado inicial del usuario
+        token: localStorage.getItem('token') || null, // Obtener el token del almacenamiento local
+        username: localStorage.getItem('username') || null // Obtener el username del almacenamiento local
     },
     mutations: {
-        setUser(state, user) {
-            state.user = user;
+        setToken(state, token) {
+            state.token = token;
+            localStorage.setItem('token', token); // Guardar el token en el almacenamiento local
+        },
+        setUsername(state, username) {
+            state.username = username;
+            localStorage.setItem('username', username); // Guardar el username en el almacenamiento local
+        },
+        clearAuthData(state) {
+            state.token = null;
+            state.username = null;
+            localStorage.removeItem('token'); // Eliminar el token del almacenamiento local al cerrar sesión
+            localStorage.removeItem('username'); // Eliminar el username del almacenamiento local al cerrar sesión
         }
     },
     actions: {
-        login({ commit }, user) {
-            // Lógica de inicio de sesión aquí...
-            commit('setUser', user); // Establecer el usuario después del inicio de sesión
+        login({ commit }, authData) {
+            commit('setToken', authData.token);
+            commit('setUsername', authData.username);
         },
         logout({ commit }) {
-            // Lógica de cierre de sesión aquí...
-            commit('setUser', null); // Limpiar el usuario al cerrar sesión
+            commit('clearAuthData');
         }
     },
-    modules: {}
+    getters: {
+        isAuthenticated(state) {
+            return state.token !== null;
+        },
+        username(state) {
+            return state.username;
+        }
+    }
 });
+
+export default store;

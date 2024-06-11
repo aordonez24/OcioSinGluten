@@ -89,6 +89,7 @@
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import { mapActions } from 'vuex';
 
 export default {
   name: 'PerfilUsuario',
@@ -128,6 +129,15 @@ export default {
     this.obtenerSeguidos();
   },
   methods: {
+    ...mapActions(['logout']), // Mapear la acción logout del store Vuex
+    async cerrarSesion() {
+      try {
+        await this.logout(); // Llamar a la acción logout del store Vuex
+        this.$router.push('/'); // Redirigir a la página de inicio
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+      }
+    },
     async obtenerUsuario() {
       try {
         this.loading = true;
@@ -151,15 +161,6 @@ export default {
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;
-      }
-    },
-    async cerrarSesion() {
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        this.$router.push('/');
-      } catch (error) {
-        console.error('Error al cerrar sesión:', error);
       }
     },
     openFileInput() {

@@ -1,71 +1,73 @@
 <template>
-  <template v-if="token">
-    <header3/>
-  </template>
-  <template v-else>
-    <cabecera-componente/>
-  </template>
   <div>
-    <section class="main-section">
-      <h2>¿Qué es la celiaquía?</h2>
-      <p>La enfermedad celíaca es una afección en la que el cuerpo no puede tolerar el gluten. El gluten es una proteína que se encuentra en el trigo, la cebada y el centeno. Cuando las personas con celiaquía consumen gluten, su sistema inmunológico ataca el revestimiento del intestino delgado, lo que puede causar una serie de síntomas y problemas de salud.</p>
-      <h3>¡Inicia sesión o crea una cuenta nueva para pertenecer a la comunidad de Ocio Sin Gluten!</h3>
-    </section>
-    <div class="symptoms-container">
-      <h3>Síntomas de la celiaquía</h3>
-      <div class="symptoms-columns">
-        <div class="column-container">
-          <div class="left-column">
-            <ul>
-              <li>Diarrea crónica</li>
-              <li>Distensión abdominal</li>
-              <li>Pérdida de peso inexplicable</li>
-              <li>Fatiga</li>
-            </ul>
+    <template v-if="isAuthenticated">
+      <header3/>
+    </template>
+    <template v-else>
+      <cabecera-componente/>
+    </template>
+    <div>
+      <section class="main-section">
+        <h2>¿Qué es la celiaquía?</h2>
+        <p>La enfermedad celíaca es una afección en la que el cuerpo no puede tolerar el gluten. El gluten es una proteína que se encuentra en el trigo, la cebada y el centeno. Cuando las personas con celiaquía consumen gluten, su sistema inmunológico ataca el revestimiento del intestino delgado, lo que puede causar una serie de síntomas y problemas de salud.</p>
+        <h3>¡Inicia sesión o crea una cuenta nueva para pertenecer a la comunidad de Ocio Sin Gluten!</h3>
+      </section>
+      <div class="symptoms-container">
+        <h3>Síntomas de la celiaquía</h3>
+        <div class="symptoms-columns">
+          <div class="column-container">
+            <div class="left-column">
+              <ul>
+                <li>Diarrea crónica</li>
+                <li>Distensión abdominal</li>
+                <li>Pérdida de peso inexplicable</li>
+                <li>Fatiga</li>
+              </ul>
+            </div>
+          </div>
+          <div class="column-container">
+            <div class="right-column">
+              <ul>
+                <li>Erupciones cutáneas</li>
+                <li>Dolor abdominal</li>
+                <li>Anemia</li>
+                <li>Dolor en las articulaciones</li>
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="column-container">
-          <div class="right-column">
-            <ul>
-              <li>Erupciones cutáneas</li>
-              <li>Dolor abdominal</li>
-              <li>Anemia</li>
-              <li>Dolor en las articulaciones</li>
-            </ul>
+      </div>
+      <div id="contacto" class="contactin" v-if="!mensajeEnviado">
+        <div class="column">
+          <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
+          <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
+        </div>
+        <div class="column" v-if="!mensajeEnviado">
+          <form @submit.prevent="handleSubmit">
+            <label for="name">Nombre y apellidos:</label>
+            <input type="text" id="name" v-model="name" required>
+            <label for="email">Correo:</label>
+            <input type="email" id="email" v-model="email" required>
+            <label for="message">Escribe tu mensaje:</label>
+            <textarea id="message" v-model="message" required></textarea>
+            <button type="submit">Enviar</button>
+          </form>
+        </div>
+        <div class="column">
+          <p>¡También puedes seguirnos en nuestras redes sociales!</p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-facebook"></i></a>
           </div>
         </div>
       </div>
-    </div>
-    <div id="contacto" class="contactin" v-if="!mensajeEnviado">
-      <div class="column">
-        <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-        <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-      </div>
-      <div class="column" v-if="!mensajeEnviado">
-        <form @submit.prevent="handleSubmit">
-          <label for="name">Nombre y apellidos:</label>
-          <input type="text" id="name" v-model="name" required>
-          <label for="email">Correo:</label>
-          <input type="email" id="email" v-model="email" required>
-          <label for="message">Escribe tu mensaje:</label>
-          <textarea id="message" v-model="message" required></textarea>
-          <button type="submit">Enviar</button>
-        </form>
-      </div>
-      <div class="column">
-        <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-facebook"></i></a>
-        </div>
+      <div v-else class="contactin mensaje-enviado">
+        <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
       </div>
     </div>
-    <div v-else class="contactin mensaje-enviado">
-      <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
-    </div>
+    <footer-componente/>
   </div>
-  <footer-componente/>
 </template>
 
 <script>
@@ -74,6 +76,7 @@ import CabeceraComponente from "@/components/header.vue";
 import FooterComponente from "@/components/footer.vue";
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import axios from "axios";
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'Vista-Inicio',
@@ -87,9 +90,11 @@ export default {
       name: '',
       email: '',
       message: '',
-      token: localStorage.getItem('token'),
       mensajeEnviado: false
     };
+  },
+  computed: {
+    ...mapGetters(['isAuthenticated'])
   },
   methods: {
     handleSubmit() {
@@ -110,7 +115,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style>

@@ -1,31 +1,22 @@
+<!-- src/components/header-3.vue -->
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'header-3',
-  data() {
-    return {
-      username: ''
-    };
-  },
-  mounted() {
-    this.username = localStorage.getItem('username');
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
   },
   methods: {
-    async cerrarSesion() {
-      console.log("cerrarSesion method called");
-      try {
-        localStorage.removeItem('token');
-        console.log("Token removed from localStorage");
-        this.$router.push('/');
-        console.log("Redirecting to home");
-      } catch (error) {
-        console.error('Error al cerrar sesión:', error);
-      }
-    },
     scrollToContacto() {
       const elementoContacto = document.getElementById('contacto');
       if (elementoContacto) {
         elementoContacto.scrollIntoView({ behavior: 'smooth' });
       }
+    },
+    logout() {
+      this.$store.dispatch('logout');
+      this.$router.push('/login');
     }
   }
 }
@@ -38,7 +29,7 @@ export default {
         <img src="../assets/images/_8c971745-c451-48f5-8bf7-05017ae6975e.jpeg" alt="Logo de la aplicación" class="logo">
         <div class="title-container">
           <h1 class="title">Ocio Sin Gluten</h1>
-          <h2 class="subtitle">Disfrute de su tiempo de ocio sin gluten</h2> <!-- Subtítulo debajo del título -->
+          <h2 class="subtitle">Disfrute de su tiempo de ocio sin gluten</h2>
         </div>
       </div>
       <nav>
@@ -48,7 +39,7 @@ export default {
           <li><router-link to="/actividades" class="cerrar-sesion-button">Actividades</router-link></li>
           <li><router-link to="/comunidad" class="cerrar-sesion-button">Comunidad</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
-          <li v-if="username">
+          <li v-if="isAuthenticated">
             <span class="welcome-message">Bienvenido
               <router-link :to="'/perfil/' + username" class="welcome-link">{{ username }}</router-link>
             </span>
@@ -58,7 +49,6 @@ export default {
     </header>
   </div>
 </template>
-
 
 <style scoped>
 @import "../assets/css/header3.css";

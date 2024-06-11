@@ -1,5 +1,5 @@
 <template>
-  <template v-if="token">
+  <template v-if="isAuthenticated">
     <header3/>
   </template>
   <template v-else>
@@ -16,19 +16,27 @@
       <p>Código Postal: {{ establecimiento.codPostal }}</p>
       <p>País: {{ establecimiento.pais }}</p>
       <p>
-        <i v-if="token" class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)">
+        <i v-if="isAuthenticated" class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)">
           {{ establecimiento.numLikes}}
         </i>
         <span v-else>
-          Debes iniciar sesión para dar like
+          <strong>Debes iniciar sesión para dar like y marcar este establecimiento como favorito y visitado.</strong>
         </span>
       </p>
-      <button @click="esFavorito ? quitarComoFav() : marcarComoFavorito()" class="boton-subir">
-        {{ esFavorito ? 'Quitar como favorito' : 'Marcar como favorito' }}
+      <button v-if="isAuthenticated && !esFavorito" @click="marcarComoFavorito()" class="boton-subir">
+        Marcar como favorito
       </button>
-      <button @click="esVisitado ? eliminarVis() : marcarComoVisitado()" class="boton-subir">
-        {{ esVisitado ? 'Quitar como visitado' : 'Marcar como visitado' }}
+      <button v-if="isAuthenticated && esFavorito" @click="quitarComoFav()" class="boton-subir">
+        Quitar como favorito
       </button>
+
+      <button v-if="isAuthenticated && !esVisitado" @click="marcarComoVisitado()" class="boton-subir">
+        Marcar como visitado
+      </button>
+      <button v-if="isAuthenticated && esVisitado" @click="eliminarVis()" class="boton-subir">
+        Quitar como visitado
+      </button>
+
       <button v-if="rol === 'ADMIN'" @click="toggleEditarEstablecimiento" class="boton-subir2">Editar establecimiento</button> <!-- Botón de edición para administradores -->
       <button v-if="rol === 'ADMIN'" @click="eliminarEstablecimiento" class="boton-subir2">Eliminar establecimiento</button> <!-- Botón de eliminación para administradores -->
 
@@ -76,7 +84,7 @@
       </div>
       <!-- Botón para subir imágenes -->
       <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
-      <button @click="openFileInput" class="boton-subir">¿Dispone de alguna imagen de este establecimiento? ¡Compártela con nosotros!</button>
+      <button v-if="isAuthenticated" @click="openFileInput" class="boton-subir">¿Dispone de alguna imagen de este establecimiento? ¡Compártela con nosotros!</button>
       <p>
         Valoración media:
         <span v-for="(estrella, index) in calcularEstrellas()" :key="index">
@@ -101,7 +109,7 @@
     <div class="titulo">
       <h2> Comentarios </h2>
     </div>
-    <div v-if="token" class="nuevo-comentario">
+    <div v-if="isAuthenticated" class="nuevo-comentario">
       <div class="campo-comentario-con-boton">
         <textarea v-model="nuevoComentario" placeholder="Introduce tu comentario (máximo 140 caracteres)" maxlength="140" class="campo-comentario"></textarea>
         <button @click="enviarComentario" class="boton-subir">Enviar</button>
@@ -123,6 +131,34 @@
       </div>
     </div>
   </div>
+  <div id="contacto" class="contactin" v-if="!mensajeEnviado">
+    <div class="column">
+      <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
+      <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
+    </div>
+    <div class="column" v-if="!mensajeEnviado">
+      <form @submit.prevent="handleSubmit">
+        <label for="name">Nombre y apellidos:</label>
+        <input type="text" id="name" v-model="name" required>
+        <label for="email">Correo:</label>
+        <input type="email" id="email" v-model="email" required>
+        <label for="message">Escribe tu mensaje:</label>
+        <textarea id="message" v-model="message" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+    <div class="column">
+      <p>¡También puedes seguirnos en nuestras redes sociales!</p>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-facebook"></i></a>
+      </div>
+    </div>
+  </div>
+  <div v-else class="contactin mensaje-enviado">
+    <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
+  </div>
   <footer-componente/>
 </template>
 
@@ -133,6 +169,7 @@ import CabeceraComponente from "@/components/header.vue";
 import axios from "axios";
 import 'ol/ol.css'; // Importa los estilos CSS de OpenLayers
 import { loadModules } from 'esri-loader';
+import {mapGetters} from "vuex";
 
 export default {
   name: 'Vista-Establecimiento',
@@ -143,7 +180,6 @@ export default {
   },
   data() {
     return {
-      token: localStorage.getItem('token'),
       establecimiento: '',
       imagenes: [],
       imagenSeleccionada: null,
@@ -169,7 +205,9 @@ export default {
         codPostal: '',
         pais: ''
       },
-      valoracionMedia:''
+      valoracionMedia:'',
+      mensajeEnviado: false
+
     };
   },
   mounted() {
@@ -178,13 +216,32 @@ export default {
       this.mostrarMapa();
     });
     this.cargarComentarios();
-    this.usuarioActual = localStorage.getItem('username');
+    this.usuarioActual = this.username;
     this.obtenerFavoritosUsuario();
     this.obtenerVisitadosUsuario();
     this.obtenerDatosUsuario();
 
   },
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
+  },
   methods: {
+    handleSubmit() {
+      // Envío del formulario al servidor
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: this.name,
+        email: this.email,
+        mensaje: this.message
+      })
+          .then(response => {
+            console.log('Mensaje enviado con éxito:', response.data);
+            this.mensajeEnviado = true;
+          })
+          .catch(error => {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al enviar el mensaje:', error);
+          });
+    },
     async obtenerDatosEstablecimiento() {
       // Obtener datos del establecimiento
       const id = this.$route.params.idEstablecimiento;
@@ -199,7 +256,10 @@ export default {
       }
     },
     async obtenerFavoritosUsuario() {
-      const username = localStorage.getItem('username');
+      if (!this.isAuthenticated) {
+        return;
+      }
+      const username = this.username;
       const response1 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/estFavoritos`);
       this.favoritosUsuario = response1.data;
       const id = this.$route.params.idEstablecimiento;
@@ -211,7 +271,10 @@ export default {
       }
     },
     async obtenerVisitadosUsuario() {
-      const username = localStorage.getItem('username');
+      if (!this.isAuthenticated) {
+        return;
+      }
+      const username = this.username;
       const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/estVisitados`);
       this.visitadosUsuario = response2.data;
       const id = this.$route.params.idEstablecimiento;
@@ -223,12 +286,15 @@ export default {
       }
     },
     async obtenerDatosUsuario(){
-      const yo = localStorage.getItem('username')
+      if (!this.isAuthenticated) {
+        return;
+      }
+      const yo = this.username;
       const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
       this.rol = response2.data.rol;
     },
     openFileInput() {
-      if (this.token) {
+      if (this.isAuthenticated) {
         this.$refs.fileInput.click();
       } else {
         this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
@@ -391,7 +457,7 @@ export default {
     },
     async marcarComoFavorito(){
       const id = this.$route.params.idEstablecimiento;
-      const username = localStorage.getItem('username');
+      const username = this.username;
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/favorito`, username)
           .then(() => {
             // Si el comentario se envía correctamente, actualiza la lista de comentarios
@@ -404,7 +470,7 @@ export default {
     },
     async marcarComoVisitado(){
       const id = this.$route.params.idEstablecimiento;
-      const username = localStorage.getItem('username');
+      const username = this.username;
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/visitado`, username)
           .then(() => {
             // Si el comentario se envía correctamente, actualiza la lista de comentarios
@@ -418,7 +484,7 @@ export default {
     async quitarComoFav() {
       try {
         const id = this.$route.params.idEstablecimiento;
-        const username = localStorage.getItem('username');
+        const username = this.username;
         const response = await axios.delete(`http://localhost:8080/ociosingluten/establecimientos/${id}/nofavorito`, {
           params: {
             username: username
@@ -438,7 +504,7 @@ export default {
     async eliminarVis() {
       try {
         const id = this.$route.params.idEstablecimiento;
-        const username = localStorage.getItem('username');
+        const username = this.username;
         const response = await axios.delete(`http://localhost:8080/ociosingluten/establecimientos/${id}/noVisitado`, {
           params: {
             username: username
@@ -463,7 +529,7 @@ export default {
       }
       // Envía la respuesta al backend utilizando axios
       const nuevoComentarioDTO = {
-        username: localStorage.getItem('username'),
+        username: this.username,
         mensaje: respuesta
       };
       console.log(nuevoComentarioDTO);
@@ -482,7 +548,7 @@ export default {
           });
     },
     async eliminarComentario(id) {
-      const username = localStorage.getItem('username');
+      const username = this.username;
       const idEstablecimiento = this.$route.params.idEstablecimiento;
       const url = `http://localhost:8080/ociosingluten/comentario/${id}?username=${username}&idEstablecimiento=${idEstablecimiento}`;
 
@@ -497,7 +563,7 @@ export default {
     },
     async likeEstablecimiento(id) {
       try {
-        const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`, localStorage.getItem('username'));
+        const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/nuevoLike`, this.username);
         if (response.status === 202) {
           this.quitarLike(id);
         } else if (response.status === 200) {
@@ -509,7 +575,7 @@ export default {
     },
     async quitarLike(id) {
       try {
-        const username = localStorage.getItem('username');
+        const username = this.username;
         const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/eliminaLike`, username);
         if (response.status === 200) {
           // Si se quita el like correctamente, actualiza la lista de comentarios u otra acción necesaria
@@ -868,6 +934,18 @@ export default {
 
 .star-size {
   font-size: 20px; /* Cambia este valor al tamaño deseado */
+}
+
+.mensaje-enviado {
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  background-color: #353535; /* Mantener el fondo gris oscuro */
+}
+
+.mensaje-enviado h2 {
+  color: white; /* Cambiar el color del texto a blanco */
+  text-align: center; /* Asegurarse de que el texto esté centrado */
 }
 
 </style>

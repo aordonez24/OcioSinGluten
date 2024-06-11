@@ -126,23 +126,6 @@ public class UsuarioController {
     }
 
 
-
-    private byte[] compress(byte[] input) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(input);
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-             LZMACompressorOutputStream lzmaOutputStream = new LZMACompressorOutputStream(outputStream)) {
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                lzmaOutputStream.write(buffer, 0, bytesRead);
-            }
-            lzmaOutputStream.finish();
-
-            return outputStream.toByteArray();
-        }
-    }
-
     @GetMapping("/perfilUsuario/{username}/seguidores")
     public ResponseEntity<List<UsuarioDTO>> obtenerSeguidores(@PathVariable String username) {
         Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);

@@ -50,6 +50,7 @@ import FooterComponente from "@/components/footer.vue";
 
 <script>
 import axios from 'axios';
+import {mapGetters} from "vuex";
 
 export default {
   data() {
@@ -71,8 +72,8 @@ export default {
       paisValido: true
     };
   },
-  mounted() {
-    this.username = localStorage.getItem('username');
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
   },
   methods: {
     validarNombre() {

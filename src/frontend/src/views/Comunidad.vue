@@ -55,6 +55,7 @@
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
 import axios from 'axios';
+import {mapGetters} from "vuex";
 
 
 export default {
@@ -68,19 +69,21 @@ export default {
       rol:''
     };
   },
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
+  },
   mounted() {
     this.obtenerUsuarios();
   },
   methods: {
     filterUsers() {
-      // Filtrar usuarios según el texto ingresado en la barra de búsqueda
-      const loggedInUsername = localStorage.getItem('username');
+      const loggedInUsername = this.username;
       this.filteredUsers = this.users.filter(user =>
           user.username.toLowerCase().includes(this.searchQuery.toLowerCase()) && user.username !== loggedInUsername
       );
     },
     async obtenerUsuarios() {
-      const yo = localStorage.getItem('username')
+      const yo = this.username;
       const response2 =  await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
       this.rol = response2.data.rol;
       let response = "";

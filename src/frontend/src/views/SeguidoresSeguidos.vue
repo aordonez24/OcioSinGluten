@@ -47,6 +47,8 @@
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import {mapGetters} from "vuex";
+
 
 export default {
   components: { FooterComponente, Header3 },
@@ -72,7 +74,9 @@ export default {
       return this.followedUsers.filter(followed =>
           followed.username.toLowerCase().includes(this.followedSearchQuery.toLowerCase())
       );
-    }
+    },
+    ...mapGetters(['username', 'isAuthenticated'])
+
   },
   methods: {
     async obtenerSeguidores() {
@@ -93,33 +97,15 @@ export default {
         console.error('Error al obtener seguidos:', error);
       }
     },
-    async seguirUsuario(alquesigo) {
-      try {
-        const yo = localStorage.getItem('username');
-        const data = {
-          usernameQueSigueA: yo,
-          usernameAQuienSigue: alquesigo // Asegúrate de obtener el nombre de usuario del objeto alquesigo
-        };
-
-        const response = await axios.post(
-            `http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${yo}/nuevoSeguidor`,
-            data
-        );
-        if (response.status === 200) {
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error al seguir al usuario:', error);
-      }
-    },
     irAPerfil(username) {
-      if(username === localStorage.getItem('username')) {
+      if(username === this.username) {
         this.$router.push({name: 'Perfil', params: {username: username}});
       }else{
         this.$router.push({name: 'perfilOtroUsuario', params: {username: username}});
       }
-    }
+    },
   },
+
 };
 </script>
 

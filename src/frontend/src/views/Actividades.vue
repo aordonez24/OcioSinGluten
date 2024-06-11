@@ -24,6 +24,34 @@
         </div>
       </div>
     </div>
+    <div id="contacto" class="contactin" v-if="!mensajeEnviado">
+      <div class="column">
+        <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
+        <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
+      </div>
+      <div class="column" v-if="!mensajeEnviado">
+        <form @submit.prevent="handleSubmit">
+          <label for="name">Nombre y apellidos:</label>
+          <input type="text" id="name" v-model="namelon" required>
+          <label for="email">Correo:</label>
+          <input type="email" id="email" v-model="email" required>
+          <label for="message">Escribe tu mensaje:</label>
+          <textarea id="message" v-model="message" required></textarea>
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+      <div class="column">
+        <p>¡También puedes seguirnos en nuestras redes sociales!</p>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+        </div>
+      </div>
+    </div>
+    <div v-else class="contactin mensaje-enviado">
+      <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
+    </div>
     <footer-componente />
   </div>
 </template>
@@ -34,14 +62,23 @@ import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
 import { useRouter } from 'vue-router';
+import {mapGetters} from "vuex";
 
 export default {
-  name: 'actividades-ociosingluten',
   components: { Header3, FooterComponente },
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
+  },
   setup() {
     const actividades = ref([]);
     const searchQuery = ref('');
     const router = useRouter();
+    const mensajeEnviado = ref(false); // Agregar ref para mensajeEnviado
+    const namelon = ref(''); // Agregar ref para namelon
+    const email = ref(''); // Agregar ref para email
+    const message = ref(''); // Agregar ref para message
+
+
 
     const mensajeMap = {
       HA_VISITADO: 'Ha visitado',
@@ -59,12 +96,29 @@ export default {
       }
     };
 
+    const handleSubmit = () => {
+      // Envío del formulario al servidor
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: namelon.value, // Acceder a los valores con .value
+        email: email.value, // Acceder a los valores con .value
+        mensaje: message.value // Acceder a los valores con .value
+      })
+          .then(response => {
+            console.log('Mensaje enviado con éxito:', response.data);
+            mensajeEnviado.value = true;
+          })
+          .catch(error => {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al enviar el mensaje:', error);
+          });
+    }
+
     const traducirMensaje = (mensaje) => {
       return mensajeMap[mensaje] || mensaje;
     };
 
     const irAPerfil = (username) => {
-      if(username === localStorage.getItem('username')) {
+      if(username === this.username) {
         router.push({name: 'Perfil', params: {username: username}});
       }else{
         router.push({name: 'perfilOtroUsuario', params: {username: username}});
@@ -89,7 +143,12 @@ export default {
       searchQuery,
       traducirMensaje,
       irAPerfil,
-      filteredActividades
+      filteredActividades,
+      handleSubmit,
+      mensajeEnviado, // Agregar mensajeEnviado al objeto de retorno
+      namelon, // Agregar namelon al objeto de retorno
+      email, // Agregar email al objeto de retorno
+      message // Agregar message al objeto de retorno
     };
   }
 };

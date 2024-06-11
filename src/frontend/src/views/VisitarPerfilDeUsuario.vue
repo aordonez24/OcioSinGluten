@@ -65,6 +65,7 @@
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: 'PerfilUsuario',
@@ -97,6 +98,9 @@ export default {
     this.obtenerSeguidos();
     this.checkSeguido();
   },
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
+  },
   methods: {
     async obtenerUsuario() {
       try {
@@ -113,7 +117,7 @@ export default {
         this.apellidos = response.data.apellidos;
         this.telefono = response.data.telefono;
         this.archivado = response.data.archivado;
-        const yo = localStorage.getItem('username')
+        const yo = this.username;
         const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
         this.rol = response2.data.rol;
         console.log(this.rol);
@@ -147,7 +151,7 @@ export default {
     async toggleSeguir() {
       try {
         const username = this.$route.params.username;
-        const loggedInUsername = localStorage.getItem('username');
+        const loggedInUsername = this.username;
 
         // Verificar si el usuario intenta seguirse a sí mismo
         if (username === loggedInUsername) {
@@ -181,7 +185,7 @@ export default {
     async checkSeguido() {
       try {
         const buscado = this.$route.params.username;
-        const username = localStorage.getItem('username');
+        const username = this.username;
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
         for (let i = 0; i < response.data.length; i++) {
           if (buscado === response.data[i].username) {

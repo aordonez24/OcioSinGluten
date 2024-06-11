@@ -36,6 +36,7 @@
 import { Client } from '@stomp/stompjs';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import {mapGetters} from "vuex";
 
 export default {
   components: {FooterComponente, Header3},
@@ -49,8 +50,11 @@ export default {
   },
   mounted() {
     this.conectarWS();
-    this.nombre = localStorage.getItem('username');
+    this.nombre = this.username;
 
+  },
+  computed: {
+    ...mapGetters(['username', 'isAuthenticated'])
   },
   methods: {
     async conectarWS() {
