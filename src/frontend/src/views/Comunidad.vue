@@ -4,7 +4,9 @@
     <h2 class="welcome-text">¡Bienvenido a la comunidad de Ocio Sin Gluten!</h2>
     <p class="subtext">Busque a conocidos y comparta experiencias con ellos</p>
     <button @click="iniciarChat" class="cerrar-sesion-button">Acceda a nuestro chat grupal!</button>
-    <input type="text" v-model="searchQuery" placeholder="Buscar usuario..." @input="filterUsers" class="search-input">
+    <div class="barra-busqueda">
+      <input type="text" v-model="searchQuery" placeholder="Buscar usuario..." @input="filterUsers">
+    </div>
     <div class="user-grid">
       <div v-for="user in filteredUsers" :key="user.username" class="user-card">
         <div class="user-avatar">
@@ -39,9 +41,8 @@
     <div class="column">
       <p>¡También puedes seguirnos en nuestras redes sociales!</p>
       <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
       </div>
     </div>
   </div>
@@ -100,6 +101,30 @@ export default {
     },
     iniciarChat() {
       this.$router.push({ name: 'chatGrupal'}); // Navegar al chat con ese usuario
+    },
+    handleSubmit() {
+      if(!this.validateForm()){
+        return;
+      }
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: this.name,
+        email: this.email,
+        mensaje: this.message
+      })
+          .then(response => {
+            console.log('Mensaje enviado con éxito:', response.data);
+            this.mensajeEnviado = true;
+          })
+          .catch(error => {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al enviar el mensaje:', error);
+          });
+    },
+    validateForm() {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
     },
   }
 };
@@ -314,5 +339,22 @@ export default {
 .mensaje-enviado h2 {
   color: white; /* Cambiar el color del texto a blanco */
   text-align: center; /* Asegurarse de que el texto esté centrado */
+}
+
+.barra-busqueda {
+  margin-top: 10px; /* Espacio superior */
+  margin-bottom: 20px; /* Espacio inferior */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centra horizontalmente */
+}
+
+.barra-busqueda input {
+  width: 600px; /* Ancho de la barra de búsqueda */
+  padding: 10px; /* Espacio interno */
+  border-radius: 5px; /* Bordes redondeados */
+  border: 1px solid #ccc; /* Borde */
+  box-sizing: border-box; /* Incluir padding y border en el ancho */
+  text-align: center; /* Centrar el texto */
 }
 </style>

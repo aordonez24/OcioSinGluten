@@ -20,7 +20,7 @@
           {{ establecimiento.numLikes}}
         </i>
         <span v-else>
-          <strong>Debes iniciar sesión para dar like y marcar este establecimiento como favorito y visitado.</strong>
+          <strong>Debe iniciar sesión para dar like y marcar este establecimiento como favorito y/o visitado.</strong>
         </span>
       </p>
       <button v-if="isAuthenticated && !esFavorito" @click="marcarComoFavorito()" class="boton-subir">
@@ -150,9 +150,8 @@
     <div class="column">
       <p>¡También puedes seguirnos en nuestras redes sociales!</p>
       <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
       </div>
     </div>
   </div>
@@ -227,7 +226,9 @@ export default {
   },
   methods: {
     handleSubmit() {
-      // Envío del formulario al servidor
+      if(!this.validateForm()){
+        return;
+      }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
         nombre: this.name,
         email: this.email,
@@ -241,6 +242,12 @@ export default {
             // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
+    },
+    validateForm() {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
     },
     async obtenerDatosEstablecimiento() {
       // Obtener datos del establecimiento

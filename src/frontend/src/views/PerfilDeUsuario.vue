@@ -13,7 +13,8 @@
                   class="profile-picture"
               />
               <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
-              <button @click="openFileInput" class="change-profile-picture-button">Sustituir foto de perfil</button>
+              <button @click="openFileInput" class="change-profile-picture-button">Subir foto de perfil</button>
+              <button @click="eliminarFoto" class="change-profile-picture-button">Eliminar foto de perfil</button>
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
@@ -32,24 +33,24 @@
         <div class="right-column">
           <div class="datosDeUsuario">
             <p><strong>DNI:</strong> {{ dni }}</p>
-            <p><strong>Nombre de usuario:</strong> {{ username }}</p>
+            <p><strong>Nombre de usuario:</strong>{{ }} {{ username }}</p>
             <p><strong>Nombre:</strong>
               <span v-if="!editing">{{ }} {{ nombre }}</span>
-              <input v-else v-model="editedNombre" type="text">
+              <input v-else v-model="editedNombre" type="text" class="editing-input">
             </p>
             <p><strong>Apellidos:</strong>
               <span v-if="!editing">{{ }} {{ apellidos }}</span>
-              <input v-else v-model="editedApellidos" type="text">
+              <input v-else v-model="editedApellidos" type="text" class="editing-input">
             </p>
             <p><strong>Fecha de nacimiento:</strong>
               <span v-if="!editing">{{ }} {{ fechaNacimiento }}</span>
-              <input v-else v-model="editedFechaNacimiento" type="date">
+              <input v-else v-model="editedFechaNacimiento" type="date" class="editing-input">
             </p>
             <p><strong>Teléfono:</strong>
               <span v-if="!editing">{{ }} {{ telefono }}</span>
-              <input v-else v-model="editedTelefono" type="text">
+              <input v-else v-model="editedTelefono" type="text" class="editing-input">
             </p>
-            <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Email:</strong>{{ }} {{ email }}</p>
 
             <div v-if="!changingPassword" class="button-group">
               <button v-if="!editing" @click="editing = true" class="cerrar-sesion-button2">Editar</button>
@@ -166,6 +167,22 @@ export default {
     openFileInput() {
       this.$refs.fileInput.click();
     },
+    async eliminarFoto() {
+      try {
+        const username = this.username;
+        const response = await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/quitafotoPerfil`);
+        if (response.status === 200) {
+          // Actualizar la vista después de eliminar la foto de perfil
+          this.fotoPerfilURL = null;
+          alert("Foto de perfil eliminada exitosamente");
+        } else {
+          alert("Error al eliminar la foto de perfil");
+        }
+      } catch (error) {
+        console.error('Error al eliminar la foto de perfil:', error);
+        alert("Error al eliminar la foto de perfil");
+      }
+    },
     async onFileChange(event) {
       const file = event.target.files[0];
       if (file) {
@@ -174,7 +191,6 @@ export default {
           const fotoPerfilBase64 = e.target.result.split(',')[1];
           try {
             const username = this.$route.params.username;
-            // Realizar la solicitud POST al servidor para actualizar la foto de perfil
             await axios.post(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/fotoPerfil`, fotoPerfilBase64, {
               headers: {
                 'Content-Type': 'text/plain' // Establecer el tipo de contenido como texto plano
@@ -467,6 +483,14 @@ export default {
   background-color: white;
   border: none;
   cursor: pointer;
+}
+
+.editing-input {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+  width: 100%;
 }
 
 .change-password-button3:hover {

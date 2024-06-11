@@ -10,7 +10,7 @@
       <section class="main-section">
         <h2>¿Qué es la celiaquía?</h2>
         <p>La enfermedad celíaca es una afección en la que el cuerpo no puede tolerar el gluten. El gluten es una proteína que se encuentra en el trigo, la cebada y el centeno. Cuando las personas con celiaquía consumen gluten, su sistema inmunológico ataca el revestimiento del intestino delgado, lo que puede causar una serie de síntomas y problemas de salud.</p>
-        <h3>¡Inicia sesión o crea una cuenta nueva para pertenecer a la comunidad de Ocio Sin Gluten!</h3>
+        <h3 v-if="!isAuthenticated">¡Inicia sesión o crea una cuenta nueva para pertenecer a la comunidad de Ocio Sin Gluten!</h3>
       </section>
       <div class="symptoms-container">
         <h3>Síntomas de la celiaquía</h3>
@@ -49,16 +49,15 @@
             <label for="email">Correo:</label>
             <input type="email" id="email" v-model="email" required>
             <label for="message">Escribe tu mensaje:</label>
-            <textarea id="message" v-model="message" required></textarea>
+            <textarea id="message" maxlength="140" v-model="message" required></textarea>
             <button type="submit">Enviar</button>
           </form>
         </div>
         <div class="column">
           <p>¡También puedes seguirnos en nuestras redes sociales!</p>
           <div class="social-icons">
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
           </div>
         </div>
       </div>
@@ -98,7 +97,9 @@ export default {
   },
   methods: {
     handleSubmit() {
-      // Envío del formulario al servidor
+      if(!this.validateForm()){
+        return;
+      }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
         nombre: this.name,
         email: this.email,
@@ -112,11 +113,212 @@ export default {
             // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
-    }
+    },
+    validateForm() {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
+    },
   }
 }
 </script>
 
 <style>
-@import "../assets/css/inicio.css";
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+}
+
+.main-section {
+  background-color: #353535; /* Color de fondo gris */
+  padding: 80px; /* Aumentar el padding para hacer la sección más grande */
+  color: rgb(244, 255, 253); /* Color de texto blanco */
+  text-align: center; /* Centrar texto */
+
+}
+
+.main-section h2 {
+  color: rgb(244, 255, 253); /* Color de texto blanco */
+  text-align: center; /* Centrar el título de los síntomas */
+  margin-bottom: 20px; /* Agregar margen inferior al título */
+  font-size: 45px; /* Tamaño de fuente más grande */
+  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+
+}
+
+.main-section h3 {
+  color: #ffcc74; /* Color de texto blanco */
+  text-align: center; /* Centrar el título de los síntomas */
+  margin-top: 40px;
+  font-size: 30px; /* Tamaño de fuente más grande */
+  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+}
+
+.main-section p {
+  font-size: 26px; /* Tamaño de fuente más pequeño */
+  line-height: 1.4; /* Espaciado entre líneas más compacto */
+  max-width: 1000px; /* Ancho máximo del texto para evitar que se extienda demasiado */
+  margin: 0 auto; /* Centrar el texto horizontalmente */
+}
+
+.symptoms-container {
+  background-color: #ffffff; /* Color de fondo gris */
+  margin-top: 0; /* Espacio entre el section y los síntomas */
+  padding: 40px; /* Aumentar el padding para hacer la sección más grande */
+}
+
+.symptoms-container h3 {
+  margin-top: -15px; /* Reducir margen superior del título */
+  text-align: center; /* Centrar el título de los síntomas */
+  margin-bottom: 30px; /* Agregar margen inferior al título */
+  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+  font-size: 45px; /* Tamaño de fuente más grande */
+}
+
+.symptoms-columns {
+  display: flex;
+  justify-content: center; /* Centrar las columnas horizontalmente */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px; /* Agregar un espacio entre las columnas */
+}
+
+
+.column-container {
+  width: 20%; /* Reducir el ancho de los contenedores para que estén más juntos */
+  margin: 0 20px; /* Agregar un margen entre las columnas */
+  text-align: center; /* Centrar el contenido de los contenedores */
+}
+
+.left-column ul,
+.right-column ul {
+  padding-left: -10px;
+  list-style-type: none; /* Eliminar los puntos de la lista */
+  text-align: left; /* Alinear el texto de la lista a la izquierda */
+}
+.left-column ul li,
+.right-column ul li {
+  list-style-type: none;
+  font-size: 22px; /* Cambia el tamaño de fuente de los síntomas */
+  white-space: nowrap; /* Evitar el salto de línea */
+
+}
+
+
+.symptoms-column ul li {
+  list-style-type: none;
+  font-size: 22px; /* Tamaño de fuente más grande */
+}
+
+.footer {
+  background-color: #9DD9D2; /* Color de fondo gris oscuro */
+  padding: 20px;
+  text-align: center; /* Centrar el texto */
+}
+
+.footer p {
+  margin-top: 12px; /* Espacio entre el section y los síntomas */
+  color: black; /* Color del texto */
+  font-size: 18px; /* Tamaño de fuente */
+  text-decoration: underline; /* Subrayar el texto */
+}
+
+.contactin {
+  background-color: #353535; /* Color de fondo gris */
+  padding: 80px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.contactin .column {
+  flex: 1; /* Las columnas ocupan el mismo espacio */
+  padding: 20px; /* Agregar espaciado interno */
+  text-align: center; /* Centrar el contenido */
+}
+
+.contactin h1,
+.contactin p {
+  font-size: 30px; /* Tamaño de fuente más pequeño */
+  line-height: 1.4; /* Espaciado entre líneas más compacto */
+  max-width: 400px; /* Ancho máximo del texto para evitar que se extienda demasiado */
+  margin: 0 auto; /* Centrar el texto horizontalmente */
+  color: white;
+}
+
+.contactin form {
+  text-align: left; /* Alinear el contenido del formulario a la izquierda */
+  max-width: 400px; /* Limitar el ancho del formulario para que no se vea muy extendido */
+  margin: 0 auto; /* Centrar el formulario horizontalmente */
+}
+
+.contactin form label {
+  display: block; /* Mostrar los labels en una línea nueva */
+  margin-bottom: 8px; /* Añadir un poco de espacio entre los labels */
+  color: white; /* Color del texto de los labels */
+}
+
+.contactin form input,
+.contactin form textarea {
+  width: calc(100% - 16px); /* Hacer que los campos de entrada y el área de texto ocupen todo el ancho disponible */
+  padding: 10px; /* Añadir relleno a los campos de entrada */
+  margin-bottom: 16px; /* Añadir espacio entre los campos */
+  border: 1px solid #ddd; /* Añadir un borde */
+  border-radius: 4px; /* Agregar bordes redondeados */
+  background-color: #f9f9f9; /* Color de fondo del campo */
+  color: #333; /* Color del texto */
+  font-size: 16px; /* Tamaño de fuente */
+}
+
+.contactin form textarea {
+  height: 120px; /* Establecer una altura para el área de texto */
+}
+
+.contactin form button {
+  background-color: #7F7F7F; /* Color de fondo del botón */
+  color: white; /* Color del texto del botón */
+  border: none; /* Eliminar el borde del botón */
+  padding: 12px 24px; /* Aumentar el relleno del botón */
+  cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
+  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+  font-size: 16px; /* Tamaño de fuente */
+  border-radius: 4px; /* Agregar bordes redondeados */
+  transition: background-color 0.3s ease; /* Agregar una transición suave al color de fondo */
+  display: block; /* Convertir el botón en un elemento de bloque */
+  margin: 0 auto; /* Centrar horizontalmente */
+}
+
+.contactin form button:hover {
+  background-color: #ffcc74; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+}
+
+.social-icons a {
+  margin: 0 20px; /* Ajusta el margen entre los iconos según sea necesario */
+  color: #fff; /* Color de los iconos */
+  font-size: 36px; /* Tamaño más grande de los iconos */
+  transition: color 0.3s ease; /* Agregar una transición suave al color */
+}
+
+
+.social-icons a:hover {
+  color: #ffcc74; /* Cambiar el color al pasar el cursor */
+}
+
+.mensaje-enviado {
+  display: flex;
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  background-color: #353535; /* Mantener el fondo gris oscuro */
+}
+
+.mensaje-enviado h2 {
+  color: white; /* Cambiar el color del texto a blanco */
+  text-align: center; /* Asegurarse de que el texto esté centrado */
+}
+
 </style>

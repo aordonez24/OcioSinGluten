@@ -93,6 +93,7 @@ export default {
           })
         });
       }
+      this.mensaje = ''; // Vaciar el campo de mensaje
     },
     mostrarMensaje(mensaje) {
       const body = JSON.parse(mensaje);

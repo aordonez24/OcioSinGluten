@@ -43,9 +43,8 @@
       <div class="column">
         <p>¡También puedes seguirnos en nuestras redes sociales!</p>
         <div class="social-icons">
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
         </div>
       </div>
     </div>
@@ -98,6 +97,9 @@ export default {
 
     const handleSubmit = () => {
       // Envío del formulario al servidor
+      if(!validateForm()){
+        return;
+      }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
         nombre: namelon.value, // Acceder a los valores con .value
         email: email.value, // Acceder a los valores con .value
@@ -111,6 +113,13 @@ export default {
             // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
+    }
+
+    const validateForm = () => {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
     }
 
     const traducirMensaje = (mensaje) => {

@@ -1,9 +1,6 @@
 package com.osc.ociosingluten.controlador;
 
-import com.osc.ociosingluten.controlador.DTO.EstablecimientoDTO;
-import com.osc.ociosingluten.controlador.DTO.LoginDTO;
-import com.osc.ociosingluten.controlador.DTO.SeguirDTO;
-import com.osc.ociosingluten.controlador.DTO.UsuarioDTO;
+import com.osc.ociosingluten.controlador.DTO.*;
 import com.osc.ociosingluten.excepciones.*;
 import com.osc.ociosingluten.herramientas.LoginMessage;
 import com.osc.ociosingluten.modelo.Actividad;
@@ -79,26 +76,29 @@ public class UsuarioController {
         return usuarios;
     }
 
-    //Añadir el usuario
     @PostMapping("/nuevoUsuario")
-    public ResponseEntity<UsuarioDTO> anadirUsuario(@RequestParam("dni") String dni,
-                              @RequestParam("username") String username,
-                              @RequestParam("nombre") String nombre,
-                              @RequestParam("apellidos") String apellidos,
-                              @RequestParam("fechaNacimiento") LocalDate fechaNacimiento,
-                              @RequestParam("telefono") int telefono,
-                              @RequestParam("fotoPerfil") String  fotoPerfilBase64,
-                              @RequestParam("email") String email,
-                              @RequestParam("password") String password) throws IOException, UsuarioExisteException {
+    public ResponseEntity<?> anadirUsuario(@RequestParam("dni") String dni,
+                                                    @RequestParam("username") String username,
+                                                    @RequestParam("nombre") String nombre,
+                                                    @RequestParam("apellidos") String apellidos,
+                                                    @RequestParam("fechaNacimiento") LocalDate fechaNacimiento,
+                                                    @RequestParam("telefono") int telefono,
+                                                    @RequestParam("fotoPerfil") String fotoPerfilBase64,
+                                                    @RequestParam("email") String email,
+                                                    @RequestParam("password") String password) throws IOException, UsuarioExisteException {
         byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
         Usuario usuario = new Usuario(dni, username, nombre, apellidos, fechaNacimiento, telefono, fotoPerfil, email, password);
-        if(servicio.registroUsuario(usuario)){
-            return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioDTO(usuario));
-        }else{
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        try {
+            if (servicio.registroUsuario(usuario)) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(new UsuarioDTO(usuario));
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+        } catch (UsuarioExisteException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(e.getMessage()));
         }
-
     }
+
 
     @GetMapping("/perfilUsuarioUsername/{username}")
     public ResponseEntity<UsuarioDTO> mostrarUsuarioporUsername(@PathVariable String username) throws IOException {
@@ -268,7 +268,19 @@ public class UsuarioController {
         }
     }
 
-    // Endpoint para actualizar la foto de perfil y los datos del usuario
+    @DeleteMapping("/perfilUsuario/{username}/quitafotoPerfil")
+    public ResponseEntity<String> eliminarFotoPerfil(@PathVariable String username) {
+        Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            usuario.setFotoPerfil(null);
+            repoUsu.save(usuario);
+            return ResponseEntity.ok("Foto de perfil actualizada exitosamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PutMapping("/perfilUsuario/{username}/nuevosDatos")
     public ResponseEntity<String> actualizarPerfilUsuario(@PathVariable String username,
                                                           @RequestBody UsuarioDTO usuarioDTO) {

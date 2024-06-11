@@ -5,7 +5,7 @@
       <div class="profile-container">
         <div class="left-column">
           <div class="profile-picture-container">
-            <div v-if="fotoPerfilURL" class="picture-button-container">
+            <div v-if="hayFoto" class="picture-button-container">
               <img
                   :src="'data:image/jpeg;base64,' + fotoPerfilURL"
                   alt="Foto de perfil"
@@ -13,7 +13,7 @@
               />
             </div>
             <div v-else class="profile-picture-default">
-              <i class="fas fa-user"></i>
+              <i class="fas fa-user"></i> <!-- Aquí debes usar el icono que desees -->
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
@@ -39,7 +39,7 @@
         <div class="right-column">
           <div class="datosDeUsuario">
             <p><strong>Nombre de usuario:</strong>
-              <span v-if="!editing">{{ }} {{ username }}</span>
+              <span v-if="!editing">{{ }} {{ usernameUsuario }}</span>
               <input v-else v-model="editedUsername" type="text">
             </p>
             <p><strong>Nombre:</strong>
@@ -79,7 +79,7 @@ export default {
       loading: false,
       fotoPerfilURL: null,
       dni: '',
-      username: '',
+      usernameUsuario: '',
       nombre: '',
       apellidos: '',
       fechaNacimiento: '',
@@ -89,7 +89,8 @@ export default {
       numSeguidores: '',
       siguiendo: false,
       rol: '',
-      archivado: '' // Nuevo dato para controlar si el usuario está archivado
+      archivado: '', // Nuevo dato para controlar si el usuario está archivado
+      hayFoto: false
     };
   },
   mounted() {
@@ -109,8 +110,14 @@ export default {
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${username}`);
         this.usuario = response.data;
         this.fotoPerfilURL = response.data.fotoPerfil;
+
+        if(this.fotoPerfilURL.length > 4){
+          this.hayFoto = true;
+        }else{
+          this.hayFoto = false;
+        }
         this.dni = response.data.dni;
-        this.username = response.data.username;
+        this.usernameUsuario = response.data.username;
         this.email = response.data.email;
         this.fechaNacimiento = response.data.fechaNacimiento;
         this.nombre = response.data.nombre;
@@ -120,7 +127,7 @@ export default {
         const yo = this.username;
         const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
         this.rol = response2.data.rol;
-        console.log(this.rol);
+        //console.log(this.fotoPerfilURL.length);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;
@@ -152,7 +159,8 @@ export default {
       try {
         const username = this.$route.params.username;
         const loggedInUsername = this.username;
-
+        console.log(username);
+        console.log(loggedInUsername);
         // Verificar si el usuario intenta seguirse a sí mismo
         if (username === loggedInUsername) {
           console.error('No puedes seguirte a ti mismo.');
@@ -426,5 +434,18 @@ footer-componente {
   flex-direction: column;
   gap: 10px; /* Espacio entre los botones */
 }
+
+.profile-picture-default {
+  width: 150px; /* Ancho del contenedor */
+  height: 150px; /* Altura del contenedor */
+  border-radius: 50%; /* Para que el contenedor sea circular */
+  background-color: #ccc; /* Color de fondo del contenedor */
+  display: flex; /* Para centrar el icono vertical y horizontalmente */
+  align-items: center; /* Para centrar verticalmente */
+  justify-content: center; /* Para centrar horizontalmente */
+  font-size: 60px; /* Tamaño del icono de usuario */
+  color: #666; /* Color del icono de usuario */
+}
+
 
 </style>

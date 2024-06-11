@@ -59,9 +59,8 @@
     <div class="column">
       <p>¡También puedes seguirnos en nuestras redes sociales!</p>
       <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
       </div>
     </div>
   </div>
@@ -118,24 +117,29 @@ export default {
       );
     },
     handleSubmit() {
-      // Envío del formulario al servidor
+      if(!this.validateForm()){
+        return;
+      }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
         nombre: this.name,
         email: this.email,
         mensaje: this.message
       })
           .then(response => {
-            // Manejar la respuesta del servidor en caso de éxito
             console.log('Mensaje enviado con éxito:', response.data);
-            // Actualizar el estado para mostrar el mensaje de confirmación
             this.mensajeEnviado = true;
           })
           .catch(error => {
             // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
-            // Aquí podrías mostrar un mensaje de error al usuario si lo deseas
           });
-    }
+    },
+    validateForm() {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
+    },
   },
   mounted() {
     this.cargarEstablecimientos();

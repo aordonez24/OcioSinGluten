@@ -101,6 +101,7 @@
         </div>
       </div>
     </form>
+    <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
   </div>
   <div class="extra-space">
     <footer-componente/>
@@ -130,7 +131,7 @@ export default {
       },
       confirmPassword: '',
       imagePreview: '',
-      showFormatWarning: false, // Mostrar advertencia de formato de imagen
+      showFormatWarning: false,
       showPassword: false,
       showConfirmPassword: false,
       dniValido: false,
@@ -138,7 +139,8 @@ export default {
       telefonoValido: false,
       passwordValida: false,
       passwordsCoinciden: false,
-      mayorDeEdad: false
+      mayorDeEdad: false,
+      errorMessage: ''  // Variable para almacenar el mensaje de error
     }
   },
   methods: {
@@ -196,12 +198,18 @@ export default {
               password: ''
             };
             this.confirmPassword = '';
+            this.errorMessage = '';  // Limpiar el mensaje de error
             this.$emit('usuario-agregado');
+            this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
           })
           .catch(error => {
             console.error('Error al agregar usuario:', error);
+            if (error.response && error.response.data && error.response.data.message) {
+              this.errorMessage = error.response.data.message;
+            } else {
+              this.errorMessage = 'Error al agregar el usuario. Inténtelo de nuevo más tarde.';
+            }
           });
-      this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
     },
     validarEmail() {
       this.emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.nuevoUsuario.email);
@@ -211,9 +219,7 @@ export default {
     },
     validarTelefono() {
       if (this.nuevoUsuario.telefono) {
-        // Validación del formato del teléfono
         const telefonoValido = /^\d{9}$/.test(this.nuevoUsuario.telefono);
-        // Validación adicional utilizando la anotación @Digits
         const telefonoConAnnotacionValido = /^\d{9}$/.test(this.nuevoUsuario.telefono);
         this.telefonoValido = telefonoValido && telefonoConAnnotacionValido;
       } else {
@@ -222,7 +228,6 @@ export default {
     },
     validarPassword() {
       if (this.nuevoUsuario.password) {
-        // Verificar si la contraseña tiene al menos 8 caracteres y al menos una mayúscula
         this.passwordValida = /^(?=.*[A-Z]).{8,}$/.test(this.nuevoUsuario.password);
       } else {
         this.passwordValida = false;
@@ -233,7 +238,7 @@ export default {
     },
     validarEdad() {
       const fechaNacimiento = new Date(this.nuevoUsuario.fechaNacimiento);
-      const edadMinima = 18; // Edad mínima para registrarse
+      const edadMinima = 18;
 
       const hoy = new Date();
       let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
@@ -248,18 +253,17 @@ export default {
     onFileChange(event) {
       const selectedFile = event.target.files[0];
 
-      // Verificar el tipo de archivo seleccionado
       if (!['image/jpeg', 'image/jpg'].includes(selectedFile.type)) {
-        this.showFormatWarning = true; // Mostrar advertencia si el tipo de archivo no es válido
+        this.showFormatWarning = true;
         return;
       }
-      this.showFormatWarning = false; // Ocultar advertencia si el tipo de archivo es válido
+      this.showFormatWarning = false;
 
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        this.imagePreview = e.target.result; // URL base64 de la imagen para previsualización
-        this.nuevoUsuario.fotoPerfil = e.target.result.split(',')[1]; // Base64 de la imagen
+        this.imagePreview = e.target.result;
+        this.nuevoUsuario.fotoPerfil = e.target.result.split(',')[1];
       };
 
       reader.readAsDataURL(selectedFile);
