@@ -1,7 +1,8 @@
 <template>
   <div>
     <header3/>
-    <div class="container-principal">
+    <div class="container1">
+      <div class="container-principal">
       <div class="profile-container">
         <div class="left-column">
           <div class="profile-picture-container">
@@ -54,10 +55,10 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
-  <div class="extra-space">
-    <footer-componente/>
-  </div>
+  <contacto/>
+  <footer-componente/>
 </template>
 
 
@@ -66,12 +67,14 @@ import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
 import { mapGetters } from "vuex";
+import contacto from "@/components/contacto.vue";
 
 export default {
   name: 'PerfilUsuario',
   components: {
     Header3,
-    FooterComponente
+    FooterComponente,
+    contacto
   },
   data() {
     return {
@@ -447,5 +450,12 @@ footer-componente {
   color: #666; /* Color del icono de usuario */
 }
 
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
+}
 
 </style>

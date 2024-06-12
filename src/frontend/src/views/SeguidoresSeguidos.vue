@@ -1,7 +1,8 @@
 <template>
   <div>
     <header3 />
-    <div class="container-principal">
+    <div class="container1">
+      <div class="container-principal">
       <div class="followers-column">
         <h2>Seguidores</h2>
         <input type="text" v-model="followerSearchQuery" placeholder="Buscar seguidor...">
@@ -38,6 +39,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
     <footer-componente />
   </div>
@@ -110,9 +112,18 @@ export default {
 </script>
 
 <style scoped>
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
+}
+
 .container-principal {
   min-height: calc(100vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
-  width: 70vw;
+  width: 75vw;
   margin: 50px auto 0; /* Eliminamos el margen inferior */
   padding: 45px;
   background-color: #fff;
@@ -159,26 +170,13 @@ export default {
 }
 
 input[type="text"] {
-  width: 100%;
+  width: 96%;
   padding: 8px;
   margin-bottom: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-.seguir-boton {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 20px;
-  color: white;
-  background-color: #9DD9D2;
-  border: none;
-  cursor: pointer;
-}
-
-.seguir-boton:hover {
-  background-color: #ffcc74;
-}
 
 footer-componente {
   position: fixed;

@@ -1,7 +1,8 @@
 <template>
   <div>
     <header3/>
-    <div class="container-principal">
+    <div class="container1">
+      <div class="container-principal">
       <div class="profile-container">
         <div class="left-column">
           <div class="profile-picture-container">
@@ -50,7 +51,7 @@
               <span v-if="!editing">{{ }} {{ telefono }}</span>
               <input v-else v-model="editedTelefono" type="text" class="editing-input">
             </p>
-            <p><strong>Email:</strong>{{ }} {{ email }}</p>
+            <p><strong>Email:</strong>{{ }} {{ emailon }}</p>
 
             <div v-if="!changingPassword" class="button-group">
               <button v-if="!editing" @click="editing = true" class="cerrar-sesion-button2">Editar</button>
@@ -80,23 +81,25 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
-  <div class="extra-space">
-    <footer-componente/>
-  </div>
+  <contacto/>
+  <footer-componente/>
 </template>
 
 <script>
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import contacto from "@/components/contacto.vue";
 import { mapActions } from 'vuex';
 
 export default {
   name: 'PerfilUsuario',
   components: {
     Header3,
-    FooterComponente
+    FooterComponente,
+    contacto
   },
   data() {
     return {
@@ -109,7 +112,7 @@ export default {
       apellidos: '',
       fechaNacimiento: '',
       telefono: '',
-      email: '',
+      emailon: '',
       editing: false,
       editedUsername: '',
       editedNombre: '',
@@ -148,7 +151,7 @@ export default {
         this.fotoPerfilURL = response.data.fotoPerfil;
         this.dni = response.data.dni;
         this.username = response.data.username;
-        this.email = response.data.email;
+        this.emailon = response.data.email;
         this.fechaNacimiento = response.data.fechaNacimiento;
         this.nombre = response.data.nombre;
         this.apellidos = response.data.apellidos;
@@ -298,6 +301,30 @@ export default {
     validarTelefono(telefono) {
       return /^\d{9}$/.test(telefono);
     },
+    handleSubmit() {
+      console.log("hola");
+      if(!this.validateForm()){
+        return;
+      }
+      axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
+        nombre: this.name,
+        email: this.email,
+        mensaje: this.message
+      })
+          .then(response => {
+            console.log('Mensaje enviado con éxito:', response.data);
+            this.mensajeEnviado = true;
+          })
+          .catch(error => {
+            console.error('Error al enviar el mensaje:', error);
+          });
+    },
+    validateForm() {
+      if (!this.name || !this.email || !this.message) {
+        alert('Todos los campos son obligatorios.');
+        return false;
+      }
+    },
   }
 };
 </script>
@@ -311,6 +338,7 @@ export default {
   border-radius: 20px;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
+  margin-bottom: 50px;
 }
 
 .profile-container {
@@ -495,5 +523,13 @@ export default {
 
 .change-password-button3:hover {
   background-color: #ffcc74;
+}
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
 }
 </style>

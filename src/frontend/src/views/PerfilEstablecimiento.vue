@@ -5,159 +5,135 @@
   <template v-else>
     <cabecera-componente/>
   </template>
-  <div class="container-principal">
-    <div class="datos">
-      <!-- Mostrar los datos del establecimiento -->
-      <h1>{{ establecimiento.nombre }}</h1>
-      <p>Teléfono: {{ establecimiento.telefono }}</p>
-      <p>Localidad: {{ establecimiento.localidad }}</p>
-      <p>Provincia: {{ establecimiento.provincia }}</p>
-      <p>Calle: {{ establecimiento.calle }}</p>
-      <p>Código Postal: {{ establecimiento.codPostal }}</p>
-      <p>País: {{ establecimiento.pais }}</p>
-      <p>
-        <i v-if="isAuthenticated" class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)">
-          {{ establecimiento.numLikes}}
-        </i>
-        <span v-else>
-          <strong>Debe iniciar sesión para dar like y marcar este establecimiento como favorito y/o visitado.</strong>
-        </span>
-      </p>
-      <button v-if="isAuthenticated && !esFavorito" @click="marcarComoFavorito()" class="boton-subir">
-        Marcar como favorito
-      </button>
-      <button v-if="isAuthenticated && esFavorito" @click="quitarComoFav()" class="boton-subir">
-        Quitar como favorito
-      </button>
+  <div class="container1">
+    <div class="container-principal">
+      <div class="datos">
+        <!-- Mostrar los datos del establecimiento -->
+        <h1>{{ establecimiento.nombre }}</h1>
+        <p>Teléfono: {{ establecimiento.telefono }}</p>
+        <p>Localidad: {{ establecimiento.localidad }}</p>
+        <p>Provincia: {{ establecimiento.provincia }}</p>
+        <p>Calle: {{ establecimiento.calle }}</p>
+        <p>Código Postal: {{ establecimiento.codPostal }}</p>
+        <p>País: {{ establecimiento.pais }}</p>
+        <p>
+          <i v-if="isAuthenticated" class="far fa-thumbs-up like-icon" @click="likeEstablecimiento(establecimiento.idEstablecimiento)">
+            {{ establecimiento.numLikes}}
+          </i>
+          <span v-else>
+            <strong>Debe iniciar sesión para dar like y marcar este establecimiento como favorito y/o visitado.</strong>
+          </span>
+        </p>
+        <button v-if="isAuthenticated && !esFavorito" @click="marcarComoFavorito()" class="boton-subir">
+          Marcar como favorito
+        </button>
+        <button v-if="isAuthenticated && esFavorito" @click="quitarComoFav()" class="boton-subir">
+          Quitar como favorito
+        </button>
 
-      <button v-if="isAuthenticated && !esVisitado" @click="marcarComoVisitado()" class="boton-subir">
-        Marcar como visitado
-      </button>
-      <button v-if="isAuthenticated && esVisitado" @click="eliminarVis()" class="boton-subir">
-        Quitar como visitado
-      </button>
+        <button v-if="isAuthenticated && !esVisitado" @click="marcarComoVisitado()" class="boton-subir">
+          Marcar como visitado
+        </button>
+        <button v-if="isAuthenticated && esVisitado" @click="eliminarVis()" class="boton-subir">
+          Quitar como visitado
+        </button>
 
-      <button v-if="rol === 'ADMIN'" @click="toggleEditarEstablecimiento" class="boton-subir2">Editar establecimiento</button> <!-- Botón de edición para administradores -->
-      <button v-if="rol === 'ADMIN'" @click="eliminarEstablecimiento" class="boton-subir2">Eliminar establecimiento</button> <!-- Botón de eliminación para administradores -->
+        <button v-if="rol === 'ADMIN'" @click="toggleEditarEstablecimiento" class="boton-subir2">Editar establecimiento</button> <!-- Botón de edición para administradores -->
+        <button v-if="rol === 'ADMIN'" @click="eliminarEstablecimiento" class="boton-subir2">Eliminar establecimiento</button> <!-- Botón de eliminación para administradores -->
 
-      <div v-if="mostrarFormularioEditar" class="formulario-edicion">
-        <h2>Editar Establecimiento</h2>
-        <form @submit.prevent="editarEstablecimiento">
-          <div>
-            <label for="nombre">Nombre del Establecimiento:</label>
-            <input type="text" v-model="formulario.nombre" id="nombre" required>
-          </div>
-          <div>
-            <label for="telefono">Teléfono:</label>
-            <input type="text" v-model="formulario.telefono" id="telefono" required>
-          </div>
-          <div>
-            <label for="localidad">Localidad:</label>
-            <input type="text" v-model="formulario.localidad" id="localidad" required>
-          </div>
-          <div>
-            <label for="provincia">Provincia:</label>
-            <input type="text" v-model="formulario.provincia" id="provincia" required>
-          </div>
-          <div>
-            <label for="calle">Calle:</label>
-            <input type="text" v-model="formulario.calle" id="calle" required>
-          </div>
-          <div>
-            <label for="codPostal">Código Postal:</label>
-            <input type="text" v-model="formulario.codPostal" id="codPostal" required>
-          </div>
-          <div>
-            <label for="pais">País:</label>
-            <input type="text" v-model="formulario.pais" id="pais" required>
-          </div>
-          <button type="submit" class="boton-subir">Guardar cambios</button>
-          <button type="button" @click="cancelarEdicion" class="boton-subir2">Cancelar</button>
-        </form>
-      </div>
-    </div>
-    <div class="mapa" ref="map"></div>
-    <div class="imagenes">
-      <!-- Galería de imágenes -->
-      <div class="galeria">
-        <img v-for="(imagen, index) in imagenes" :key="index" :src="imagen" alt="Imagen" @click="mostrarImagen(index)">
-      </div>
-      <!-- Botón para subir imágenes -->
-      <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
-      <button v-if="isAuthenticated" @click="openFileInput" class="boton-subir">¿Dispone de alguna imagen de este establecimiento? ¡Compártela con nosotros!</button>
-      <p>
-        Valoración media:
-        <span v-for="(estrella, index) in calcularEstrellas()" :key="index">
-          <i v-if="estrella === 'full'" class="fas fa-star star-yellow star-size"></i>
-          <i v-if="estrella === 'half'" class="fas fa-star-half-alt star-yellow star-size"></i>
-          <i v-if="estrella === 'empty'" class="far fa-star star-yellow star-size"></i>
-        </span>
-        (Calculada como la media entre el número de likes y los usuarios que han visitado este establecimiento.)
-      </p>
-
-
-    </div>
-    <!-- Modal para mostrar la imagen en tamaño completo -->
-    <div class="modal" v-if="imagenSeleccionada !== null">
-      <div class="modal-contenido">
-        <span class="cerrar" @click="cerrarModal">&times;</span>
-        <img :src="imagenSeleccionada" alt="Imagen" style="max-width: 100%; max-height: 100%;">
-      </div>
-    </div>
-  </div>
-  <div class="comentarios">
-    <div class="titulo">
-      <h2> Comentarios </h2>
-    </div>
-    <div v-if="isAuthenticated" class="nuevo-comentario">
-      <div class="campo-comentario-con-boton">
-        <textarea v-model="nuevoComentario" placeholder="Introduce tu comentario (máximo 140 caracteres)" maxlength="140" class="campo-comentario"></textarea>
-        <button @click="enviarComentario" class="boton-subir">Enviar</button>
-      </div>
-    </div>
-    <div v-for="(comentario, index) in comentarios" :key="index" class="comentario">
-      <div class="comentario-contenido">
-        <p><strong>{{comentario.autor.username}}</strong> Comentó: {{comentario.mensaje}}</p>
-        <p>{{comentario.fecha}}</p>
-        <div class="acciones">
-          <i v-if="comentario.autor.username === usuarioActual" class="fas fa-trash-alt fa-lg" @click="eliminarComentario(comentario.id)"></i>
+        <div v-if="mostrarFormularioEditar" class="formulario-edicion">
+          <h2>Editar Establecimiento</h2>
+          <form @submit.prevent="editarEstablecimiento">
+            <div>
+              <label for="nombre">Nombre del Establecimiento:</label>
+              <input type="text" v-model="formulario.nombre" id="nombre" required>
+            </div>
+            <div>
+              <label for="telefono">Teléfono:</label>
+              <input type="text" v-model="formulario.telefono" id="telefono" required>
+            </div>
+            <div>
+              <label for="localidad">Localidad:</label>
+              <input type="text" v-model="formulario.localidad" id="localidad" required>
+            </div>
+            <div>
+              <label for="provincia">Provincia:</label>
+              <input type="text" v-model="formulario.provincia" id="provincia" required>
+            </div>
+            <div>
+              <label for="calle">Calle:</label>
+              <input type="text" v-model="formulario.calle" id="calle" required>
+            </div>
+            <div>
+              <label for="codPostal">Código Postal:</label>
+              <input type="text" v-model="formulario.codPostal" id="codPostal" required>
+            </div>
+            <div>
+              <label for="pais">País:</label>
+              <input type="text" v-model="formulario.pais" id="pais" required>
+            </div>
+            <button type="submit" class="boton-subir">Guardar cambios</button>
+            <button type="button" @click="cancelarEdicion" class="boton-subir2">Cancelar</button>
+          </form>
         </div>
-        <div v-if="respuestasAbiertas.includes(index)" class="nueva-respuesta">
-          <div class="campo-comentario-con-boton">
-            <textarea v-model="nuevaRespuesta[index]" placeholder="Introduce tu respuesta (máximo 140 caracteres)" maxlength="140" class="campo-comentario"></textarea>
-            <button @click="enviarRespuesta(index, comentario.id)" class="boton-subir">Enviar</button>
-          </div>
+      </div>
+      <div class="mapa" ref="map"></div>
+      <div class="imagenes">
+        <!-- Galería de imágenes -->
+        <div class="galeria">
+          <img v-for="(imagen, index) in imagenes" :key="index" :src="imagen" alt="Imagen" @click="mostrarImagen(index)">
+        </div>
+        <!-- Botón para subir imágenes -->
+        <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
+        <button v-if="isAuthenticated" @click="openFileInput" class="boton-subir">¿Dispone de alguna imagen de este establecimiento? ¡Compártela con nosotros!</button>
+        <p>
+          Valoración media:
+          <span v-for="(estrella, index) in calcularEstrellas()" :key="index">
+            <i v-if="estrella === 'full'" class="fas fa-star star-yellow star-size"></i>
+            <i v-if="estrella === 'half'" class="fas fa-star-half-alt star-yellow star-size"></i>
+            <i v-if="estrella === 'empty'" class="far fa-star star-yellow star-size"></i>
+          </span>
+          (Calculada como la media entre el número de likes y los usuarios que han visitado este establecimiento.)
+        </p>
+
+
+      </div>
+      <!-- Modal para mostrar la imagen en tamaño completo -->
+      <div class="modal" v-if="imagenSeleccionada !== null">
+        <div class="modal-contenido">
+          <span class="cerrar" @click="cerrarModal">&times;</span>
+          <img :src="imagenSeleccionada" alt="Imagen" style="max-width: 100%; max-height: 100%;">
         </div>
       </div>
     </div>
-  </div>
-  <div id="contacto" class="contactin" v-if="!mensajeEnviado">
-    <div class="column">
-      <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-      <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-    </div>
-    <div class="column" v-if="!mensajeEnviado">
-      <form @submit.prevent="handleSubmit">
-        <label for="name">Nombre y apellidos:</label>
-        <input type="text" id="name" v-model="name" required>
-        <label for="email">Correo:</label>
-        <input type="email" id="email" v-model="email" required>
-        <label for="message">Escribe tu mensaje:</label>
-        <textarea id="message" v-model="message" required></textarea>
-        <button type="submit">Enviar</button>
-      </form>
-    </div>
-    <div class="column">
-      <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-      <div class="social-icons">
-        <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
+    <div class="comentarios">
+      <div class="titulo">
+        <h2> Comentarios </h2>
+      </div>
+      <div v-if="isAuthenticated" class="nuevo-comentario">
+        <div class="campo-comentario-con-boton">
+          <textarea v-model="nuevoComentario" placeholder="Introduce tu comentario (máximo 140 caracteres)" maxlength="140" class="campo-comentario"></textarea>
+          <button @click="enviarComentario" class="boton-subir">Enviar</button>
+        </div>
+      </div>
+      <div v-for="(comentario, index) in comentarios" :key="index" class="comentario">
+        <div class="comentario-contenido">
+          <p><strong>{{comentario.autor.username}}</strong> Comentó: {{comentario.mensaje}}</p>
+          <p>{{comentario.fecha}}</p>
+          <div class="acciones">
+            <i v-if="comentario.autor.username === usuarioActual" class="fas fa-trash-alt fa-lg" @click="eliminarComentario(comentario.id)"></i>
+          </div>
+          <div v-if="respuestasAbiertas.includes(index)" class="nueva-respuesta">
+            <div class="campo-comentario-con-boton">
+              <textarea v-model="nuevaRespuesta[index]" placeholder="Introduce tu respuesta (máximo 140 caracteres)" maxlength="140" class="campo-comentario"></textarea>
+              <button @click="enviarRespuesta(index, comentario.id)" class="boton-subir">Enviar</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div v-else class="contactin mensaje-enviado">
-    <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
-  </div>
+  <contacto/>
   <footer-componente/>
 </template>
 
@@ -169,13 +145,15 @@ import axios from "axios";
 import 'ol/ol.css'; // Importa los estilos CSS de OpenLayers
 import { loadModules } from 'esri-loader';
 import {mapGetters} from "vuex";
+import contacto from "@/components/contacto.vue";
 
 export default {
   name: 'Vista-Establecimiento',
   components: {
     CabeceraComponente,
     FooterComponente,
-    Header3
+    Header3,
+    contacto
   },
   data() {
     return {
@@ -953,6 +931,14 @@ export default {
 .mensaje-enviado h2 {
   color: white; /* Cambiar el color del texto a blanco */
   text-align: center; /* Asegurarse de que el texto esté centrado */
+}
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
 }
 
 </style>

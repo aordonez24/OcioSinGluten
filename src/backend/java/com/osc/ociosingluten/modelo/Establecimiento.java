@@ -43,6 +43,7 @@ public class Establecimiento {
     private String calle;
 
     @NotNull
+    @Digits(integer = 5, fraction = 0)
     private int codPostal;
 
     @NotNull

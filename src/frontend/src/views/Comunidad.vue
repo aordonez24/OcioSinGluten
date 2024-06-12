@@ -22,46 +22,21 @@
       </div>
     </div>
   </div>
-  <div id="contacto" class="contactin" v-if="!mensajeEnviado">
-    <div class="column">
-      <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-      <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-    </div>
-    <div class="column" v-if="!mensajeEnviado">
-      <form @submit.prevent="handleSubmit">
-        <label for="name">Nombre y apellidos:</label>
-        <input type="text" id="name" v-model="name" required>
-        <label for="email">Correo:</label>
-        <input type="email" id="email" v-model="email" required>
-        <label for="message">Escribe tu mensaje:</label>
-        <textarea id="message" v-model="message" required></textarea>
-        <button type="submit">Enviar</button>
-      </form>
-    </div>
-    <div class="column">
-      <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-      <div class="social-icons">
-        <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
-      </div>
-    </div>
-  </div>
-  <div v-else class="contactin mensaje-enviado">
-    <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
-  </div>
+  <contacto/>
   <footer-componente/>
 </template>
 
 <script>
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
+import contacto from "@/components/contacto.vue";
 import axios from 'axios';
 import {mapGetters} from "vuex";
 
 
 export default {
   name: 'comunidad-ociosingluten',
-  components: {FooterComponente, Header3},
+  components: {FooterComponente, Header3, contacto},
   data() {
     return {
       users: [], // Aquí se almacenarán todos los usuarios

@@ -1,107 +1,109 @@
 <template>
   <cabecera-componente2/>
-  <div class="container2">
-    <h1 class="text-center">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
-    <p class="subtitle text-center">¡Introduzca sus datos para pasar a formar parte de la comunidad celiaca!</p>
-    <form @submit.prevent="agregarUsuario" class="row">
-      <!-- Columna izquierda -->
-      <div class="col-md-4">
-        <div class="form-group">
-          <label for="dni">DNI:</label>
-          <input type="text" class="form-control" id="dni" v-model="nuevoUsuario.dni" @change="validarDni" required>
-          <span v-if="!dniValido" class="text-danger">DNI no válido.</span>
-        </div>
-        <div class="form-group">
-          <label for="username">Nombre de Usuario:</label>
-          <input type="text" class="form-control" id="username" v-model="nuevoUsuario.username" required>
-        </div>
-        <div class="form-group">
-          <label for="nombre">Nombre:</label>
-          <input type="text" class="form-control" id="nombre" v-model="nuevoUsuario.nombre" required>
-        </div>
-        <div class="form-group">
-          <label for="apellidos">Apellidos:</label>
-          <input type="text" class="form-control" id="apellidos" v-model="nuevoUsuario.apellidos" required>
-        </div>
-        <div class="form-group">
-          <label for="fechaNacimiento">Fecha de Nacimiento:</label>
-          <input type="date" class="form-control" id="fechaNacimiento" v-model="nuevoUsuario.fechaNacimiento" @change="validarEdad" required>
-          <span v-if="!mayorDeEdad" class="text-danger">Debes ser mayor de edad para registrarte.</span>
-        </div>
-      </div>
-      <!-- Columna central -->
-      <div class="col-md-4">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" class="form-control" id="email" v-model="nuevoUsuario.email" @input="validarEmail" required>
-          <span v-if="!emailValido" class="text-danger">Email no válido.</span>
-        </div>
-        <div class="form-group">
-          <label for="telefono">Teléfono:</label>
-          <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" @change="validarTelefono" required>
-          <span v-if="!telefonoValido" class="text-danger">Teléfono no válido.</span>
-        </div>
-        <div class="form-group position-relative">
-          <label for="password">Contraseña:</label>
-          <input
-              :type="showPassword? 'text' : 'password'"
-              class="form-control"
-              id="password"
-              v-model="nuevoUsuario.password"
-              @change="validarPassword"
-              required
-          >
-          <button
-              type="button"
-              class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
-              style="width: 40px; height: 40px; padding: 0;"
-              @click="showPassword =!showPassword"
-          >
-            <i :class="showPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
-          </button>
-          <span v-if="!passwordValida" class="text-danger">Contraseña incorrecta. Introduzca al menos 8 caracteres con una mayúscula.</span>
-        </div>
-        <div class="form-group position-relative">
-          <label for="confirmPassword">Confirmar Contraseña:</label>
-          <input
-              :type="showConfirmPassword? 'text' : 'password'"
-              class="form-control"
-              id="confirmPassword"
-              v-model="confirmPassword"
-              @change="contrasenaCoincide"
-              required
-          >
-          <button
-              type="button"
-              class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
-              style="width: 40px; height: 40px; padding: 0;"
-              @click="showConfirmPassword =!showConfirmPassword"
-          >
-            <i :class="showConfirmPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
-          </button>
-          <span v-if="!passwordsCoinciden" class="text-danger ">Las contraseñas no coinciden.</span>
-        </div>
-      </div>
-      <!-- Columna derecha -->
-      <div class="col-md-4">
-        <!-- Campo de carga de foto de perfil -->
-        <div class="form-group">
-          <label for="fotoPerfil">Foto de Perfil:</label>
-          <input type="file" class="form-control-file" id="fotoPerfil" @change="onFileChange">
-          <!-- Previsualización de la imagen -->
-          <div v-if="imagePreview" class="image-preview">
-            <img :src="imagePreview" alt="Previsualización de la imagen" class="rounded-circle">
+  <div class="container1">
+    <div class="container2">
+      <h1 class="text-center">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
+      <p class="subtitle text-center">¡Introduzca sus datos para pasar a formar parte de la comunidad celiaca!</p>
+      <form @submit.prevent="agregarUsuario" class="row">
+        <!-- Columna izquierda -->
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="dni">DNI:</label>
+            <input type="text" class="form-control" id="dni" v-model="nuevoUsuario.dni" @change="validarDni" required>
+            <span v-if="!dniValido" class="text-danger">DNI no válido.</span>
           </div>
-          <!-- Mensaje de aviso -->
-          <span v-if="showFormatWarning" class="text-danger">Por favor, seleccione una imagen en formato JPG o JPEG.</span>
+          <div class="form-group">
+            <label for="username">Nombre de Usuario:</label>
+            <input type="text" class="form-control" id="username" v-model="nuevoUsuario.username" required>
+          </div>
+          <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" v-model="nuevoUsuario.nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="apellidos">Apellidos:</label>
+            <input type="text" class="form-control" id="apellidos" v-model="nuevoUsuario.apellidos" required>
+          </div>
+          <div class="form-group">
+            <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+            <input type="date" class="form-control" id="fechaNacimiento" v-model="nuevoUsuario.fechaNacimiento" @change="validarEdad" required>
+            <span v-if="!mayorDeEdad" class="text-danger">Debes ser mayor de edad para registrarte.</span>
+          </div>
         </div>
-        <!-- Botón de Agregar Usuario -->
-        <div class="form-group">
-          <button type="submit" class="btn btn-primary">Agregar Usuario</button>
+        <!-- Columna central -->
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" v-model="nuevoUsuario.email" @input="validarEmail" required>
+            <span v-if="!emailValido" class="text-danger">Email no válido.</span>
+          </div>
+          <div class="form-group">
+            <label for="telefono">Teléfono:</label>
+            <input type="text" class="form-control" id="telefono" v-model="nuevoUsuario.telefono" @change="validarTelefono" required>
+            <span v-if="!telefonoValido" class="text-danger">Teléfono no válido.</span>
+          </div>
+          <div class="form-group position-relative">
+            <label for="password">Contraseña:</label>
+            <input
+                :type="showPassword? 'text' : 'password'"
+                class="form-control"
+                id="password"
+                v-model="nuevoUsuario.password"
+                @change="validarPassword"
+                required
+            >
+            <button
+                type="button"
+                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+                style="width: 40px; height: 40px; padding: 0;"
+                @click="showPassword =!showPassword"
+            >
+              <i :class="showPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
+            </button>
+            <span v-if="!passwordValida" class="text-danger">Contraseña incorrecta. Introduzca al menos 8 caracteres con una mayúscula.</span>
+          </div>
+          <div class="form-group position-relative">
+            <label for="confirmPassword">Confirmar Contraseña:</label>
+            <input
+                :type="showConfirmPassword? 'text' : 'password'"
+                class="form-control"
+                id="confirmPassword"
+                v-model="confirmPassword"
+                @change="contrasenaCoincide"
+                required
+            >
+            <button
+                type="button"
+                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+                style="width: 40px; height: 40px; padding: 0;"
+                @click="showConfirmPassword =!showConfirmPassword"
+            >
+              <i :class="showConfirmPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
+            </button>
+            <span v-if="!passwordsCoinciden" class="text-danger ">Las contraseñas no coinciden.</span>
+          </div>
         </div>
-      </div>
-    </form>
-    <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+        <!-- Columna derecha -->
+        <div class="col-md-4">
+          <!-- Campo de carga de foto de perfil -->
+          <div class="form-group">
+            <label for="fotoPerfil">Foto de Perfil:</label>
+            <input type="file" class="form-control-file" id="fotoPerfil" @change="onFileChange">
+            <!-- Previsualización de la imagen -->
+            <div v-if="imagePreview" class="image-preview">
+              <img :src="imagePreview" alt="Previsualización de la imagen" class="rounded-circle">
+            </div>
+            <!-- Mensaje de aviso -->
+            <span v-if="showFormatWarning" class="text-danger">Por favor, seleccione una imagen en formato JPG o JPEG.</span>
+          </div>
+          <!-- Botón de Agregar Usuario -->
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Agregar Usuario</button>
+          </div>
+        </div>
+      </form>
+      <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+    </div>
   </div>
   <div class="extra-space">
     <footer-componente/>
@@ -273,5 +275,13 @@ export default {
 </script>
 
 <style scoped>
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
+}
+
 @import '../assets/css/registro.css';
 </style>

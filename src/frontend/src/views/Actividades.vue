@@ -1,7 +1,8 @@
 <template>
   <div class="page-container">
     <header3 />
-    <div class="container-principal">
+    <div class="container1">
+      <div class="container-principal">
       <h1>Actividades de Ocio Sin Gluten</h1>
       <p class="intro-text">
         Si quiere que aparezca alguna de sus actividades por aquí, tan solo tiene que comentar algún establecimiento,
@@ -17,40 +18,15 @@
         </div>
         <div class="contenido-actividad">
           <div>
-            <strong @click="irAPerfil(actividad.autor.username)" class="nombre-usuario">{{ actividad.autor.username }}</strong>
-            : {{ traducirMensaje(actividad.mensajePredefinido) }} {{ actividad.establecimiento.nombre }}, {{actividad.establecimiento.localidad }}, {{actividad.establecimiento.provincia }}
+            <strong @click="irAPerfil(actividad.autor.username)" class="nombre-usuario">{{ actividad.autor.username }}:</strong>
+             {{ traducirMensaje(actividad.mensajePredefinido) }} {{ actividad.establecimiento.nombre }}, {{actividad.establecimiento.localidad }}, {{actividad.establecimiento.provincia }}
           </div>
           <div class="fecha">{{ actividad.fechaContribucion }}</div>
         </div>
       </div>
     </div>
-    <div id="contacto" class="contactin" v-if="!mensajeEnviado">
-      <div class="column">
-        <h1>¿Tienes alguna pregunta sobre la celiaquía o los alimentos sin gluten?</h1>
-        <p>¡Envíanos un mensaje y estaremos encantados de ayudarte!</p>
-      </div>
-      <div class="column" v-if="!mensajeEnviado">
-        <form @submit.prevent="handleSubmit">
-          <label for="name">Nombre y apellidos:</label>
-          <input type="text" id="name" v-model="namelon" required>
-          <label for="email">Correo:</label>
-          <input type="email" id="email" v-model="email" required>
-          <label for="message">Escribe tu mensaje:</label>
-          <textarea id="message" v-model="message" required></textarea>
-          <button type="submit">Enviar</button>
-        </form>
-      </div>
-      <div class="column">
-        <p>¡También puedes seguirnos en nuestras redes sociales!</p>
-        <div class="social-icons">
-          <a href="https://www.instagram.com/ociosingluten/" target="_blank"><i class="fab fa-instagram"></i></a>
-          <a href="https://x.com/ociosingluten" target="_blank"><i class="fab fa-twitter"></i></a>
-        </div>
-      </div>
     </div>
-    <div v-else class="contactin mensaje-enviado">
-      <h2>¡Mensaje enviado, en breves obtendrás respuestas!</h2>
-    </div>
+    <contacto/>
     <footer-componente />
   </div>
 </template>
@@ -62,9 +38,10 @@ import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
 import { useRouter } from 'vue-router';
 import {mapGetters} from "vuex";
+import contacto from "@/components/contacto.vue";
 
 export default {
-  components: { Header3, FooterComponente },
+  components: { Header3, FooterComponente, contacto },
   computed: {
     ...mapGetters(['username', 'isAuthenticated'])
   },
@@ -207,6 +184,14 @@ footer-componente {
   margin-bottom: 10px;
   display: flex;
   align-items: flex-start;
+}
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
 }
 
 .user-avatar {

@@ -1,12 +1,13 @@
 <template>
   <div>
     <header3/>
-    <div class="container mt-5 mb-5"> <!-- Agregamos un margen inferior -->
+    <div class="container1">
+      <div class="container mt-5 mb-5"> <!-- Agregamos un margen inferior -->
       <div class="row">
         <!-- Formulario para enviar mensajes -->
         <div class="col-md-4">
           <div class="mb-3">
-            <h4>Enviar Mensaje</h4>
+            <h4>Envie su mensaje</h4>
             <input v-model="nombre" type="text" class="form-control mb-2" placeholder="Nombre" readonly>
             <input v-model="mensaje" type="text" class="form-control mb-2" placeholder="Mensaje">
             <button @click="enviarMensaje" class="botoncin">Enviar</button>
@@ -27,6 +28,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
     <footer-componente class="mt-auto"/>
   </div>
@@ -178,5 +180,13 @@ footer-componente {
 
 .botoncin:hover {
   background-color: #ffcc74;
+}
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
 }
 </style>

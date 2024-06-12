@@ -1,7 +1,8 @@
 <template>
   <div>
     <header3/>
-    <div class="container-principal">
+    <div class="container1">
+      <div class="container-principal">
       <div class="followers-column">
         <h2>Establecimientos favoritos del usuario</h2>
         <input type="text" v-model="favoritosSearchQuery" placeholder="Buscar establecimiento...">
@@ -32,6 +33,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
     <footer-componente />
   </div>
@@ -92,6 +94,15 @@ export default {
 </script>
 
 <style scoped>
+
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
+}
+
 .container-principal {
   min-height: calc(100vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
   width: 80vw;

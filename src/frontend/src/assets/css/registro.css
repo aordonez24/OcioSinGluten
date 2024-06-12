@@ -1,9 +1,4 @@
-body {
-    background-image: url("../images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-repeat: no-repeat; /* Evitar que la imagen se repita */
-    background-size: cover;
-}
+
 
 .container2 {
     width: 70vw; /* Ancho del viewport */
@@ -15,9 +10,6 @@ body {
     border: 1px solid #ccc;
 }
 
-.extra-space {
-    margin-top: 20px;
-}
 
 h1 {
     font-size: 32px;

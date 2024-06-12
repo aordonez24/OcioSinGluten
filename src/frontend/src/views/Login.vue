@@ -1,20 +1,22 @@
 <!-- src/components/Login.vue -->
 <template>
   <cabecera-componente2/>
-  <div class="container">
-    <div class="form-background">
-      <h1><span class="black-text">Inicia sesión en</span> <span class="yellow-text">Ocio Sin Gluten</span></h1>
-      <form @submit.prevent="submitLogin">
-        <input type="text" v-model="email" placeholder="Correo electrónico">
-        <br>
-        <input type="password" v-model="password" placeholder="Contraseña" @keyup.enter="submitLogin">
-        <br><br>
-        <button type="submit2">Ingresar</button>
-      </form>
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-    </div>
-    <div class="login">
-      <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Crea una nueva</router-link> </a></p>
+  <div class="container1">
+    <div class="container">
+      <div class="form-background">
+        <h1><span class="black-text">Inicia sesión en</span> <span class="yellow-text">Ocio Sin Gluten</span></h1>
+        <form @submit.prevent="submitLogin">
+          <input type="text" v-model="email" placeholder="Correo electrónico">
+          <br>
+          <input type="password" v-model="password" placeholder="Contraseña" @keyup.enter="submitLogin">
+          <br><br>
+          <button type="submit2">Ingresar</button>
+        </form>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      </div>
+      <div class="login">
+        <p>¿Necesitas una cuenta? <a> <router-link :to="{ path: '/registroUsuario' }">Crea una nueva</router-link> </a></p>
+      </div>
     </div>
   </div>
   <div class="extra-space">
@@ -91,9 +93,14 @@ html, body {
   height: 100%;
 }
 
-body {
-  background-image: url("@/assets/images/_93bec00e-8ba7-4efb-9132-607d254c8874.jpg");
+.container1 {
+  background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-size: cover;
+  padding: 20px;
 }
+
 
 .container {
   width: 510px; /* Ancho del viewport */
