@@ -19,13 +19,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'cabecera-componente-2'
-}
-
-</script>
-
 <style scoped>
 header {
   background-color: #444444;
@@ -60,7 +53,12 @@ header {
   font-size: 50px; /* Tamaño del título */
   margin-bottom: 15px; /* Margen inferior para separar el título del botón */
   white-space: nowrap; /* Evita que el texto se divida en varias líneas */
-  margin-top: 15px;
+
+  /* Estilos para pantallas más pequeñas */
+  @media screen and (max-width: 768px) {
+    font-size: 30px; /* Tamaño del título para dispositivos móviles */
+    margin-top: 5px; /* Ajusta el margen superior en dispositivos móviles */
+  }
 }
 
 p {

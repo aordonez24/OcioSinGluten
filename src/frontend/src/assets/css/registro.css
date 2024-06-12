@@ -62,8 +62,6 @@ label {
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
 }
 
-
-
 .btn-primary:hover {
     background-color: #7F7F7F;
     box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.2);
@@ -95,6 +93,10 @@ input[type="file"]::-webkit-file-upload-button:hover {
     background-color: #9DD9D2;
     transform: scale(1.05);
 }
+input[type="file"]::placeholder {
+    visibility: hidden;
+}
+
 
 /* Efecto de sombra al hacer hover en los campos de entrada */
 .form-control:hover {

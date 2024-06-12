@@ -2,7 +2,7 @@
   <cabecera-componente2/>
   <div class="container1">
     <div class="container2">
-      <h1 class="text-center">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
+      <h1 class="text-center title">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
       <p class="subtitle text-center">¡Introduzca sus datos para pasar a formar parte de la comunidad celiaca!</p>
       <form @submit.prevent="agregarUsuario" class="row">
         <!-- Columna izquierda -->
@@ -54,7 +54,7 @@
             >
             <button
                 type="button"
-                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y show-password-btn"
                 style="width: 40px; height: 40px; padding: 0;"
                 @click="showPassword =!showPassword"
             >
@@ -74,28 +74,27 @@
             >
             <button
                 type="button"
-                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y"
+                class="btn btn-secondary position-absolute end-0 top-50 translate-middle-y show-password-btn"
                 style="width: 40px; height: 40px; padding: 0;"
                 @click="showConfirmPassword =!showConfirmPassword"
             >
               <i :class="showConfirmPassword? 'fa fa-eye-slash' : 'fa fa-eye-slash'" aria-hidden="true"></i>
             </button>
-            <span v-if="!passwordsCoinciden" class="text-danger ">Las contraseñas no coinciden.</span>
+            <span v-if="!passwordsCoinciden" class="text-danger">Las contraseñas no coinciden.</span>
           </div>
         </div>
         <!-- Columna derecha -->
         <div class="col-md-4">
-          <!-- Campo de carga de foto de perfil -->
-          <div class="form-group">
+          <div class="form-group d-flex flex-column align-items-start">
             <label for="fotoPerfil">Foto de Perfil:</label>
-            <input type="file" class="form-control-file" id="fotoPerfil" @change="onFileChange">
-            <!-- Previsualización de la imagen -->
             <div v-if="imagePreview" class="image-preview">
               <img :src="imagePreview" alt="Previsualización de la imagen" class="rounded-circle">
             </div>
-            <!-- Mensaje de aviso -->
-            <span v-if="showFormatWarning" class="text-danger">Por favor, seleccione una imagen en formato JPG o JPEG.</span>
+            <div v-if="showFormatWarning" class="text-danger">Por favor, seleccione una imagen en formato JPG o JPEG.</div>
+            <input type="file" class="form-control-file" id="fotoPerfilInput" style="display: none;" @change="onFileChange">
+            <button type="button" class="btn btn-primary" id="seleccionarFotoPerfil">Seleccionar Foto</button>
           </div>
+
           <!-- Botón de Agregar Usuario -->
           <div class="form-group">
             <button type="submit" class="btn btn-primary">Agregar Usuario</button>
@@ -144,6 +143,13 @@ export default {
       mayorDeEdad: false,
       errorMessage: ''  // Variable para almacenar el mensaje de error
     }
+  },
+  mounted() {
+    // Escuchar el evento clic en el botón personalizado
+    document.getElementById('seleccionarFotoPerfil').addEventListener('click', () => {
+      // Disparar el evento de clic en el input de tipo "file"
+      document.getElementById('fotoPerfilInput').click();
+    });
   },
   methods: {
     agregarUsuario() {
@@ -255,20 +261,28 @@ export default {
     onFileChange(event) {
       const selectedFile = event.target.files[0];
 
-      if (!['image/jpeg', 'image/jpg'].includes(selectedFile.type)) {
-        this.showFormatWarning = true;
-        return;
+      // Verificar si se seleccionó un archivo
+      if (selectedFile) {
+        if (!['image/jpeg', 'image/jpg'].includes(selectedFile.type)) {
+          this.showFormatWarning = true;
+          return;
+        }
+        this.showFormatWarning = false;
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          this.imagePreview = e.target.result;
+          this.nuevoUsuario.fotoPerfil = e.target.result.split(',')[1];
+        };
+
+        reader.readAsDataURL(selectedFile);
+      } else {
+        // Si no se selecciona un archivo, limpiar la previsualización y resetear el aviso
+        this.imagePreview = '';
+        this.nuevoUsuario.fotoPerfil = null;
+        this.showFormatWarning = false;
       }
-      this.showFormatWarning = false;
-
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        this.imagePreview = e.target.result;
-        this.nuevoUsuario.fotoPerfil = e.target.result.split(',')[1];
-      };
-
-      reader.readAsDataURL(selectedFile);
     }
   }
 }
@@ -281,6 +295,71 @@ export default {
   background-repeat: no-repeat; /* Evitar que la imagen se repita */
   background-size: cover;
   padding: 20px;
+}
+
+/* Estilos para pantallas más pequeñas */
+@media screen and (max-width: 768px) {
+  .container1 {
+    background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-repeat: no-repeat; /* Evitar que la imagen se repita */
+    background-size: cover;
+    padding: 20px;
+  }
+
+  .container2 {
+    width: 90vw; /* Reducir el ancho del contenedor en pantallas más pequeñas */
+    padding: 20px;
+  }
+
+  /* Estilos para el título en dispositivos móviles */
+  .title {
+    font-size: 24px; /* Tamaño del título para dispositivos móviles */
+    margin-bottom: 20px; /* Ajusta el margen inferior si es necesario */
+  }
+
+
+  /* Alinear el botón de enviar al centro */
+  .form-group:last-child {
+    text-align: center;
+  }
+
+  /* Alinear el texto de aviso en el centro */
+  .text-danger {
+    text-align: center;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+}
+
+/* Estilos específicos para campos de entrada */
+@media screen and (max-width: 576px) {
+  /* Reducir el padding de los campos de entrada */
+  .form-control {
+    padding: 10px;
+  }
+
+  /* Reducir el tamaño de la imagen de previsualización */
+  .image-preview {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Estilos para botones en pantallas más pequeñas */
+@media screen and (max-width: 576px) {
+  .btn-primary {
+    padding: 10px 20px;
+  }
+
+  .show-password-btn {
+    padding: 10px 15px;
+  }
 }
 
 @import '../assets/css/registro.css';

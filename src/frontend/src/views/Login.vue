@@ -236,4 +236,35 @@ input[type="password"] {
   margin-top: 5px;
   text-align: center;
 }
+
+@media screen and (max-width: 768px) {
+  .container {
+    width: 90%; /* Cambia el ancho del contenedor para pantallas más pequeñas */
+    margin: 50px auto; /* Ajusta el margen vertical */
+    padding: 20px; /* Ajusta el padding */
+  }
+
+  .form-background {
+    width: 100%; /* Ajusta el ancho del formulario */
+    padding: 20px; /* Ajusta el padding del formulario */
+  }
+
+  h1 {
+    font-size: 24px; /* Ajusta el tamaño del título */
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%; /* Ajusta el ancho de los campos de entrada */
+  }
+
+  button[type="submit"] {
+    width: 100%; /* Ajusta el ancho del botón */
+  }
+
+  .login {
+    font-size: 16px; /* Ajusta el tamaño del texto de "¿Necesitas una cuenta?" */
+  }
+}
+
 </style>

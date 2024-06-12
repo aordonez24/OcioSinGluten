@@ -22,12 +22,6 @@
                 <li>Distensión abdominal</li>
                 <li>Pérdida de peso inexplicable</li>
                 <li>Fatiga</li>
-              </ul>
-            </div>
-          </div>
-          <div class="column-container">
-            <div class="right-column">
-              <ul>
                 <li>Erupciones cutáneas</li>
                 <li>Dolor abdominal</li>
                 <li>Anemia</li>
@@ -35,6 +29,7 @@
               </ul>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -198,6 +193,38 @@ body {
   color: black; /* Color del texto */
   font-size: 18px; /* Tamaño de fuente */
   text-decoration: underline; /* Subrayar el texto */
+}
+
+/* Media Queries para pantallas pequeñas */
+@media (max-width: 768px) {
+  .main-section {
+    padding: 20px 10px; /* Ajustar el padding para pantallas más pequeñas */
+  }
+
+  .main-section h2 {
+    font-size: 25px; /* Ajustar el tamaño de fuente */
+  }
+
+  .main-section h3 {
+    font-size: 20px; /* Ajustar el tamaño de fuente */
+  }
+
+  .main-section p {
+    font-size: 16px; /* Ajustar el tamaño de fuente */
+  }
+
+  .symptoms-container {
+    padding: 20px 10px; /* Ajustar el padding para pantallas más pequeñas */
+  }
+
+  .symptoms-container h3 {
+    font-size: 25px; /* Ajustar el tamaño de fuente */
+  }
+
+  .column-container {
+    flex: 1 1 100%; /* Permitir que las columnas se ocupen todo el ancho en pantallas pequeñas */
+    margin: 10px 0; /* Agregar un margen entre las columnas */
+  }
 }
 
 

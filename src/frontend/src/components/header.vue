@@ -161,4 +161,89 @@ nav ul li:nth-child(5) a:hover {
 .cerrar-sesion-button:hover {
   background-color: #9DD9D2;
 }
+
+/* Media Queries para diseño responsive */
+@media (max-width: 992px) {
+  .logo-container {
+    flex-direction: column;
+  }
+
+  .logo {
+    width: 100px;
+    height: 100px;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 2em;
+  }
+
+  .subtitle {
+    font-size: 1em;
+  }
+
+  nav {
+    margin-left: 0;
+    margin-top: 20px;
+  }
+
+  nav ul.main-links {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav ul.main-links li {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  nav ul.main-links li:last-child {
+    margin-bottom: 0;
+  }
+
+  .welcome-message {
+    font-size: 1.25em;
+  }
+
+  .welcome-link {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.5em;
+  }
+
+  .subtitle {
+    font-size: 0.875em;
+  }
+
+  .welcome-message {
+    font-size: 1em;
+  }
+
+  .welcome-link {
+    font-size: 0.875em;
+  }
+}
+
+@media (max-width: 576px) {
+  .title {
+    font-size: 1.25em;
+  }
+
+  .subtitle {
+    font-size: 0.75em;
+  }
+
+  .welcome-message {
+    font-size: 0.875em;
+  }
+
+  .welcome-link {
+    font-size: 0.75em;
+  }
+}
 </style>
