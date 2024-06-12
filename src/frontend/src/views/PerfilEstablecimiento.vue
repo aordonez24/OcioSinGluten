@@ -101,6 +101,9 @@
       <!-- Modal para mostrar la imagen en tamaño completo -->
       <div class="modal" v-if="imagenSeleccionada !== null">
         <div class="modal-contenido">
+          <span class="eliminar" @click="eliminarImagen(imagenSeleccionada)">
+            <i class="fas fa-trash-alt"></i>
+          </span>
           <span class="cerrar" @click="cerrarModal">&times;</span>
           <img :src="imagenSeleccionada" alt="Imagen" style="max-width: 100%; max-height: 100%;">
         </div>
@@ -233,7 +236,6 @@ export default {
       const response = await axios.get(`http://localhost:8080/ociosingluten/establecimientos/establecimiento/${id}`);
       this.establecimiento = response.data;
       this.imagenes = this.establecimiento.imagenesBase64.map(base64 => 'data:image/png;base64,' + base64);
-      console.log(this.establecimiento);
       if(this.establecimiento.numLikes < this.establecimiento.visitantes.length) {
         this.valoracionMedia = 5 * (this.establecimiento.numLikes / this.establecimiento.visitantes.length);
       }else{
@@ -317,7 +319,6 @@ export default {
         username: this.usuarioActual,
         mensaje: this.nuevoComentario
       };
-      console.log(nuevoComentarioDTO);
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/establecimientos/${id}/nuevoComentario`, nuevoComentarioDTO)
           .then(() => {
             // Si el comentario se envía correctamente, actualiza la lista de comentarios
@@ -356,6 +357,32 @@ export default {
     cerrarModal() {
       this.imagenSeleccionada = null;
     },
+    async eliminarImagen(imagenSeleccionada){
+      const id = this.$route.params.idEstablecimiento;
+      console.log(imagenSeleccionada.id);
+      try {
+        // Obtener el segmento Base64 de la imagen seleccionada
+        const base64Image = imagenSeleccionada.split(',')[1];
+
+        // Realizar la petición POST al endpoint sin convertir a JSON
+        const response = await fetch(`http://localhost:8080/ociosingluten/establecimientos/establecimientoFoto/${id}/quitaFoto`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain' // Cambiar el tipo de contenido a text/plain
+          },
+          body: base64Image
+        });
+        if (response.ok) {
+          console.log("Imagen eliminada correctamente");
+          this.cerrarModal();
+          location.reload();
+        } else {
+          console.error("Error al eliminar la imagen:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error inesperado:", error);
+      }
+    },
     async obtenerCoordenadas() {
       try {
         const id = this.$route.params.idEstablecimiento;
@@ -382,7 +409,6 @@ export default {
         const id = this.$route.params.idEstablecimiento;
         const response = await axios.get(`http://localhost:8080/ociosingluten/establecimientos/establecimientos/${id}/comentarios`);
         this.comentarios = response.data;
-        console.log(this.comentarios);
       } catch (error) {
         console.error('Error al cargar los comentarios:', error);
       }
@@ -475,7 +501,6 @@ export default {
             username: username
           }
         });
-        console.log(response);
         if (response.status === 200) {
           this.esFavorito = false;
           console.log('Establecimiento quitado como favorito con éxito.');
@@ -495,7 +520,6 @@ export default {
             username: username
           }
         });
-        console.log(response);
         if (response.status === 200) {
           this.esVisitado = false;
           console.log('Establecimiento quitado como favorito con éxito.');
@@ -517,8 +541,7 @@ export default {
         username: this.username,
         mensaje: respuesta
       };
-      console.log(nuevoComentarioDTO);
-      console.log(id);
+
       axios.post(`http://localhost:8080/ociosingluten/comentario/${id}/nuevaRespuesta`, nuevoComentarioDTO)
           .then(() => {
             // Si la respuesta se envía correctamente, actualiza la lista de comentarios

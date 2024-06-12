@@ -100,12 +100,32 @@ public class EstablecimientoController {
         byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
 
         Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
-        Imagen img = new Imagen(fotoPerfil, est.get());
-        repoImg.save(img);
+        if(est.isPresent()) {
+            Imagen img = new Imagen(fotoPerfil, est.get());
+            repoImg.save(img);
 
-        est.get().anadirImagen(img);
-        repoEst.actualizar(est.get());
-        return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(est.get()));
+            est.get().anadirImagen(img);
+            repoEst.actualizar(est.get());
+            return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(est.get()));
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/establecimientoFoto/{id}/quitaFoto")
+    public ResponseEntity<?> quitaFoto(@PathVariable int id, @RequestBody String  fotoPerfilBase64){
+        byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
+        Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
+        List<Imagen> imagenes = repoImg.findByImagenAndEstablecimiento(fotoPerfil, est.get());
+        if(est.isPresent() && !imagenes.isEmpty()) {
+            Imagen img = imagenes.get(imagenes.size()-1
+             );
+            repoImg.delete(img);
+            repoEst.actualizar(est.get());
+            return ResponseEntity.status(HttpStatus.CREATED).body(new EstablecimientoDTO(est.get()));
+        }else{
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/nuevoEstablecimiento")

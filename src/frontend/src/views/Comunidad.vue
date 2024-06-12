@@ -10,7 +10,7 @@
     <div class="user-grid">
       <div v-for="user in filteredUsers" :key="user.username" class="user-card">
         <div class="user-avatar">
-          <img v-if="user.fotoPerfil" :src="'data:image/jpeg;base64,' + user.fotoPerfil"  />
+          <img v-if="user.fotoPerfil && user.fotoPerfil.length > 4" :src="'data:image/jpeg;base64,' + user.fotoPerfil"  />
           <i v-else class="fas fa-user"></i>
         </div>
         <div class="user-info">

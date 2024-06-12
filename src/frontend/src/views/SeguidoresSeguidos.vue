@@ -10,7 +10,7 @@
           <div v-for="follower in filteredFollowers" :key="follower.username" class="follower">
             <div class="follower-info">
               <div class="profile-pic">
-                <img v-if="follower.fotoPerfil" :src="'data:image/jpeg;base64,' + follower.fotoPerfil" :alt="'Foto de perfil de ' + follower.username">
+                <img v-if="follower.fotoPerfil && follower.fotoPerfil.length > 4" :src="'data:image/jpeg;base64,' + follower.fotoPerfil" :alt="'Foto de perfil de ' + follower.username">
                 <i v-else class="fas fa-user"></i> <!-- Icono de usuario predeterminado -->
               </div>
               <div>
@@ -28,7 +28,7 @@
           <div v-for="followed in filteredFollowedUsers" :key="followed.username" class="followed">
             <div class="followed-info">
               <div class="profile-pic">
-                <img v-if="followed.fotoPerfil" :src="'data:image/jpeg;base64,' + followed.fotoPerfil" :alt="'Foto de perfil de ' + followed.username">
+                <img v-if="followed.fotoPerfil.length > 4" :src="'data:image/jpeg;base64,' + followed.fotoPerfil" :alt="'Foto de perfil de ' + followed.username">
                 <i v-else class="fas fa-user"></i> <!-- Icono de usuario predeterminado -->
               </div>
               <div>
