@@ -5,7 +5,7 @@
     <p class="subtext">Busque a conocidos y comparta experiencias con ellos</p>
     <button @click="iniciarChat" class="cerrar-sesion-button">Acceda a nuestro chat grupal!</button>
     <div class="barra-busqueda">
-      <input type="text" v-model="searchQuery" placeholder="Buscar usuario..." @input="filterUsers">
+      <input type="text" class="search-input" v-model="searchQuery" placeholder="Buscar usuario..." @input="filterUsers">
     </div>
     <div class="user-grid">
       <div v-for="user in filteredUsers" :key="user.username" class="user-card">
@@ -32,7 +32,6 @@ import FooterComponente from "@/components/footer.vue";
 import contacto from "@/components/contacto.vue";
 import axios from 'axios';
 import {mapGetters} from "vuex";
-
 
 export default {
   name: 'comunidad-ociosingluten',
@@ -106,10 +105,9 @@ export default {
 </script>
 
 <style scoped>
-
 .container-principal {
-  height: 100vh; /* 100% del alto de la pantalla */
-  width: 100%; /* 100% del ancho de la pantalla */
+  height: 100vh;
+  width: 100%;
   background-color: #ffcc74;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -119,23 +117,21 @@ export default {
 }
 
 .welcome-text {
-  font-size: 30px;
+  font-size: 2rem;
   font-weight: bold;
   text-align: center;
   margin-bottom: 10px;
 }
 
-/* Estilos para el subtítulo */
 .subtext {
-  font-size: 24px;
+  font-size: 1.5rem;
   text-align: center;
   margin-bottom: 20px;
 }
 
-
 .search-input {
-  margin-bottom: 20px; /* Espacio entre la barra de búsqueda y los usuarios */
-  width: 50%; /* Ancho de la barra de búsqueda */
+  margin-bottom: 20px;
+  width: 50%;
 }
 
 .user-grid {
@@ -145,28 +141,28 @@ export default {
 }
 
 .user-avatar {
-  width: 100px;
-  height: 100px;
+  width: 6.25rem;
+  height: 6.25rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px; /* Tamaño del icono */
-  background-color: #ccc; /* Color de fondo predeterminado */
-  color: white; /* Color del icono */
-  margin-right: 30px;
+  font-size: 1.5rem;
+  background-color: #ccc;
+  color: white;
+  margin-right: 1rem;
 }
 
 .username-link {
-  cursor: pointer; /* Cambia el cursor al pasar el ratón */
-  color: black; /* Cambia el color del texto */
+  cursor: pointer;
+  color: black;
 }
 
 .user-avatar img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%; /* Hacer que la imagen sea circular */
-  object-fit: cover; /* Hacer que la imagen se ajuste dentro del contenedor manteniendo su relación de aspecto */
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .user-card {
@@ -177,13 +173,8 @@ export default {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin: 10px;
 }
-
-.user-card:not(:last-child) {
-  margin-right: 20px; /* Espacio entre cada tarjeta de usuario */
-}
-
 
 .user-info {
   text-align: center;
@@ -205,71 +196,72 @@ export default {
 }
 
 .contactin {
-  background-color: #353535; /* Color de fondo gris */
+  background-color: #353535;
   padding: 80px;
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .contactin .column {
-  flex: 1; /* Las columnas ocupan el mismo espacio */
-  padding: 20px; /* Agregar espaciado interno */
-  text-align: center; /* Centrar el contenido */
+  flex: 1;
+  padding: 20px;
+  text-align: center;
 }
 
 .contactin h1,
 .contactin p {
-  font-size: 30px; /* Tamaño de fuente más pequeño */
-  line-height: 1.4; /* Espaciado entre líneas más compacto */
-  max-width: 400px; /* Ancho máximo del texto para evitar que se extienda demasiado */
-  margin: 0 auto; /* Centrar el texto horizontalmente */
+  font-size: 1.875rem;
+  line-height: 1.4;
+  max-width: 25rem;
+  margin: 0 auto;
   color: white;
 }
 
 .contactin form {
-  text-align: left; /* Alinear el contenido del formulario a la izquierda */
-  max-width: 400px; /* Limitar el ancho del formulario para que no se vea muy extendido */
-  margin: 0 auto; /* Centrar el formulario horizontalmente */
+  text-align: left;
+  max-width: 25rem;
+  margin: 0 auto;
 }
 
 .contactin form label {
-  display: block; /* Mostrar los labels en una línea nueva */
-  margin-bottom: 8px; /* Añadir un poco de espacio entre los labels */
-  color: white; /* Color del texto de los labels */
+  display: block;
+  margin-bottom: 8px;
+  color: white;
 }
 
 .contactin form input,
 .contactin form textarea {
-  width: calc(100% - 16px); /* Hacer que los campos de entrada y el área de texto ocupen todo el ancho disponible */
-  padding: 10px; /* Añadir relleno a los campos de entrada */
-  margin-bottom: 16px; /* Añadir espacio entre los campos */
-  border: 1px solid #ddd; /* Añadir un borde */
-  border-radius: 4px; /* Agregar bordes redondeados */
-  background-color: #f9f9f9; /* Color de fondo del campo */
-  color: #333; /* Color del texto */
-  font-size: 16px; /* Tamaño de fuente */
+  width: calc(100% - 16px);
+  padding: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 1rem;
 }
 
 .contactin form textarea {
-  height: 120px; /* Establecer una altura para el área de texto */
+  height: 120px;
 }
 
 .contactin form button {
-  background-color: #7F7F7F; /* Color de fondo del botón */
-  color: white; /* Color del texto del botón */
-  border: none; /* Eliminar el borde del botón */
-  padding: 12px 24px; /* Aumentar el relleno del botón */
-  cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
-  font-size: 16px; /* Tamaño de fuente */
-  border-radius: 4px; /* Agregar bordes redondeados */
-  transition: background-color 0.3s ease; /* Agregar una transición suave al color de fondo */
-  display: block; /* Convertir el botón en un elemento de bloque */
-  margin: 0 auto; /* Centrar horizontalmente */
+  background-color: #7F7F7F;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 0 auto;
 }
 
 .contactin form button:hover {
-  background-color: #ffcc74; /* Cambiar el color de fondo al pasar el cursor sobre el botón */
+  background-color: #ffcc74;
 }
 
 .social-icons {
@@ -278,21 +270,20 @@ export default {
 }
 
 .social-icons a {
-  margin: 0 20px; /* Ajusta el margen entre los iconos según sea necesario */
-  color: #fff; /* Color de los iconos */
-  font-size: 36px; /* Tamaño más grande de los iconos */
-  transition: color 0.3s ease; /* Agregar una transición suave al color */
+  margin: 0 20px;
+  color: #fff;
+  font-size: 2.25rem;
+  transition: color 0.3s ease;
 }
 
-
 .social-icons a:hover {
-  color: #ffcc74; /* Cambiar el color al pasar el cursor */
+  color: #ffcc74;
 }
 
 .cerrar-sesion-button {
   padding: 8px 12px;
   border-radius: 20px;
-  margin-bottom: 20px; /* Espacio entre el botón y la barra de búsqueda */
+  margin-bottom: 20px;
   color: black;
   background-color: white;
   border: 2px solid transparent;
@@ -306,30 +297,59 @@ export default {
 
 .mensaje-enviado {
   display: flex;
-  align-items: center; /* Centrar verticalmente */
-  justify-content: center; /* Centrar horizontalmente */
-  background-color: #353535; /* Mantener el fondo gris oscuro */
+  align-items: center;
+  justify-content: center;
+  background-color: #353535;
 }
 
 .mensaje-enviado h2 {
-  color: white; /* Cambiar el color del texto a blanco */
-  text-align: center; /* Asegurarse de que el texto esté centrado */
+  color: white;
+  text-align: center;
 }
 
 .barra-busqueda {
-  margin-top: 10px; /* Espacio superior */
-  margin-bottom: 20px; /* Espacio inferior */
+  margin-top: 10px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  align-items: center; /* Centra horizontalmente */
+  align-items: center;
 }
 
 .barra-busqueda input {
-  width: 600px; /* Ancho de la barra de búsqueda */
-  padding: 10px; /* Espacio interno */
-  border-radius: 5px; /* Bordes redondeados */
-  border: 1px solid #ccc; /* Borde */
-  box-sizing: border-box; /* Incluir padding y border en el ancho */
-  text-align: center; /* Centrar el texto */
+  width: 80%;
+  max-width: 600px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .welcome-text {
+    font-size: 1.5rem;
+  }
+
+  .subtext {
+    font-size: 1.25rem;
+  }
+
+  .user-card {
+    width: 90%;
+    margin: 10px 0;
+  }
+
+  .user-avatar {
+    width: 4rem;
+    height: 4rem;
+    font-size: 1rem;
+    margin-right: 0;
+  }
+
+  .barra-busqueda input {
+    width: 90%;
+  }
+
 }
 </style>

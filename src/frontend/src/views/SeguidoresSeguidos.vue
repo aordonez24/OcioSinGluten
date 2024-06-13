@@ -5,7 +5,7 @@
       <div class="container-principal">
       <div class="followers-column">
         <h2>Seguidores</h2>
-        <input type="text" v-model="followerSearchQuery" placeholder="Buscar seguidor...">
+        <input type="text" v-model="followerSearchQuery" placeholder="Buscar seguidor por username...">
         <div class="follower-list" ref="followerList">
           <div v-for="follower in filteredFollowers" :key="follower.username" class="follower">
             <div class="follower-info">
@@ -23,7 +23,7 @@
       </div>
       <div class="following-column">
         <h2>Siguiendo</h2>
-        <input type="text" v-model="followedSearchQuery" placeholder="Buscar usuario seguido...">
+        <input type="text" v-model="followedSearchQuery" placeholder="Buscar usuario seguido por username...">
         <div class="followed-list" ref="followedList">
           <div v-for="followed in filteredFollowedUsers" :key="followed.username" class="followed">
             <div class="followed-info">
@@ -112,7 +112,6 @@ export default {
 </script>
 
 <style scoped>
-
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -123,20 +122,22 @@ export default {
 
 .container-principal {
   min-height: calc(100vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
-  width: 75vw;
-  margin: 50px auto 0; /* Eliminamos el margen inferior */
-  padding: 45px;
+  width: 90vw;
+  max-width: 1200px;
+  margin: 50px auto 0;
+  padding: 20px;
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
   display: flex;
-  margin-bottom: 30px;
+  flex-direction: column;
 }
 
 .followers-column, .following-column {
-  flex: 1;
   padding: 20px;
+  flex: 1;
+  max-width: 100%;
 }
 
 .follower, .followed {
@@ -151,7 +152,7 @@ export default {
   padding: 10px;
   display: flex;
   align-items: center;
-  width: 600px; /* Ajusta la altura mínima aquí */
+  width: 100%;
 }
 
 .follower img, .followed img {
@@ -161,22 +162,17 @@ export default {
   margin-right: 10px;
 }
 
-.following-column {
-  margin-left: 20px;
-}
-
 .follower-list, .followed-list {
-  overflow-y: auto; /* Barra de desplazamiento vertical */
+  overflow-y: auto;
 }
 
 input[type="text"] {
-  width: 96%;
+  width: 100%;
   padding: 8px;
   margin-bottom: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
-
 
 footer-componente {
   position: fixed;
@@ -185,34 +181,48 @@ footer-componente {
 }
 
 .profile-pic {
-  width: 100px;
-  height: 100px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background-color: #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 30px;
+  margin-right: 10px;
   overflow: hidden;
 }
 
 .profile-pic img {
   width: 110%;
   height: 110%;
-  object-fit: cover; /* Ajusta la imagen al contenedor, recortando si es necesario */
-  object-position: center; /* Añade esta línea */
-  border-radius: 50%; /* Mantén el borde circular */
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
 }
 
 .username-link {
-  cursor: pointer; /* Cambia el cursor al pasar el ratón */
-  color: black; /* Cambia el color del texto */
-  transition: color 0.5s; /* Agrega una transición para un cambio suave de color */
+  cursor: pointer;
+  color: black;
+  transition: color 0.5s;
 }
 
 .username-link:hover {
-  text-decoration: #ffcc74; /* Subraya el texto al pasar el ratón */
+  text-decoration: underline;
 }
 
+@media (max-width: 768px) {
+  .container-principal {
+    padding: 10px; /* Ajuste el padding para que sea más compacto en pantallas pequeñas */
+  }
+  .followers-column, .following-column {
+    width: 100%; /* Ambas columnas ocupan el 100% del ancho disponible */
+    padding: 5px; /* Padding reducido para conservar espacio */
+  }
+  .profile-pic {
+    width: 50px; /* Reduje el tamaño de la imagen de perfil para ajustarse mejor */
+    height: 50px;
+    border-radius: 50%; /* Añadí borde redondeado para mejorar aspecto en móviles */
+  }
+}
 
 </style>
