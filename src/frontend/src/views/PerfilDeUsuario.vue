@@ -14,8 +14,10 @@
                   class="profile-picture"
               />
               <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
+              <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
               <button @click="openFileInput" class="change-profile-picture-button">Subir foto de perfil</button>
               <button @click="eliminarFoto" class="change-profile-picture-button">Eliminar foto de perfil</button>
+              <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
@@ -27,57 +29,52 @@
                 <span>{{ numSeguidos }}</span>
               </div>
             </div>
-          </div>
-          <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
-          <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
-        </div>
-        <div class="right-column">
-          <div class="datosDeUsuario">
-            <p><strong>DNI:</strong> {{ dni }}</p>
-            <p><strong>Nombre de usuario:</strong>{{ }} {{ username }}</p>
-            <p><strong>Nombre:</strong>
-              <span v-if="!editing">{{ }} {{ nombre }}</span>
-              <input v-else v-model="editedNombre" type="text" class="editing-input">
-            </p>
-            <p><strong>Apellidos:</strong>
-              <span v-if="!editing">{{ }} {{ apellidos }}</span>
-              <input v-else v-model="editedApellidos" type="text" class="editing-input">
-            </p>
-            <p><strong>Fecha de nacimiento:</strong>
-              <span v-if="!editing">{{ }} {{ fechaNacimiento }}</span>
-              <input v-else v-model="editedFechaNacimiento" type="date" class="editing-input">
-            </p>
-            <p><strong>Teléfono:</strong>
-              <span v-if="!editing">{{ }} {{ telefono }}</span>
-              <input v-else v-model="editedTelefono" type="text" class="editing-input">
-            </p>
-            <p><strong>Email:</strong>{{ }} {{ emailon }}</p>
+            <div class="datosDeUsuario">
+              <p><strong>DNI:</strong> {{ dni }}</p>
+              <p><strong>Nombre de usuario:</strong>{{ }} {{ username }}</p>
+              <p><strong>Nombre:</strong>
+                <span v-if="!editing">{{ }} {{ nombre }}</span>
+                <input v-else v-model="editedNombre" type="text" class="editing-input">
+              </p>
+              <p><strong>Apellidos:</strong>
+                <span v-if="!editing">{{ }} {{ apellidos }}</span>
+                <input v-else v-model="editedApellidos" type="text" class="editing-input">
+              </p>
+              <p><strong>Fecha de nacimiento:</strong>
+                <span v-if="!editing">{{ }} {{ fechaNacimiento }}</span>
+                <input v-else v-model="editedFechaNacimiento" type="date" class="editing-input">
+              </p>
+              <p><strong>Teléfono:</strong>
+                <span v-if="!editing">{{ }} {{ telefono }}</span>
+                <input v-else v-model="editedTelefono" type="text" class="editing-input">
+              </p>
+              <p><strong>Email:</strong>{{ }} {{ emailon }}</p>
 
-            <div v-if="!changingPassword" class="button-group">
-              <button v-if="!editing" @click="editing = true" class="cerrar-sesion-button2">Editar</button>
-              <div class="button-separator"></div>
-              <button @click="iniciarCambioContrasena" class="cerrar-sesion-button2">Cambiar Contraseña</button>
-              <button v-if="editing" @click="guardarCambios" class="cerrar-sesion-button2">Guardar</button>
-            </div>
+              <div v-if="!changingPassword" class="button-group">
+                <button v-if="!editing" @click="editing = true" class="cerrar-sesion-button2">Editar</button>
+                <div class="button-separator"></div>
+                <button @click="iniciarCambioContrasena" class="cerrar-sesion-button2">Cambiar Contraseña</button>
+                <button v-if="editing" @click="guardarCambios" class="cerrar-sesion-button2">Guardar</button>
+              </div>
 
-            <!-- Formulario para cambiar contraseña -->
-            <div v-if="changingPassword" class="change-password-form">
-              <h3>Cambiar Contraseña</h3>
-              <form @submit.prevent="submitCambiarContrasena">
-                <div>
-                  <label for="newPassword" class="white-label">Nueva Contraseña:</label>
-                  <input id="newPassword" type="password" v-model="newPassword" class="white-input">
-                </div>
-                <div>
-                  <label for="confirmPassword" class="white-label">Confirmar Contraseña:</label>
-                  <input id="confirmPassword" type="password" v-model="confirmPassword" class="white-input">
-                </div>
-                <button type="submit" class="change-password-button3">Guardar Contraseña</button>
-                <button @click="cancelarCambioContrasena" class="change-password-button3">Cancelar</button>
-              </form>
+              <!-- Formulario para cambiar contraseña -->
+              <div v-if="changingPassword" class="change-password-form">
+                <h3>Cambiar Contraseña</h3>
+                <form @submit.prevent="submitCambiarContrasena">
+                  <div>
+                    <label for="newPassword" class="white-label">Nueva Contraseña:</label>
+                    <input id="newPassword" type="password" v-model="newPassword" class="white-input">
+                  </div>
+                  <div>
+                    <label for="confirmPassword" class="white-label">Confirmar Contraseña:</label>
+                    <input id="confirmPassword" type="password" v-model="confirmPassword" class="white-input">
+                  </div>
+                  <button type="submit" class="change-password-button3">Guardar Contraseña</button>
+                  <button @click="cancelarCambioContrasena" class="change-password-button3">Cancelar</button>
+                </form>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -351,9 +348,6 @@ export default {
   margin-right: 20px;
 }
 
-.right-column {
-  flex: 2;
-}
 
 .profile-picture-container {
   margin-bottom: 20px;
@@ -433,11 +427,10 @@ export default {
   padding: 20px;
   border-radius: 10px;
   color: white;
+  width: 80%; /* Cambia el ancho del div de los datos del usuario */
+  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
 }
 
-.extra-space {
-  margin-top: 210px; /* Ajusta este valor según sea necesario */
-}
 
 .cerrar-sesion-button2 {
   padding: 8px 12px;
@@ -532,4 +525,44 @@ export default {
   background-size: cover;
   padding: 20px;
 }
+@media screen and (max-width: 768px) {
+  .container-principal {
+    width: 95%;
+    padding: 5px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .left-column {
+    flex: none;
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .profile-picture-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+    margin-right: 0;
+  }
+
+  .seguidores-seguidos {
+    margin-top: 20px;
+    margin-left: 0;
+  }
+
+  .datosDeUsuario {
+    margin-top: -100px;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+
 </style>

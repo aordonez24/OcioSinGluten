@@ -36,7 +36,7 @@
   <div class="nuevoEstablecimiento">
     <div class="titulo-subtitulo-nuevoEstablecimiento">
       <h1 class="titulo-nuevoEstablecimiento">¿Has encontrado un nuevo establecimiento con alimentación sin gluten y no aparece aquí?</h1>
-      <p class="subtitulo-nuevoEstablecimiento">Si has visitado un nuevo establecimiento que no figura en esta web, no te olvides de rellenar el formulario para añadir dicho establecimiento, así harás crecer aún mas la comunidad!</p>
+      <p class="subtitulo-nuevoEstablecimiento">Si has visitado un nuevo establecimiento que no figura en esta web, no te olvides de rellenar el formulario para añadir dicho establecimiento, así harás crecer aún más la comunidad!</p>
     </div>
     <router-link to="/nuevoEstablecimiento" class="cerrar-sesion-button2">FORMULARIO</router-link>
   </div>
@@ -50,7 +50,7 @@ import FooterComponente from "@/components/footer.vue";
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import axios from 'axios';
 import CabeceraComponente from "@/components/header.vue";
-import {mapGetters} from "vuex";
+import { mapGetters } from "vuex";
 import contacto from "@/components/contacto.vue";
 
 export default {
@@ -93,7 +93,7 @@ export default {
       );
     },
     handleSubmit() {
-      if(!this.validateForm()){
+      if (!this.validateForm()) {
         return;
       }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
@@ -124,7 +124,6 @@ export default {
 </script>
 
 <style scoped>
-
 .cerrar-sesion-button2 {
   padding: 8px 12px;
   border-radius: 20px;
@@ -134,7 +133,6 @@ export default {
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   text-decoration: none; /* Elimina el subrayado */
-
 }
 
 .cerrar-sesion-button2:hover {
@@ -169,7 +167,6 @@ export default {
 
 .nuevoEstablecimiento {
   padding: 30px;
-  height: 300px; /* Ajusta esta altura según tus necesidades */
   background-color: white;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -180,12 +177,11 @@ export default {
 
 .titulo-subtitulo-nuevoEstablecimiento {
   text-align: center; /* Centra el texto */
-  max-width: 1000px; /* Ancho máximo del contenedor
-
+  max-width: 1000px; /* Ancho máximo del contenedor */
 }
 
 .titulo-nuevoEstablecimiento {
-  font-size: 2400px; /* Tamaño de fuente del título */
+  font-size: 24px; /* Tamaño de fuente del título */
   line-height: 1.2; /* Espaciado entre líneas del título */
   margin-bottom: 10px; /* Espaciado inferior del título */
 }
@@ -195,15 +191,17 @@ export default {
   line-height: 1.2; /* Espaciado entre líneas del subtítulo */
   margin-bottom: 0; /* Elimina el espaciado inferior del subtítulo */
 }
+
 .contactin {
   background-color: #353535; /* Color de fondo gris */
   padding: 80px;
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap; /* Permitir que las columnas se envuelvan */
 }
 
 .contactin .column {
-  flex: 1; /* Las columnas ocupan el mismo espacio */
+  flex: 1 1 300px; /* Las columnas ocupan el mismo espacio y se envuelven a un ancho mínimo de 300px */
   padding: 20px; /* Agregar espaciado interno */
   text-align: center; /* Centrar el contenido */
 }
@@ -266,6 +264,7 @@ export default {
 .social-icons {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap; /* Permitir que los iconos se envuelvan */
 }
 
 .social-icons a {
@@ -274,7 +273,6 @@ export default {
   font-size: 36px; /* Tamaño más grande de los iconos */
   transition: color 0.3s ease; /* Agregar una transición suave al color */
 }
-
 
 .social-icons a:hover {
   color: #ffcc74; /* Cambiar el color al pasar el cursor */
@@ -289,7 +287,8 @@ export default {
 }
 
 .barra-busqueda input {
-  width: 600px; /* Ancho de la barra de búsqueda */
+  width: 100%;
+  max-width: 600px; /* Ancho máximo de la barra de búsqueda */
   padding: 10px; /* Espacio interno */
   border-radius: 5px; /* Bordes redondeados */
   border: 1px solid #ccc; /* Borde */
@@ -310,15 +309,32 @@ export default {
   color: inherit; /* Utiliza el color heredado del elemento padre */
 }
 
-.mensaje-enviado {
-  display: flex;
-  align-items: center; /* Centrar verticalmente */
-  justify-content: center; /* Centrar horizontalmente */
-  background-color: #353535; /* Mantener el fondo gris oscuro */
-}
-
 .mensaje-enviado h2 {
   color: white; /* Cambiar el color del texto a blanco */
   text-align: center; /* Asegurarse de que el texto esté centrado */
+}
+
+/* Media Queries para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .container-principal-establecimientos {
+    padding: 20px;
+  }
+
+  .titulo-subtitulo {
+    padding: 0 10px; /* Añadir padding horizontal */
+  }
+
+  .barra-busqueda input {
+    width: 100%; /* Ancho completo en pantallas pequeñas */
+  }
+
+  .establecimientos {
+    grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+  }
+
+  .titulo-nuevoEstablecimiento {
+    font-size: 20px; /* Reducir tamaño de fuente */
+  }
+
 }
 </style>

@@ -26,6 +26,20 @@
                 <span>{{ numSeguidos }}</span>
               </div>
             </div>
+            <div class="datosDeUsuario">
+              <p><strong>Nombre de usuario:</strong>
+                <span v-if="!editing">{{ }} {{ usernameUsuario }}</span>
+                <input v-else v-model="editedUsername" type="text">
+              </p>
+              <p><strong>Nombre:</strong>
+                <span v-if="!editing">{{ }} {{ nombre }}</span>
+                <input v-else v-model="editedNombre" type="text">
+              </p>
+              <p><strong>Apellidos:</strong>
+                <span v-if="!editing">{{ }} {{ apellidos }}</span>
+                <input v-else v-model="editedApellidos" type="text">
+              </p>
+            </div>
           </div>
 
           <!-- Contenedor para los botones de acción -->
@@ -36,22 +50,6 @@
             <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="cerrar-sesion-button2">Eliminar usuario</button> <!-- Botón de eliminación para administradores -->
           </div>
 
-        </div>
-        <div class="right-column">
-          <div class="datosDeUsuario">
-            <p><strong>Nombre de usuario:</strong>
-              <span v-if="!editing">{{ }} {{ usernameUsuario }}</span>
-              <input v-else v-model="editedUsername" type="text">
-            </p>
-            <p><strong>Nombre:</strong>
-              <span v-if="!editing">{{ }} {{ nombre }}</span>
-              <input v-else v-model="editedNombre" type="text">
-            </p>
-            <p><strong>Apellidos:</strong>
-              <span v-if="!editing">{{ }} {{ apellidos }}</span>
-              <input v-else v-model="editedApellidos" type="text">
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -283,6 +281,7 @@ export default {
   border: 1px solid #ccc;
   display: flex;
   flex-direction: column; /* Asegura que el pie de página se coloque al final */
+  margin-bottom: 40px;
 }
 
 .profile-container {
@@ -295,9 +294,6 @@ export default {
   margin-right: 20px;
 }
 
-.right-column {
-  flex: 2;
-}
 
 .profile-picture-container {
   margin-bottom: 20px;
@@ -314,7 +310,7 @@ export default {
 }
 
 .seguidores-seguidos {
-  margin-left: 75px;
+  margin-left: 50px;
   display: flex;
   justify-content: space-between;
 }
@@ -381,16 +377,15 @@ export default {
 }
 
 .datosDeUsuario {
-  margin-left: 75px;
+  margin-left: 50px;
   background-color: #9DD9D2;
   padding: 20px;
   border-radius: 10px;
   color: white;
+  width: 80%; /* Cambia el ancho del div de los datos del usuario */
+  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
 }
 
-.extra-space {
-  margin-top: 210px; /* Ajusta este valor según sea necesario */
-}
 
 .cerrar-sesion-button2 {
   padding: 8px 12px;
@@ -456,6 +451,45 @@ footer-componente {
   background-repeat: no-repeat; /* Evitar que la imagen se repita */
   background-size: cover;
   padding: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .container-principal {
+    width: 95%;
+    padding: 5px;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .left-column {
+    flex: none;
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .profile-picture-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+    margin-right: 0;
+  }
+
+  .seguidores-seguidos {
+    margin-top: 20px;
+    margin-left: 0;
+  }
+
+  .datosDeUsuario {
+    margin-top: -100px;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 </style>
