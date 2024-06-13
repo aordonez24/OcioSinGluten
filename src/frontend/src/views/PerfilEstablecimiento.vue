@@ -871,11 +871,12 @@ export default {
 .mapa {
   width: 100%;
   height: 50vh; /* Set a relative height, adjust as needed */
-  border-radius: 10px;
+  border-radius: 8px; /* Redondear bordes del mapa */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   margin-left: 30px;
   margin-right: 20px;
+
 }
 
 .nuevo-comentario {
@@ -944,12 +945,6 @@ export default {
   font-size: 20px; /* Cambia este valor al tamaño deseado */
 }
 
-.mensaje-enviado {
-  display: flex;
-  align-items: center; /* Centrar verticalmente */
-  justify-content: center; /* Centrar horizontalmente */
-  background-color: #353535; /* Mantener el fondo gris oscuro */
-}
 
 .mensaje-enviado h2 {
   color: white; /* Cambiar el color del texto a blanco */
@@ -962,6 +957,22 @@ export default {
   background-repeat: no-repeat; /* Evitar que la imagen se repita */
   background-size: cover;
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .container-principal {
+    flex-direction: column; /* Cambiar a disposición en columna en pantallas pequeñas */
+  }
+
+  .mapa {
+    margin-top: 10px;
+  }
+
+  .datos,
+  .imagenes {
+    width: 100%; /* Ancho completo en pantallas pequeñas */
+    margin-right: 0; /* Sin margen en pantallas pequeñas */
+  }
 }
 
 </style>
