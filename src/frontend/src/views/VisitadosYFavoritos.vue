@@ -3,37 +3,38 @@
     <header3/>
     <div class="container1">
       <div class="container-principal">
-      <div class="followers-column">
-        <h2>Establecimientos favoritos del usuario</h2>
-        <input type="text" v-model="favoritosSearchQuery" placeholder="Buscar establecimiento...">
-        <div class="follower-list" ref="followerList">
-          <div v-for="establecimiento in filtrarFavoritos" :key="establecimiento.nombre" class="follower">
-            <div class="follower-info">
-              <div>
-                <p><router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre"> <strong>{{ establecimiento.nombre }}</strong></router-link></p>
-                <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}, {{ establecimiento.calle }}, {{ establecimiento.codPostal }}</p>
-                <p>{{ establecimiento.telefono }}</p>
+        <div class="followers-column">
+          <h2>Establecimientos favoritos del usuario</h2>
+          <input type="text" v-model="favoritosSearchQuery" placeholder="Buscar establecimiento...">
+          <div class="follower-list" ref="followerList">
+            <div v-for="establecimiento in filtrarFavoritos" :key="establecimiento.nombre" class="follower">
+              <div class="follower-info">
+                <div>
+                  <p><router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre"><strong>{{ establecimiento.nombre }}</strong></router-link></p>
+                  <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}, {{ establecimiento.calle }}, {{ establecimiento.codPostal }}</p>
+                  <p>{{ establecimiento.telefono }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="following-column">
+          <h2>Establecimientos visitados del usuario</h2>
+          <input type="text" v-model="visitadosSearchQuery" placeholder="Buscar establecimiento visitado...">
+          <div class="followed-list" ref="followedList">
+            <div v-for="establecimiento in filtrarVisitados" :key="establecimiento.nombre" class="followed">
+              <div class="followed-info">
+                <div>
+                  <p><router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre"><strong>{{ establecimiento.nombre }}</strong></router-link></p>
+                  <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}, {{ establecimiento.calle }}, {{ establecimiento.codPostal }}</p>
+                  <p>{{ establecimiento.telefono }}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="following-column">
-        <h2>Establecimientos visitados del usuario</h2>
-        <input type="text" v-model="visitadosSearchQuery" placeholder="Buscar establecimiento visitado...">
-        <div class="followed-list" ref="followedList">
-          <div v-for="establecimiento in filtrarVisitados" :key="establecimiento.nombre" class="followed">
-            <div class="followed-info">
-              <div>
-                <p><router-link :to="'/verEstabecimiento/' + establecimiento.idEstablecimiento" class="nombre"> <strong>{{ establecimiento.nombre }}</strong></router-link></p>
-                <p>{{ establecimiento.localidad }}, {{ establecimiento.provincia }}, {{ establecimiento.calle }}, {{ establecimiento.codPostal }}</p>
-                <p>{{ establecimiento.telefono }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     </div>
     <footer-componente />
   </div>
@@ -60,13 +61,15 @@ export default {
   },
   computed: {
     filtrarFavoritos() {
+      const query = this.favoritosSearchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       return this.establecimientosFavoritos.filter(est =>
-          est.nombre.toLowerCase().includes(this.favoritosSearchQuery.toLowerCase())
+          this.matchEstablecimiento(est, query)
       );
     },
     filtrarVisitados() {
+      const query = this.visitadosSearchQuery.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       return this.establecimientosVisitados.filter(est =>
-          est.nombre.toLowerCase().includes(this.visitadosSearchQuery.toLowerCase())
+          this.matchEstablecimiento(est, query)
       );
     }
   },
@@ -77,7 +80,7 @@ export default {
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/estFavoritos`);
         this.establecimientosFavoritos = response.data;
       } catch (error) {
-        console.error('Error al obtener seguidores:', error);
+        console.error('Error al obtener establecimientos favoritos:', error);
       }
     },
     async obtenerEstablecimientosVisitados() {
@@ -86,34 +89,49 @@ export default {
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/estVisitados`);
         this.establecimientosVisitados = response.data;
       } catch (error) {
-        console.error('Error al obtener seguidos:', error);
+        console.error('Error al obtener establecimientos visitados:', error);
       }
+    },
+    matchEstablecimiento(establecimiento, query) {
+      const normalizedName = establecimiento.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalizedLocalidad = establecimiento.localidad.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalizedProvincia = establecimiento.provincia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const normalizedCalle = establecimiento.calle.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      return (
+          normalizedName.includes(query) ||
+          normalizedLocalidad.includes(query) ||
+          normalizedProvincia.includes(query) ||
+          normalizedCalle.includes(query)
+      );
     }
-  },
+  }
 };
 </script>
 
-<style scoped>
 
+<style scoped>
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }
 
 .container-principal {
-  min-height: calc(100vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
-  width: 80vw;
-  margin: 50px auto 0; /* Eliminamos el margen inferior */
-  padding: 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100vh - 200px);
+  width: 90vw;
+  max-width: 1200px;
+  margin: 50px auto 0;
+  padding: 20px;
   background-image: linear-gradient(120deg, #ffffff 0%, #ffcc74 100%);
   border-radius: 20px;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
-  display: flex;
-  margin-bottom: 30px;
 }
 
 .followers-column, .following-column {
@@ -128,12 +146,12 @@ export default {
 }
 
 .follower-info, .followed-info {
-  border: 1px solid #000000;
+  border: 1px solid #ccc;
   border-radius: 10px;
   padding: 10px;
   display: flex;
   align-items: center;
-  width: 600px; /* Ajusta la altura mínima aquí */
+  width: 100%;
 }
 
 .follower img, .followed img {
@@ -143,28 +161,18 @@ export default {
   margin-right: 10px;
 }
 
-.following-column {
-  margin-left: 20px;
-}
-
 .follower-list, .followed-list {
-  overflow-y: auto; /* Barra de desplazamiento vertical */
+  overflow-y: auto;
 }
 
 input[type="text"] {
-  width: 89%;
+  width: 100%;
   padding: 8px;
   margin-bottom: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-
-footer-componente {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-}
 .nombre {
   color: inherit; /* Utiliza el color heredado del elemento padre */
   text-decoration: none; /* Elimina el subrayado */
@@ -172,5 +180,15 @@ footer-componente {
 
 .nombre:hover {
   color: inherit; /* Utiliza el color heredado del elemento padre */
+}
+
+@media (max-width: 768px) {
+  .container-principal {
+    flex-direction: column;
+  }
+  .followers-column, .following-column {
+    width: 100%;
+    margin-bottom: 20px;
+  }
 }
 </style>
