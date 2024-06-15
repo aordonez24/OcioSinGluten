@@ -158,6 +158,7 @@ export default {
         this.editedApellidos = this.apellidos;
         this.editedFechaNacimiento = this.fechaNacimiento;
         this.editedTelefono=this.telefono;
+        console.log(this.usuario);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;

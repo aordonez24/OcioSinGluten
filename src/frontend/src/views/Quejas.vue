@@ -111,7 +111,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .page-container {
   display: flex;
   flex-direction: column;

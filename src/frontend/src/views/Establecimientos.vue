@@ -192,6 +192,31 @@ export default {
   margin-bottom: 0; /* Elimina el espaciado inferior del subtítulo */
 }
 
+.social-icons a:hover {
+  color: #ffcc74; /* Cambiar el color al pasar el cursor */
+}
+
+.barra-busqueda {
+  margin-top: 20px; /* Espacio superior */
+  margin-bottom: 20px; /* Espacio inferior */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Centra horizontalmente */
+}
+
+.barra-busqueda input {
+  width: 100%;
+  max-width: 600px; /* Ancho máximo de la barra de búsqueda */
+  padding: 10px; /* Espacio interno */
+  border-radius: 5px; /* Bordes redondeados */
+  border: 1px solid #ccc; /* Borde */
+  box-sizing: border-box; /* Incluir padding y border en el ancho */
+  text-align: center; /* Centrar el texto */
+}
+
+.like-icon {
+  margin-left: 10px; /* Agrega un margen a la izquierda del icono */
+}
 
 .nombre {
   color: inherit; /* Utiliza el color heredado del elemento padre */
