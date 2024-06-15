@@ -41,8 +41,13 @@ public class QuejaController {
     public ResponseEntity<QuejaDTO> anadirUsuario(@RequestBody QuejaDTO quejaDTO) throws IOException, UsuarioExisteException {
         Queja q = new Queja(quejaDTO.nombre(), quejaDTO.email(), quejaDTO.mensaje());
         repoAct.save(q);
-        QuejaDTO qe = new QuejaDTO(q);
-        return ResponseEntity.status(HttpStatus.CREATED).body(qe);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new QuejaDTO(q));
+    }
+
+    @DeleteMapping("/quitaQueja/{id}")
+    public ResponseEntity<Void> eliminarQueja(@PathVariable int id) {
+        repoAct.deleteByIdQueja(id);
+        return ResponseEntity.noContent().build();
     }
 
 

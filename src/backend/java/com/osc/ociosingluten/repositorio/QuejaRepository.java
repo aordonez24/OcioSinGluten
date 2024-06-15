@@ -14,4 +14,7 @@ public interface QuejaRepository extends JpaRepository<Queja, Integer> {
 
     @Transactional
     Queja findByEmail(Queja img);
+
+    @Transactional
+    void deleteByIdQueja(int iD);
 }

@@ -13,12 +13,14 @@ import establecimiento from "@/views/PerfilEstablecimiento.vue";
 import nuevoEstablecimiento from "@/views/NuevoEstablecimiento.vue";
 import actividad from "@/views/Actividades.vue";
 import visitadosYFavoritos from "@/views/VisitadosYFavoritos.vue";
+import quejas from "@/views/Quejas.vue"
 
 const routes = [
     { path: '/', component: Inicio },
     { path: '/iniciaSesion', component: iniciaSesion },
     { path: '/registroUsuario', component: RegistroUsuario },
     { path: '/establecimientos', name:'establecimientos', component: establecimientos },
+    { path: '/quejas', name:'quejas', component: quejas },
     {
         path: '/contacto',
         name: 'Contacto',

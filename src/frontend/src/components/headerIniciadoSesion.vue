@@ -1,22 +1,41 @@
 <!-- src/components/header-3.vue -->
 <script>
 import { mapGetters } from 'vuex';
+import axios from "axios";
 
 export default {
   name: 'header-3',
   computed: {
     ...mapGetters(['username', 'isAuthenticated'])
   },
+  data(){
+    return{
+      rol: '',
+    }
+  },
+  mounted() {
+    this.obtenerUsuario();
+  },
   methods: {
+    async obtenerUsuario() {
+      try {
+        this.loading = true;
+        const username = this.username;
+        const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${username}`);
+        this.rol = response.data.rol;
+      } catch (error) {
+        console.error('Error al obtener datos del usuario:', error);
+        this.loading = false;
+      }
+    },
     scrollToContacto() {
       const elementoContacto = document.getElementById('contacto');
       if (elementoContacto) {
         elementoContacto.scrollIntoView({ behavior: 'smooth' });
       }
     },
-    logout() {
-      this.$store.dispatch('logout');
-      this.$router.push('/login');
+    gotoQuejas() {
+      this.$router.push('/quejas');
     }
   }
 }
@@ -39,6 +58,7 @@ export default {
           <li><router-link to="/actividades" class="cerrar-sesion-button">Actividades</router-link></li>
           <li><router-link to="/comunidad" class="cerrar-sesion-button">Comunidad</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
+          <li><button v-if="rol === 'ADMIN'" class="cerrar-sesion-button" @click="gotoQuejas">Quejas</button></li>
           <li v-if="isAuthenticated">
             <span class="welcome-message">Bienvenido
               <router-link :to="'/perfil/' + username" class="welcome-link">{{ username }}</router-link>
