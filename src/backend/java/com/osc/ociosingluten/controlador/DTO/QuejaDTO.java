@@ -1,9 +1,6 @@
 package com.osc.ociosingluten.controlador.DTO;
 
-import com.osc.ociosingluten.modelo.Actividad;
-import com.osc.ociosingluten.modelo.Queja;
-
-import java.time.LocalDate;
+import com.osc.ociosingluten.modelo.Consulta;
 
 public record QuejaDTO(int id, String nombre, String email, String mensaje) {
 
@@ -27,7 +24,7 @@ public record QuejaDTO(int id, String nombre, String email, String mensaje) {
         return mensaje;
     }
 
-    public QuejaDTO(Queja q){
+    public QuejaDTO(Consulta q){
         this(q.getIdQueja(), q.getNombreUsuario(), q.getEmail(), q.getMensaje());
     }
 }

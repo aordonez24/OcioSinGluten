@@ -1,6 +1,5 @@
 package com.osc.ociosingluten.modelo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "quejas")
-public class Queja {
+public class Consulta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
@@ -22,13 +21,13 @@ public class Queja {
     @Size(min = 0, max = 280)
     private String mensaje;
 
-    public Queja(String nombreUsuario, String email, String mensaje) {
+    public Consulta(String nombreUsuario, String email, String mensaje) {
         this.nombreUsuario = nombreUsuario;
         this.email = email;
         this.mensaje = mensaje;
     }
 
-    public Queja() {
+    public Consulta() {
 
     }
 
