@@ -79,7 +79,6 @@ export default {
       calle: '',
       codPostal: null,
       pais: '',
-      username: '',
       nombreValido: true,
       telefonoValido: true,
       localidadValida: true,
@@ -217,7 +216,7 @@ export default {
         alert('Error en la validación del formulario');
         return;
       }
-
+      console.log(this.username);
       try {
         const formData = new FormData();
         formData.append('nombre', this.nombre);
@@ -242,7 +241,7 @@ export default {
         this.codPostal = null;
         this.pais = '';
 
-        this.$router.push({ name: 'establecimientos' });
+        location.reload();
 
       } catch (error) {
         console.error('Error al agregar establecimiento:', error);

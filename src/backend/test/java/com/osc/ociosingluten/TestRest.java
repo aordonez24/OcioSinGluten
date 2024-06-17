@@ -67,13 +67,5 @@ public class TestRest {
         return correoBuilder.toString();
     }
 
-    @Test
-    public void anadirYVerUsuario(){
-        byte[] fotoperfil = null;
-
-        UsuarioDTO usuario = new UsuarioDTO(generarDNIAleatorio(), "Ord24_", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24), 670988953, fotoperfil, generarCorreoAleatorio(), "alonsismoF13");
-
-
-    }
 
 }

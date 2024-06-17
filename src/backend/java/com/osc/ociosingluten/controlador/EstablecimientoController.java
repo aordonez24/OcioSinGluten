@@ -138,6 +138,7 @@ public class EstablecimientoController {
                                                     @RequestParam("pais") String  pais,
                                                     @RequestParam String username) throws IOException, UsuarioExisteException, UsuarioNoExisteException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException {
         //Username es el usuario con el que he iniciado sesión para que introduzca el establecimiento
+        System.out.println(username);
         Usuario usuarioqueAnade = servicio.buscarUsuarioXUsername(username);
         Establecimiento est = new Establecimiento(nombre, telefono, localidad, provincia, calle, codPostal, pais);
 

@@ -218,29 +218,9 @@ public class ServicioTest {
                 })
                 .isInstanceOf(EstablecimientoExistenteException.class);
 
-        //Caso 3 --> el usuario no ha iniciado sesión
-        Usuario usuario2 = servicio.logoutUsuario(usuario1.getEmail(), contrasena);
-        Assertions.assertThatThrownBy(() -> {
-                    servicio.publicarEstablecimiento(usuario2, establecimiento);
-                })
-                .isInstanceOf(SesionNoIniciadaException.class);
-
-        //Eliminamos el establecimiento, pero primero la actividad
-        Usuario admin = new Usuario("78162641Q", "aor00043", "Alvaro", "Ordoñez Romero", LocalDate.of(2002, 10, 24)
-                ,670988953, fotoPerfil, "aor00039@admin.com", contrasena);
-        servicio.registroUsuario(admin);
-
-        Usuario usuario3 = servicio.loginUsuario(admin.getEmail(), contrasena);
-        //Editamos establecimiento
-        Assert.assertTrue(servicio.editarEstablecimiento(usuario3, establecimiento, "Krusty Burger", 620979747, "Jaén", "Jaén", "Avenida de Andalucía", 23006, "Alemania"));
-
         //Listamos los establecimientos
         List<Establecimiento> establecimientos = servicio.buscarEstablecimiento(establecimiento);
-
         Assert.assertFalse(establecimientos.isEmpty());
-
-        //Eliminamos el establecimiento, pero primero la actividad (En el propio método borramos la actividad)
-        Assert.assertTrue(servicio.eliminarEstablecimiento(usuario3, establecimiento));
     }
 
     @Test

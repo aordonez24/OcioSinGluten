@@ -2,7 +2,6 @@ package com.osc.ociosingluten.controlador;
 
 import com.osc.ociosingluten.controlador.DTO.*;
 import com.osc.ociosingluten.excepciones.*;
-import com.osc.ociosingluten.herramientas.LoginMessage;
 import com.osc.ociosingluten.modelo.Actividad;
 import com.osc.ociosingluten.modelo.Comentario;
 import com.osc.ociosingluten.modelo.Establecimiento;
@@ -11,28 +10,19 @@ import com.osc.ociosingluten.repositorio.ActividadRepository;
 import com.osc.ociosingluten.repositorio.ComentarioRepository;
 import com.osc.ociosingluten.repositorio.EstablecimientoRepository;
 import com.osc.ociosingluten.repositorio.UsuarioRepository;
-import com.osc.ociosingluten.seguridad.CodificadorPassword;
 import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.osc.ociosingluten.seguridad.UserService;
-import com.osc.ociosingluten.seguridad.JwtTokenUtil;
 
 
 @RestController
@@ -430,9 +420,11 @@ public class UsuarioController {
             // 2. Eliminar comentarios asociados y comentario principal
             List<Comentario> comentarios = usuario.getComentariosRealizados();
             if (comentarios != null) {
-                for (Comentario comentario : comentarios) {
-                    eliminarComentariosAsociados(comentario);
-                    repoCom.delete(comentario); // Eliminar el comentario principal
+                List<Comentario> copiaComentarios = new ArrayList<>(comentarios);
+                for (Comentario comentario : copiaComentarios) {
+                    eliminarUsuarioDeEstablecimiento(comentario, usuario);
+                    usuario.getComentariosRealizados().remove(comentario);
+                    repoCom.delete(comentario);
                 }
             }
 
@@ -449,10 +441,29 @@ public class UsuarioController {
             }
 
             // 4. Limpiar las listas de establecimientos favoritos y visitados por el usuario
-            usuario.getEstablecimientosFavoritos().clear();
-            usuario.getEstablecimientosVisitados().clear();
+            if (usuario.getEstablecimientosFavoritos() != null) {
+                usuario.getEstablecimientosFavoritos().clear();
+            }
+            if (usuario.getEstablecimientosVisitados() != null) {
+                usuario.getEstablecimientosVisitados().clear();
+            }
 
-            // 5. Eliminar al usuario de la base de datos
+            // 5. Eliminar referencias del usuario en establecimientos_visitantes
+            List<Establecimiento> establecimientos = repoEst.findAll();
+            for (Establecimiento establecimiento : establecimientos) {
+                if (establecimiento.getVisitantes().contains(usuario) ) {
+                    establecimiento.getVisitantes().remove(usuario);
+                    repoEst.save(establecimiento);
+                }
+            }
+            for (Establecimiento establecimiento : establecimientos) {
+                if (establecimiento.getUsuariosQueDieronLike().contains(usuario)) {
+                    establecimiento.getUsuariosQueDieronLike().remove(usuario);
+                    repoEst.save(establecimiento);
+                }
+            }
+
+            // 6. Eliminar al usuario de la base de datos
             repoUsu.delete(usuario);
 
             return ResponseEntity.ok("Usuario eliminado exitosamente");
@@ -461,10 +472,15 @@ public class UsuarioController {
         }
     }
 
-    private void eliminarComentariosAsociados(Comentario comentario) {
-        repoCom.delete(comentario);
+    private void eliminarUsuarioDeEstablecimiento(Comentario comentario, Usuario usuario) {
+        List<Establecimiento> establecimientos = repoEst.findAll();
+        for (Establecimiento establecimiento : establecimientos) {
+            if (establecimiento.getComentarios().contains(comentario)) {
+                establecimiento.getComentarios().remove(comentario);
+                repoEst.save(establecimiento);
+            }
+        }
     }
-
 
 
 }

@@ -106,7 +106,6 @@ export default {
 
 <style scoped>
 .container-principal {
-  height: 100vh;
   width: 100%;
   background-color: #ffcc74;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
@@ -138,6 +137,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
 }
 
 .user-avatar {
@@ -150,7 +150,7 @@ export default {
   font-size: 1.5rem;
   background-color: #ccc;
   color: white;
-  margin-right: 1rem;
+  margin-bottom: 10px;
 }
 
 .username-link {
@@ -174,110 +174,12 @@ export default {
   border-radius: 10px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
   margin: 10px;
+  flex: 1 1 calc(33.333% - 20px); /* Ancho de la tarjeta en pantallas grandes */
 }
 
 .user-info {
   text-align: center;
   margin-bottom: 10px;
-}
-
-.seguir-boton {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 20px;
-  color: white;
-  background-color: #9DD9D2;
-  border: none;
-  cursor: pointer;
-}
-
-.seguir-boton:hover {
-  background-color: #ffcc74;
-}
-
-.contactin {
-  background-color: #353535;
-  padding: 80px;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.contactin .column {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
-}
-
-.contactin h1,
-.contactin p {
-  font-size: 1.875rem;
-  line-height: 1.4;
-  max-width: 25rem;
-  margin: 0 auto;
-  color: white;
-}
-
-.contactin form {
-  text-align: left;
-  max-width: 25rem;
-  margin: 0 auto;
-}
-
-.contactin form label {
-  display: block;
-  margin-bottom: 8px;
-  color: white;
-}
-
-.contactin form input,
-.contactin form textarea {
-  width: calc(100% - 16px);
-  padding: 10px;
-  margin-bottom: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  color: #333;
-  font-size: 1rem;
-}
-
-.contactin form textarea {
-  height: 120px;
-}
-
-.contactin form button {
-  background-color: #7F7F7F;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1rem;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-  display: block;
-  margin: 0 auto;
-}
-
-.contactin form button:hover {
-  background-color: #ffcc74;
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-}
-
-.social-icons a {
-  margin: 0 20px;
-  color: #fff;
-  font-size: 2.25rem;
-  transition: color 0.3s ease;
-}
-
-.social-icons a:hover {
-  color: #ffcc74;
 }
 
 .cerrar-sesion-button {
@@ -293,18 +195,6 @@ export default {
 
 .cerrar-sesion-button:hover {
   background-color: #9DD9D2;
-}
-
-.mensaje-enviado {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #353535;
-}
-
-.mensaje-enviado h2 {
-  color: white;
-  text-align: center;
 }
 
 .barra-busqueda {
@@ -336,20 +226,31 @@ export default {
   }
 
   .user-card {
-    width: 90%;
-    margin: 10px 0;
+    flex: 1 1 calc(50% - 20px); /* Ancho de la tarjeta en pantallas medianas */
+    margin: 10px 5px;
   }
 
   .user-avatar {
     width: 4rem;
     height: 4rem;
     font-size: 1rem;
-    margin-right: 0;
+    margin-bottom: 10px;
   }
 
   .barra-busqueda input {
     width: 90%;
   }
-
 }
+
+@media (max-width: 480px) {
+  .user-card {
+    flex: 1 1 100%; /* Ancho de la tarjeta en pantallas pequeñas */
+    margin: 10px 0;
+  }
+
+  .barra-busqueda input {
+    width: 95%;
+  }
+}
+
 </style>
