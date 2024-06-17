@@ -96,8 +96,15 @@
           </div>
 
           <!-- Botón de Agregar Usuario -->
+          <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="aceptarCondiciones" required>
+            <label class="form-check-label" for="aceptarCondiciones">
+              Acepto las <a href="#" @click="mostrarCondiciones()">condiciones de servicio y términos</a>
+            </label>
+          </div>
+
           <div class="form-group">
-            <button type="submit" class="btn btn-primary">Agregar Usuario</button>
+            <button type="submit" class="btn btn-primary" :disabled="!aceptarCondiciones">Agregar Usuario</button>
           </div>
         </div>
       </form>
@@ -141,7 +148,8 @@ export default {
       passwordValida: false,
       passwordsCoinciden: false,
       mayorDeEdad: false,
-      errorMessage: ''  // Variable para almacenar el mensaje de error
+      errorMessage: '',  // Variable para almacenar el mensaje de error
+      aceptarCondiciones: false  // Variable para verificar si se aceptaron las condiciones
     }
   },
   mounted() {
@@ -283,6 +291,21 @@ export default {
         this.nuevoUsuario.fotoPerfil = null;
         this.showFormatWarning = false;
       }
+    },
+    mostrarCondiciones() {
+      alert('Por favor, lea detenidamente nuestros términos y condiciones antes de continuar. Estos términos son importantes para tu participación en nuestra comunidad celiaca. A continuación, te presentamos un resumen de nuestras políticas y compromisos:\n' +
+          '\n' +
+          'Ocio Sin Gluten informa que:\n' +
+          'Uso del Servicio: Al registrarte en Ocio Sin Gluten, aceptas cumplir con nuestras normas comunitarias y respetar a otros miembros.\n' +
+          '\n' +
+          'Privacidad: Tu privacidad es importante para nosotros. Nos comprometemos a proteger tus datos personales según nuestras políticas de privacidad.\n' +
+          '\n' +
+          'Seguridad: Mantenemos altos estándares de seguridad para proteger tu información personal y tus interacciones en nuestra plataforma.\n' +
+          '\n' +
+          'Responsabilidades: Como miembro de Ocio Sin Gluten, eres responsable del contenido que compartes y de tu conducta en nuestra comunidad.\n' +
+          '\n' +
+          'Al hacer clic en "Aceptar", confirmas que has leído y entendido nuestros términos y condiciones completos.');
+      this.aceptarCondiciones = true;  // Marcar como aceptadas las condiciones
     }
   }
 }
