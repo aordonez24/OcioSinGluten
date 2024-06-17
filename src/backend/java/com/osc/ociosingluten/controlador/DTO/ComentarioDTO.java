@@ -6,11 +6,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record ComentarioDTO(int id, String nombreAutor,
-                            LocalDate fecha, String mensaje,
-                            int numLikes) {
+                            LocalDate fecha, String mensaje) {
 
     public ComentarioDTO(Comentario com){
-        this(com.getId(), com.getAutor().getUsername(), com.getFecha(), com.getMensaje(), com.getNumLikes());
+        this(com.getId(), com.getAutor().getUsername(), com.getFecha(), com.getMensaje());
     }
 
     public int id() {
@@ -29,8 +28,5 @@ public record ComentarioDTO(int id, String nombreAutor,
         return mensaje;
     }
 
-    public int numLikes() {
-        return numLikes;
-    }
 
 }

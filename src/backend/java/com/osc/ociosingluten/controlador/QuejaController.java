@@ -5,7 +5,6 @@ import com.osc.ociosingluten.controlador.DTO.QuejaDTO;
 import com.osc.ociosingluten.excepciones.UsuarioExisteException;
 import com.osc.ociosingluten.modelo.Consulta;
 import com.osc.ociosingluten.repositorio.QuejaRepository;
-import com.osc.ociosingluten.servicio.ServicioOcioSinGluten;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +21,6 @@ public class QuejaController {
     @Autowired
     private QuejaRepository repoAct;
 
-    @Autowired
-    private ServicioOcioSinGluten servicio;
 
     //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoQuejas")

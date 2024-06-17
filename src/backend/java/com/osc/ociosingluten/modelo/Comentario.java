@@ -29,16 +29,11 @@ public class Comentario {
     @NotNull
     private String mensaje;
 
-    private int numLikes;
 
-    @ManyToMany
-    @JsonIgnore
-    private List<Usuario> usuariosQueDieronLike;
 
     public Comentario(String mensaje, Usuario autor) {
         this.mensaje = mensaje;
         this.autor = autor;
-        this.numLikes = 0;
         this.fecha = LocalDate.now();
     }
 
@@ -62,14 +57,6 @@ public class Comentario {
         this.autor = autor;
     }
 
-    public int getNumLikes() {
-        return numLikes;
-    }
-
-    public void setNumLikes(int numLikes) {
-        this.numLikes = numLikes;
-    }
-
     public LocalDate getFecha() {
         return fecha;
     }
@@ -87,20 +74,4 @@ public class Comentario {
         this.id = id;
     }
 
-    public void setNumLikes(int numLikes, Usuario usuario, int modo) {
-        this.numLikes = numLikes;
-        if(modo == 1){
-            this.getUsuariosQueDieronLike().add(usuario);
-        }else{
-            this.getUsuariosQueDieronLike().remove(usuario);
-        }
-    }
-
-    public void sumarLike() {
-        this.numLikes += 1;
-    }
-
-    public List<Usuario> getUsuariosQueDieronLike() {
-        return usuariosQueDieronLike;
-    }
 }
