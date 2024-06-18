@@ -18,7 +18,7 @@
         </div>
         <div class="contenido-actividad">
           <div>
-            <strong @click="irAPerfil(actividad.autor.username)" class="nombre-usuario">{{ actividad.autor.username }}:</strong>
+            <strong class="nombre-usuario">{{ actividad.autor.username }}:</strong>
              {{ traducirMensaje(actividad.mensajePredefinido) }} {{ actividad.establecimiento.nombre }}, {{actividad.establecimiento.localidad }}, {{actividad.establecimiento.provincia }}
           </div>
           <div class="fecha">{{ actividad.fechaContribucion }}</div>
@@ -36,7 +36,6 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
-import { useRouter } from 'vue-router';
 import {mapGetters} from "vuex";
 import contacto from "@/components/contacto.vue";
 
@@ -48,7 +47,6 @@ export default {
   setup() {
     const actividades = ref([]);
     const searchQuery = ref('');
-    const router = useRouter();
     const mensajeEnviado = ref(false); // Agregar ref para mensajeEnviado
     const namelon = ref(''); // Agregar ref para namelon
     const email = ref(''); // Agregar ref para email
@@ -103,14 +101,6 @@ export default {
       return mensajeMap[mensaje] || mensaje;
     };
 
-    const irAPerfil = (username) => {
-      if(username === this.username) {
-        router.push({name: 'Perfil', params: {username: username}});
-      }else{
-        router.push({name: 'perfilOtroUsuario', params: {username: username}});
-      }
-    };
-
     const filteredActividades = computed(() => {
       if (!searchQuery.value) {
         return actividades.value;
@@ -128,13 +118,12 @@ export default {
       actividades,
       searchQuery,
       traducirMensaje,
-      irAPerfil,
       filteredActividades,
       handleSubmit,
-      mensajeEnviado, // Agregar mensajeEnviado al objeto de retorno
-      namelon, // Agregar namelon al objeto de retorno
-      email, // Agregar email al objeto de retorno
-      message // Agregar message al objeto de retorno
+      mensajeEnviado,
+      namelon,
+      email,
+      message,
     };
   }
 };

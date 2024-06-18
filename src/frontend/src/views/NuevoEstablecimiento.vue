@@ -232,7 +232,6 @@ export default {
 
         console.log(response.data);
 
-        // Reiniciar los campos del formulario después de enviar la solicitud
         this.nombre = '';
         this.telefono = null;
         this.localidad = '';
@@ -240,6 +239,9 @@ export default {
         this.calle = '';
         this.codPostal = null;
         this.pais = '';
+        this.mostrarProvincia = false;
+        this.mostrarLocalidad = false;
+        this.provincias = null;
 
         location.reload();
 
