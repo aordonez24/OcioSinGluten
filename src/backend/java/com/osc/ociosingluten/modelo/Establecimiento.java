@@ -22,7 +22,7 @@ import static com.osc.ociosingluten.constantes.Constantes.mediaValoracion;
 public class Establecimiento {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE) // Generar ID automáticamente
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int idEstablecimiento;
 
     @NotNull
