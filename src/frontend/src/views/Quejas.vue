@@ -3,9 +3,9 @@
     <header3 />
     <div class="container1">
       <div class="container-principal">
-        <h1>Quejas</h1>
+        <h1>Consultas</h1>
         <p class="intro-text">
-          Si desea enviar una queja, complete el formulario y haga clic en enviar.
+          Si desea enviar una consulta, complete el formulario y haga clic en enviar.
         </p>
         <div v-for="queja in quejas" :key="queja.idQueja" class="queja">
           <div class="contenido-queja">
