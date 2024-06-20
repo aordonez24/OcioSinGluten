@@ -53,24 +53,12 @@
               <input type="text" v-model="formulario.telefono" id="telefono" required>
             </div>
             <div>
-              <label for="localidad">Localidad:</label>
-              <input type="text" v-model="formulario.localidad" id="localidad" required>
-            </div>
-            <div>
-              <label for="provincia">Provincia:</label>
-              <input type="text" v-model="formulario.provincia" id="provincia" required>
-            </div>
-            <div>
               <label for="calle">Calle:</label>
               <input type="text" v-model="formulario.calle" id="calle" required>
             </div>
             <div>
               <label for="codPostal">Código Postal:</label>
               <input type="text" v-model="formulario.codPostal" id="codPostal" required>
-            </div>
-            <div>
-              <label for="pais">País:</label>
-              <input type="text" v-model="formulario.pais" id="pais" required>
             </div>
             <button type="submit" class="boton-subir">Guardar cambios</button>
             <button type="button" @click="cancelarEdicion" class="boton-subir2">Cancelar</button>
@@ -648,7 +636,6 @@ export default {
       }
     },
     validarFormulario() {
-      // Realizar la validación de los campos
       if (this.formulario.nombre.length > 0 && this.formulario.nombre.length <= 30) {
         this.nombreValido = this.formulario.nombre.length > 0 && this.formulario.nombre.length <= 30;
       }else{
@@ -679,17 +666,12 @@ export default {
         alert("Calle incorrecta");
       }
 
-      if(/^\d+$/.test(this.formulario.codPostal)) {
+      if(/^\d{5}$/.test(this.formulario.codPostal)) {
         this.codPostalValido = /^\d+$/.test(this.formulario.codPostal);
       }else{
         alert("Codigo postal incorrecto");
       }
 
-      if(this.formulario.pais.length > 0) {
-        this.paisValido = this.formulario.pais.length > 0;
-      }else{
-        alert("Pais incorrecto");
-      }
 
       // Verificar si todos los campos son válidos
       return (

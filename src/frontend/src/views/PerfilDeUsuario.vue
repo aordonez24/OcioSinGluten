@@ -14,10 +14,10 @@
                   class="profile-picture"
               />
               <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
-              <button @click="cerrarSesion" class="cerrar-sesion-button">Cerrar sesión</button>
-              <button @click="openFileInput" class="change-profile-picture-button">Subir foto de perfil</button>
-              <button @click="eliminarFoto" class="change-profile-picture-button">Eliminar foto de perfil</button>
-              <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
+              <button @click="openFileInput" class="button">Subir foto de perfil</button>
+              <button @click="eliminarFoto" class="button">Eliminar foto de perfil</button>
+              <button @click="iniciarVisitadosYFavs" class="button">Establecimientos visitados y favoritos</button>
+              <button @click="cerrarSesion" class="button">Cerrar sesión</button>
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
@@ -63,11 +63,11 @@
                 <form @submit.prevent="submitCambiarContrasena">
                   <div>
                     <label for="newPassword" class="white-label">Nueva Contraseña:</label>
-                    <input id="newPassword" type="password" v-model="newPassword" class="white-input">
+                    <input id="newPassword" type="password" v-model="newPassword" class="white-input" required>
                   </div>
                   <div>
                     <label for="confirmPassword" class="white-label">Confirmar Contraseña:</label>
-                    <input id="confirmPassword" type="password" v-model="confirmPassword" class="white-input">
+                    <input id="confirmPassword" type="password" v-model="confirmPassword" class="white-input" required>
                   </div>
                   <button type="submit" class="change-password-button3">Guardar Contraseña</button>
                   <button @click="cancelarCambioContrasena" class="change-password-button3">Cancelar</button>
@@ -158,7 +158,6 @@ export default {
         this.editedApellidos = this.apellidos;
         this.editedFechaNacimiento = this.fechaNacimiento;
         this.editedTelefono=this.telefono;
-        console.log(this.usuario);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;
@@ -216,9 +215,13 @@ export default {
           telefono: this.editedTelefono
         };
 
-        // Validar el número de teléfono
         if (!this.validarTelefono(nuevosDatos.telefono)) {
           alert('El número de teléfono no es válido.');
+          return;
+        }
+
+        if (!this.validarEdad(nuevosDatos.fechaNacimiento)) {
+          alert('Debe ser mayor de edad.');
           return;
         }
 
@@ -297,6 +300,13 @@ export default {
     },
     validarTelefono(telefono) {
       return /^\d{9}$/.test(telefono);
+    },
+    validarEdad(fechaNacimiento) {
+      const fechaActual = new Date();
+      const fechaNac = new Date(fechaNacimiento);
+      const diferencia = fechaActual - fechaNac;
+      const edad = new Date(diferencia).getUTCFullYear() - 1970;
+      return edad >= 18;
     },
     handleSubmit() {
       console.log("hola");
@@ -391,8 +401,10 @@ export default {
   font-size: 20px;
 }
 
-.change-profile-picture-button {
+.button {
   display: block;
+  width: 100%;
+  max-width: 200px;
   margin-top: 10px;
   padding: 8px 12px;
   border-radius: 20px;
@@ -401,23 +413,10 @@ export default {
   border: 2px solid transparent;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.change-profile-picture-button:hover {
-  background-color: #9DD9D2;
-}
-
-.cerrar-sesion-button {
-  padding: 8px 12px;
-  border-radius: 20px;
-  color: black;
-  background-color: transparent;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.cerrar-sesion-button:hover {
+.button:hover {
   background-color: #9DD9D2;
 }
 

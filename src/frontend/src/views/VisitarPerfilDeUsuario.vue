@@ -12,6 +12,10 @@
                   alt="Foto de perfil"
                   class="profile-picture"
               />
+              <button @click="toggleSeguir" class="button">{{ siguiendo ? 'Dejar de seguir' : 'Seguir usuario' }}</button>
+              <button @click="iniciarVisitadosYFavs" class="button">Establecimientos visitados y favoritos</button>
+              <button v-if="rol === 'ADMIN'" @click="archivado ? restaurarUsuario() : suspenderUsuario()" class="button2">{{ archivado ? 'Restaurar usuario' : 'Suspender usuario' }}</button>
+              <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="button2">Eliminar usuario</button>
             </div>
             <div v-else class="profile-picture-default">
               <i class="fas fa-user"></i> <!-- Aquí debes usar el icono que desees -->
@@ -41,15 +45,6 @@
               </p>
             </div>
           </div>
-
-          <!-- Contenedor para los botones de acción -->
-          <div class="action-buttons-container">
-            <button @click="toggleSeguir" class="cerrar-sesion-button">{{ siguiendo ? 'Dejar de seguir' : 'Seguir usuario' }}</button>
-            <button @click="iniciarVisitadosYFavs" class="cerrar-sesion-button">Establecimientos visitados y favoritos</button>
-            <button v-if="rol === 'ADMIN'" @click="archivado ? restaurarUsuario() : suspenderUsuario()" class="cerrar-sesion-button2">{{ archivado ? 'Restaurar usuario' : 'Suspender usuario' }}</button>
-            <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="cerrar-sesion-button2">Eliminar usuario</button> <!-- Botón de eliminación para administradores -->
-          </div>
-
         </div>
       </div>
     </div>
@@ -282,6 +277,44 @@ export default {
   display: flex;
   flex-direction: column; /* Asegura que el pie de página se coloque al final */
   margin-bottom: 40px;
+}
+
+.button {
+  display: block;
+  width: 100%; /* Ajusta este valor según el ancho deseado */
+  max-width: 200px; /* Opcional: establece un ancho máximo */
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: black;
+  background-color: transparent;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Asegura que el texto esté centrado */
+}
+
+.button:hover {
+  background-color: #9DD9D2;
+}
+
+.button2 {
+  display: block;
+  width: 100%; /* Ajusta este valor según el ancho deseado */
+  max-width: 200px; /* Opcional: establece un ancho máximo */
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: black;
+  background-color: transparent;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Asegura que el texto esté centrado */
+}
+
+.button2:hover {
+  background-color: #ff0000;
 }
 
 .profile-container {

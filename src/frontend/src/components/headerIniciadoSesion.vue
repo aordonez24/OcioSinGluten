@@ -58,7 +58,7 @@ export default {
           <li><router-link to="/actividades" class="cerrar-sesion-button">Actividades</router-link></li>
           <li><router-link to="/comunidad" class="cerrar-sesion-button">Comunidad</router-link></li>
           <li><button class="cerrar-sesion-button" @click="scrollToContacto">Contacto</button></li>
-          <li><button v-if="rol === 'ADMIN'" class="cerrar-sesion-button" @click="gotoQuejas">Quejas</button></li>
+          <li><button v-if="rol === 'ADMIN'" class="cerrar-sesion-button" @click="gotoQuejas">Consultas</button></li>
           <li v-if="isAuthenticated">
             <span class="welcome-message">Bienvenido
               <router-link :to="'/perfil/' + username" class="welcome-link">{{ username }}</router-link>

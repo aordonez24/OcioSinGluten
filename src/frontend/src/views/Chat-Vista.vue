@@ -9,7 +9,7 @@
           <div class="mb-3">
             <h4>Envie su mensaje</h4>
             <input v-model="nombre" type="text" class="form-control mb-2" placeholder="Nombre" readonly>
-            <input v-model="mensaje" type="text" class="form-control mb-2" placeholder="Mensaje">
+            <input v-model="mensaje" type="text" class="form-control mb-2" placeholder="Mensaje" maxlength="100">
             <button @click="enviarMensaje" class="botoncin">Enviar</button>
           </div>
         </div>
