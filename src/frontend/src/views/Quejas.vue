@@ -86,7 +86,7 @@ export default {
 
     const marcarComoRespondida = async (idQueja) => {
       try {
-        await axios.delete(`http://localhost:8080/ociosingluten/quejas/quitaQueja/${idQueja}`);
+        await axios.delete(`http://localhost:8080/ociosingluten/quejas/noqueja/${idQueja}`);
         location.reload();
       } catch (error) {
         console.error('Error al eliminar la queja:', error);

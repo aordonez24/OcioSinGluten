@@ -35,7 +35,7 @@ public class QuejaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new QuejaDTO(q));
     }
 
-    @DeleteMapping("/quitaQueja/{id}")
+    @DeleteMapping("/noqueja/{id}")
     public ResponseEntity<Void> eliminarQueja(@PathVariable int id) {
         repoAct.deleteByIdQueja(id);
         return ResponseEntity.noContent().build();

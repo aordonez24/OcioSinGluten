@@ -353,7 +353,7 @@ export default {
         const base64Image = imagenSeleccionada.split(',')[1];
 
         // Realizar la petición POST al endpoint sin convertir a JSON
-        const response = await fetch(`http://localhost:8080/ociosingluten/establecimientos/establecimientoFoto/${id}/quitaFoto`, {
+        const response = await fetch(`http://localhost:8080/ociosingluten/establecimientos/establecimientoFoto/${id}/fotomenos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'text/plain' // Cambiar el tipo de contenido a text/plain
@@ -572,7 +572,7 @@ export default {
     async quitarLike(id) {
       try {
         const username = this.username;
-        const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/eliminaLike`, username);
+        const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/likemenos`, username);
         if (response.status === 200) {
           // Si se quita el like correctamente, actualiza la lista de comentarios u otra acción necesaria
           console.log('Like quitado con éxito.');

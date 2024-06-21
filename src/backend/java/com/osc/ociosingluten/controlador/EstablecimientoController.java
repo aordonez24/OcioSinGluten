@@ -112,7 +112,7 @@ public class EstablecimientoController {
         }
     }
 
-    @PostMapping("/establecimientoFoto/{id}/quitaFoto")
+    @PostMapping("/establecimientoFoto/{id}/fotomenos")
     public ResponseEntity<?> quitaFoto(@PathVariable int id, @RequestBody String  fotoPerfilBase64){
         byte[] fotoPerfil = Base64.getDecoder().decode(fotoPerfilBase64);
         Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
@@ -188,7 +188,7 @@ public class EstablecimientoController {
         }
     }
 
-    @PostMapping("/{id}/eliminaLike")
+    @PostMapping("/{id}/likemenos")
     public ResponseEntity<?> quitarLike(@PathVariable int id, @RequestBody String username) throws ActividadNoCreada {
         Optional<Establecimiento> establecimiento = repoEst.findById(id);
         Optional<Usuario> usuario = repoUsu.findByUsername(username);

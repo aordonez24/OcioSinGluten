@@ -169,7 +169,7 @@ export default {
     async eliminarFoto() {
       try {
         const username = this.username;
-        const response = await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/quitafotoPerfil`);
+        const response = await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/nofotoperfil`);
         if (response.status === 200) {
           // Actualizar la vista después de eliminar la foto de perfil
           this.fotoPerfilURL = null;

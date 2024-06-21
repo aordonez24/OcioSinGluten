@@ -258,7 +258,7 @@ public class UsuarioController {
         }
     }
 
-    @DeleteMapping("/perfilUsuario/{username}/quitafotoPerfil")
+    @DeleteMapping("/perfilUsuario/{username}/nofotoperfil")
     public ResponseEntity<String> eliminarFotoPerfil(@PathVariable String username) {
         Optional<Usuario> usuarioOptional = repoUsu.findByUsername(username);
         if (usuarioOptional.isPresent()) {
