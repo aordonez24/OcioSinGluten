@@ -48,7 +48,6 @@ public class UsuarioController {
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoUsuarioscomun")
     public List<Usuario> cargarTodosUsuariosComun() {
         List<Usuario> usuarios = repoUsu.findAll();
@@ -95,7 +94,6 @@ public class UsuarioController {
         Optional<Usuario> usuario = repoUsu.findByUsername(username);
         if (usuario.isPresent()) {
             Usuario usu = usuario.get();
-            //String fotoPerfil = usu.getFotoPerfil() != null ? Base64.getEncoder().encodeToString(usu.getFotoPerfil()) : null;
             String fotoPerfil = "";
             if(usu.getFotoPerfil() != null){
                 fotoPerfil = Base64.getEncoder().encodeToString(usu.getFotoPerfil());
@@ -106,8 +104,6 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 
     @GetMapping("/perfilUsuarioDni/{dni}")
     public ResponseEntity<UsuarioDTO> mostrarUsuarioporDni(@PathVariable String dni){
@@ -132,7 +128,6 @@ public class UsuarioController {
                         .collect(Collectors.toList());
                 return ResponseEntity.ok(seguidoresDTO);
             } else {
-                // Si la lista de seguidores es null, devolver una lista vacía
                 return ResponseEntity.ok(Collections.emptyList());
             }
         } else {
@@ -164,9 +159,6 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
-    // En el controlador UsuarioController
 
     @GetMapping("/perfilUsuario/{username}/actividades")
     public ResponseEntity<List<Actividad>> obtenerActividadesPorUsuario(@PathVariable String username) {
@@ -278,7 +270,6 @@ public class UsuarioController {
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
             try {
-                // Verificar si se proporcionó un nuevo nombre de usuario y asegurarse de que no exista en la base de datos
                 if (usuarioDTO.getUsername() != null && !usuarioDTO.getUsername().equals(username)) {
                     Optional<Usuario> otroUsuarioOptional = repoUsu.findByUsername(usuarioDTO.getUsername());
                     if (otroUsuarioOptional.isPresent()) {
@@ -287,7 +278,6 @@ public class UsuarioController {
                     usuario.setUsername(usuarioDTO.getUsername());
                 }
 
-                // Actualizar los datos del usuario si se han proporcionado
                 if (usuarioDTO.getNombre() != null) {
                     usuario.setNombre(usuarioDTO.getNombre());
                 }
@@ -301,7 +291,6 @@ public class UsuarioController {
                     usuario.setTelefono(usuarioDTO.getTelefono());
                 }
 
-                // Guardar los cambios en la base de datos
                 repoUsu.save(usuario);
 
                 return ResponseEntity.ok("Perfil de usuario actualizado exitosamente");
@@ -411,13 +400,11 @@ public class UsuarioController {
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
 
-            // 1. Eliminar todas las actividades del usuario
             List<Actividad> actividades = usuario.getActividades();
             if (actividades != null) {
                 repoAct.deleteAll(actividades);
             }
 
-            // 2. Eliminar comentarios asociados y comentario principal
             List<Comentario> comentarios = usuario.getComentariosRealizados();
             if (comentarios != null) {
                 List<Comentario> copiaComentarios = new ArrayList<>(comentarios);
@@ -428,7 +415,6 @@ public class UsuarioController {
                 }
             }
 
-            // 3. Eliminar al usuario de las listas de seguidos y seguidores de otros usuarios
             List<Usuario> seguidos = usuario.getSeguidos();
             List<Usuario> seguidores = usuario.getSeguidores();
             if (seguidos != null) {
@@ -440,7 +426,6 @@ public class UsuarioController {
                 seguidores.clear();
             }
 
-            // 4. Limpiar las listas de establecimientos favoritos y visitados por el usuario
             if (usuario.getEstablecimientosFavoritos() != null) {
                 usuario.getEstablecimientosFavoritos().clear();
             }
@@ -448,7 +433,6 @@ public class UsuarioController {
                 usuario.getEstablecimientosVisitados().clear();
             }
 
-            // 5. Eliminar referencias del usuario en establecimientos_visitantes
             List<Establecimiento> establecimientos = repoEst.findAll();
             for (Establecimiento establecimiento : establecimientos) {
                 if (establecimiento.getVisitantes().contains(usuario) ) {
@@ -463,7 +447,6 @@ public class UsuarioController {
                 }
             }
 
-            // 6. Eliminar al usuario de la base de datos
             repoUsu.delete(usuario);
 
             return ResponseEntity.ok("Usuario eliminado exitosamente");

@@ -574,10 +574,8 @@ export default {
         const username = this.username;
         const response = await axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/likemenos`, username);
         if (response.status === 200) {
-          // Si se quita el like correctamente, actualiza la lista de comentarios u otra acción necesaria
           console.log('Like quitado con éxito.');
-          // Aquí puedes agregar cualquier otra acción que desees realizar después de quitar el like.
-          location.reload(); // Recarga la página para reflejar los cambios
+          location.reload();
         } else {
           console.error('Error al quitar el like:', response.data);
         }
@@ -692,19 +690,16 @@ export default {
         console.log("Eliminación cancelada");
       }
     },
-
-    // Método para llamar al endpoint de eliminación del establecimiento
     confirmarEliminarEstablecimiento() {
       const id = this.$route.params.idEstablecimiento;
       axios.delete(`http://localhost:8080/ociosingluten/establecimientos/establecimientos/${id}`)
           .then(() => {
-            // Si la eliminación es exitosa, redirige a otra página o realiza alguna acción adicional si es necesario
             console.log("Establecimiento eliminado con éxito");
           })
           .catch(error => {
             console.error("Error al eliminar el establecimiento:", error);
           });
-      this.$router.push('/establecimientos'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
+      this.$router.push('/establecimientos');
     },
 
   }
@@ -713,24 +708,24 @@ export default {
 
 <style scoped>
 .container-principal {
-  display: flex; /* Utilizar flexbox para distribuir los elementos */
-  justify-content: space-between; /* Espacio entre los elementos */
-  width: 75vw; /* Ancho del viewport */
+  display: flex;
+  justify-content: space-between;
+  width: 75vw;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.1);
   border: 1px solid #ccc;
-  margin: auto; /* Centra horizontal y verticalmente */
-  margin-top: 20px; /* Ajusta el margen superior según necesites */
+  margin: auto;
+  margin-top: 20px;
 
 }
 
 .comentarios {
-  margin: auto; /* Centra horizontal y verticalmente */
-  display: ruby-base; /* Utilizar flexbox para distribuir los elementos */
-  justify-content: center; /* Espacio entre los elementos */
-  width: 75vw; /* Ancho del viewport */
+  margin: auto;
+  display: ruby-base;
+  justify-content: center;
+  width: 75vw;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
@@ -745,9 +740,9 @@ export default {
 }
 
 .comentario-contenido {
-  border: 1px solid #ccc; /* Borde alrededor del contenido */
-  border-radius: 5px; /* Bordes redondeados */
-  padding: 10px; /* Espaciado interno */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 .acciones {
@@ -755,19 +750,19 @@ export default {
 }
 
 .acciones i {
-  margin-right: 10px; /* Espacio entre los iconos */
-  cursor: pointer; /* Cambia el cursor al pasar sobre los iconos */
+  margin-right: 10px;
+  cursor: pointer;
 }
 
 .datos {
-  width: 45%; /* Ancho del contenedor de datos */
+  width: 45%;
 }
 
 .imagenes {
-  width: 45%; /* Ancho del contenedor de imágenes */
-  display: flex; /* Utilizar flexbox para distribuir los elementos */
-  flex-direction: column; /* Distribución en columna */
-  align-items: flex-start; /* Alineación a la izquierda */
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .boton-subir {
@@ -800,18 +795,18 @@ export default {
 
 .galeria {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Cambiar el tamaño mínimo y máximo de las columnas */
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-gap: 10px;
 }
 
 .galeria img {
   max-width: 100%;
-  max-height: 150px; /* Cambiar la altura máxima de las imágenes */
-  width: auto; /* Para mantener la proporción */
+  max-height: 150px;
+  width: auto;
   cursor: pointer;
 }
 
-/* Estilos para el modal */
+
 .modal {
   display: block;
   position: fixed;
@@ -830,7 +825,7 @@ export default {
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
-  max-width: 800px; /* Limita el ancho máximo */
+  max-width: 800px;
   text-align: center;
 }
 
@@ -849,11 +844,11 @@ export default {
   cursor: pointer;
 }
 
-/* Estilo del contenedor del mapa */
+
 .mapa {
   width: 100%;
-  height: 50vh; /* Set a relative height, adjust as needed */
-  border-radius: 8px; /* Redondear bordes del mapa */
+  height: 50vh;
+  border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   margin-left: 30px;
@@ -924,26 +919,26 @@ export default {
 }
 
 .star-size {
-  font-size: 20px; /* Cambia este valor al tamaño deseado */
+  font-size: 20px;
 }
 
 
 .mensaje-enviado h2 {
-  color: white; /* Cambiar el color del texto a blanco */
-  text-align: center; /* Asegurarse de que el texto esté centrado */
+  color: white;
+  text-align: center;
 }
 
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }
 
 @media (max-width: 768px) {
   .container-principal {
-    flex-direction: column; /* Cambiar a disposición en columna en pantallas pequeñas */
+    flex-direction: column;
   }
 
   .mapa {
@@ -952,8 +947,8 @@ export default {
 
   .datos,
   .imagenes {
-    width: 100%; /* Ancho completo en pantallas pequeñas */
-    margin-right: 0; /* Sin margen en pantallas pequeñas */
+    width: 100%;
+    margin-right: 0;
   }
 }
 

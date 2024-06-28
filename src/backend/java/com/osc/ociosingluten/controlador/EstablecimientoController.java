@@ -65,20 +65,16 @@ public class EstablecimientoController {
         Optional<Establecimiento> establecimientoOptional = repoEst.findByIdEstablecimiento(id);
         if (establecimientoOptional.isPresent()) {
             Establecimiento establecimiento = establecimientoOptional.get();
-            // Verificar si el establecimiento tiene imágenes
             if (!establecimiento.getImagenes().isEmpty()) {
-                // Convertir las imágenes a cadenas Base64
                 List<String> imagenesBase64 = establecimiento.getImagenes().stream()
                         .map(imagen -> convertirBytesAStringBase64(imagen.getImagen()))
                         .collect(Collectors.toList());
-                // Crear el EstablecimientoDTO con las imágenes en Base64
                 EstablecimientoDTO establecimientoDTO = new EstablecimientoDTO(establecimiento.getIdEstablecimiento(),
                         establecimiento.getNombre(), establecimiento.getTelefono(), establecimiento.getLocalidad(),
                         establecimiento.getProvincia(), establecimiento.getCalle(), establecimiento.getCodPostal(),
                         establecimiento.getPais(), establecimiento.getNumLikes(), imagenesBase64, establecimiento.getVisitantes());
                 return ResponseEntity.ok(establecimientoDTO);
             } else {
-                // Si el establecimiento no tiene imágenes, devolver el DTO sin las imágenes
                 EstablecimientoDTO establecimientoDTO = new EstablecimientoDTO(establecimiento.getIdEstablecimiento(),
                         establecimiento.getNombre(), establecimiento.getTelefono(), establecimiento.getLocalidad(),
                         establecimiento.getProvincia(), establecimiento.getCalle(), establecimiento.getCodPostal(),
@@ -137,8 +133,6 @@ public class EstablecimientoController {
                                                     @RequestParam("codPostal") int codPostal,
                                                     @RequestParam("pais") String  pais,
                                                     @RequestParam String username) throws IOException, UsuarioExisteException, UsuarioNoExisteException, EstablecimientoExistenteException, ActividadNoCreada, SesionNoIniciadaException {
-        //Username es el usuario con el que he iniciado sesión para que introduzca el establecimiento
-        System.out.println(username);
         Usuario usuarioqueAnade = servicio.buscarUsuarioXUsername(username);
         Establecimiento est = new Establecimiento(nombre, telefono, localidad, provincia, calle, codPostal, pais);
 
@@ -152,13 +146,9 @@ public class EstablecimientoController {
 
     @GetMapping("/establecimientos/{id}/comentarios")
     public ResponseEntity<List<Comentario>> cargarComentariosEst(@PathVariable int id){
-        // Buscar el establecimiento por nombre
         Optional<Establecimiento> est = repoEst.findByIdEstablecimiento(id);
-
         if (!est.isEmpty()) {
-            Establecimiento establecimiento = est.get(); // Suponiendo que solo obtienes un establecimiento
-
-            // Obtener la lista de comentarios del establecimiento
+            Establecimiento establecimiento = est.get();
             List<Comentario> comentarios = establecimiento.getComentarios();
 
             return ResponseEntity.ok(comentarios);
@@ -340,14 +330,11 @@ public class EstablecimientoController {
 
         Establecimiento establecimiento = establecimientoOpt.get();
 
-        // Eliminar todas las imágenes asociadas al establecimiento
         if (establecimiento.getImagenes() != null) {
             repoImg.deleteAll(establecimiento.getImagenes());
         }
 
-        // Eliminar todos los comentarios asociados al establecimiento
         for (Comentario comentario : establecimiento.getComentarios()) {
-            // Eliminar el comentario del usuario que lo creó
             Usuario autor = comentario.getAutor();
             if (autor != null) {
                 autor.getComentariosRealizados().remove(comentario);
@@ -361,11 +348,9 @@ public class EstablecimientoController {
             comRe.delete(com);
         }
 
-        // Eliminar todas las actividades asociadas al establecimiento
         List<Actividad> actividades = repoAct.findByEstablecimiento(establecimiento);
 
         for (Actividad actividad : actividades) {
-            // Eliminar la actividad del usuario que lo creó
             Usuario autor = actividad.getAutor();
             if (autor != null) {
                 autor.getActividades().remove(actividad);
@@ -377,7 +362,6 @@ public class EstablecimientoController {
             repoAct.delete(act);
         }
 
-        // Eliminar el establecimiento de la lista de favoritos y visitados de los usuarios
         List<Usuario> usuarios = repoUsu.findByEstablecimientosFavoritosOrEstablecimientosVisitados(establecimiento, establecimiento);
         for (Usuario usuario : usuarios) {
             usuario.getEstablecimientosFavoritos().remove(establecimiento);
@@ -385,7 +369,6 @@ public class EstablecimientoController {
             repoUsu.save(usuario);
         }
 
-        // Finalmente, eliminar el establecimiento
         repoEst.delete(establecimiento);
 
         return ResponseEntity.ok().build();

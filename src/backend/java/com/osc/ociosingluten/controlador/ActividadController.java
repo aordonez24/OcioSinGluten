@@ -21,8 +21,6 @@ public class ActividadController {
     @Autowired
     private ActividadRepository repoAct;
 
-
-    //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoActividades")
     public List<Actividad> cargarTodasActividades(){
         return repoAct.findAll();

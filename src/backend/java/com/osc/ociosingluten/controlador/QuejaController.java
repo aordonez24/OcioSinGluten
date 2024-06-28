@@ -22,7 +22,6 @@ public class QuejaController {
     private QuejaRepository repoAct;
 
 
-    //Obtener todos los usuarios que se encuentran registrados en la web, esto solo lo podría ver un usuario admin
     @GetMapping("/listadoQuejas")
     public List<Consulta> cargarTodasQuejas(){
         return repoAct.findAll();

@@ -60,12 +60,6 @@ public class ServicioOcioSinGluten {
     public ServicioOcioSinGluten() {
     }
 
-    /**
-     * Funcion utilizada para el registro del usuario, el registro se simula añadiendo un usuario a la base de datos
-     * @param usu Usuario a registrar
-     * @return True si se ha registrado correctamente
-     * @throws UsuarioExisteException si ese usuario existe en la base de datos
-     */
     public boolean registroUsuario(@NotNull @Valid Usuario usu) throws UsuarioExisteException {
         Optional<Usuario> usuarioPorDni = repoUsuario.findByDni(usu.getDni());
         Optional<Usuario> usuarioPorEmail = repoUsuario.findByEmail(usu.getEmail());
@@ -197,28 +191,6 @@ public class ServicioOcioSinGluten {
 
     }
 
-    public Usuario cambiarPermisos(Usuario usu, Usuario aCambiar) throws SesionNoIniciadaException, NoPermisosException, UsuarioNoExisteException {
-        Optional<Usuario> usuario = repoUsuario.findByDni(usu.getDni());
-        Usuario gestor = usuario.get();
-        if(usuario.isPresent()) {
-            if (gestor.isSesionIniciada()) {
-                if(gestor.getRol() == Rol.ADMIN){
-                    if(aCambiar.getRol() == Rol.ADMIN){
-                        aCambiar.setRol(Rol.COMUN);
-                    }else{
-                        aCambiar.setRol(Rol.ADMIN);
-                    }
-                    return aCambiar;
-                }else{
-                    throw new NoPermisosException("El usuario no tiene permisos para realizar esta operacion.");
-                }
-            }else{
-                throw new SesionNoIniciadaException("No ha iniciado sesión.");
-            }
-        }else{
-            throw new UsuarioNoExisteException("El usuario no existe.");
-        }
-    }
 
     public boolean publicarEstablecimiento(Usuario anadeEst, Establecimiento est) throws SesionNoIniciadaException, EstablecimientoExistenteException, ActividadNoCreada {
         Optional<Establecimiento> establecimiento = repoEst.findByNombreAndCodPostal(est.getNombre(), est.getCodPostal());
@@ -232,60 +204,6 @@ public class ServicioOcioSinGluten {
             repoUsuario.actualizarUsuario(anadeEst);
             return true;
         }
-    }
-
-    public boolean eliminarEstablecimiento(Usuario usuGestor, Establecimiento est) throws EstablecimientoNoExistenteException, ActividadNoCreada, SesionNoIniciadaException, NoPermisosException, UsuarioNoExisteException {
-        //Esta opción solo la puede hacer un usuario con la sesion iniciada y si es un admin
-        Optional<Usuario> usuu = repoUsuario.findByDni(usuGestor.getDni());
-        if(usuu.isPresent()){
-            if (usuGestor.isSesionIniciada()) {
-                if (usuGestor.getRol() == Rol.ADMIN) {
-                    Optional<Establecimiento> establecimiento = repoEst.findByIdEstablecimiento(est.getIdEstablecimiento());
-                    if (establecimiento.isPresent()) {
-                        est.setArchivada(true);
-                        return true;
-                    } else {
-                        throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
-                    }
-                } else {
-                    throw new NoPermisosException("El usuario no tiene permisos para realizar esa acción.");
-                }
-            }
-            throw new SesionNoIniciadaException("El usuario no ha iniciado sesion.");
-        }else{
-            throw new UsuarioNoExisteException("El usuario no existe.");
-        }
-    }
-
-    public boolean editarEstablecimiento(Usuario usuGestor, Establecimiento est, String nuevoNombre, int nuevoTelefono, String nuevaLocalidad, String nuevaProvincia, String nuevaCalle, int nuevoCodPostal, String nuevoPais) throws SesionNoIniciadaException, NoPermisosException, EstablecimientoNoExistenteException {
-        if(usuGestor.isSesionIniciada()) {
-            if(usuGestor.getRol() == Rol.ADMIN) {
-                Optional<Establecimiento> establecimiento = repoEst.findByIdEstablecimiento(est.getIdEstablecimiento());
-                if(establecimiento.isPresent()){
-                    if(est.getNombre() != nuevoNombre)
-                        est.setNombre(nuevoNombre);
-                    if(est.getTelefono() != nuevoTelefono)
-                        est.setTelefono(nuevoTelefono);
-                    if(est.getLocalidad() != nuevaLocalidad)
-                        est.setLocalidad(nuevaLocalidad);
-                    if(est.getProvincia() != nuevaProvincia)
-                        est.setProvincia(nuevaProvincia);
-                    if(est.getCalle() != nuevaCalle)
-                        est.setCalle(nuevaCalle);
-                    if(est.getCodPostal() != nuevoCodPostal)
-                        est.setCodPostal(nuevoCodPostal);
-                    if(est.getPais() != nuevoPais)
-                        est.setPais(nuevoPais);
-                    repoEst.actualizar(est);
-                    return true;
-                }else{
-                    throw new EstablecimientoNoExistenteException("El establecimiento no existe.");
-                }
-            }else{
-                throw new NoPermisosException("El usuario no tiene permisos para realizar esa acción.");
-            }
-        }
-        throw new SesionNoIniciadaException("El usuario no ha iniciado sesion.");
     }
 
     public boolean crearActividad(Actividad actividad) throws ActividadNoCreada {
