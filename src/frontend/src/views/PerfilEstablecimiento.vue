@@ -8,7 +8,6 @@
   <div class="container1">
     <div class="container-principal">
       <div class="datos">
-        <!-- Mostrar los datos del establecimiento -->
         <h1>{{ establecimiento.nombre }}</h1>
         <p>Teléfono: {{ establecimiento.telefono }}</p>
         <p>Localidad: {{ establecimiento.localidad }}</p>
@@ -67,11 +66,9 @@
       </div>
       <div class="mapa" ref="map"></div>
       <div class="imagenes">
-        <!-- Galería de imágenes -->
         <div class="galeria">
           <img v-for="(imagen, index) in imagenes" :key="index" :src="imagen" alt="Imagen" @click="mostrarImagen(index)">
         </div>
-        <!-- Botón para subir imágenes -->
         <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
         <button v-if="isAuthenticated" @click="openFileInput" class="boton-subir">¿Dispone de alguna imagen de este establecimiento? ¡Compártela con nosotros!</button>
         <p>
@@ -133,7 +130,7 @@ import Header3 from "@/components/headerIniciadoSesion.vue";
 import FooterComponente from "@/components/footer.vue";
 import CabeceraComponente from "@/components/header.vue";
 import axios from "axios";
-import 'ol/ol.css'; // Importa los estilos CSS de OpenLayers
+import 'ol/ol.css';
 import { loadModules } from 'esri-loader';
 import {mapGetters} from "vuex";
 import contacto from "@/components/contacto.vue";
@@ -156,14 +153,14 @@ export default {
       usuarioActual: '',
       nuevoComentario: '',
       sePuedeResponder: false,
-      respuestasAbiertas: [], // Arreglo para almacenar los índices de los comentarios con el campo de respuesta abierto
-      nuevaRespuesta: {}, // Objeto para almacenar las respuestas escritas por el usuario para cada comentario
+      respuestasAbiertas: [],
+      nuevaRespuesta: {},
       favoritosUsuario: [],
       visitadosUsuario: [],
-      esFavorito: false, // Indica si el establecimiento es favorito del usuario
-      esVisitado: false, // Indica si el establecimiento ha sido visitado por el usuario
+      esFavorito: false,
+      esVisitado: false,
       rol: '',
-      mostrarFormularioEditar: false, // Estado para controlar la visibilidad del formulario de edición
+      mostrarFormularioEditar: false,
       formulario: {
         nombre:'',
         telefono: '',
@@ -208,7 +205,6 @@ export default {
             this.mensajeEnviado = true;
           })
           .catch(error => {
-            // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
     },
@@ -219,7 +215,6 @@ export default {
       }
     },
     async obtenerDatosEstablecimiento() {
-      // Obtener datos del establecimiento
       const id = this.$route.params.idEstablecimiento;
       const response = await axios.get(`http://localhost:8080/ociosingluten/establecimientos/establecimiento/${id}`);
       this.establecimiento = response.data;
@@ -272,7 +267,7 @@ export default {
       if (this.isAuthenticated) {
         this.$refs.fileInput.click();
       } else {
-        this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
+        this.$router.push('/iniciaSesion');
       }
     },
     calcularEstrellas() {
@@ -282,26 +277,24 @@ export default {
         let estrellas = [];
 
         for (let i = 0; i < estrellasLlenas; i++) {
-          estrellas.push('full'); // Añadir estrellas llenas
+          estrellas.push('full');
         }
 
         if (estrellaMedia >= 0.5) {
-          estrellas.push('half'); // Añadir media estrella si corresponde
+          estrellas.push('half');
         }
 
         const estrellasRestantes = 5 - estrellas.length;
         for (let i = 0; i < estrellasRestantes; i++) {
-          estrellas.push('empty'); // Añadir estrellas vacías para completar el total
+          estrellas.push('empty');
         }
 
         return estrellas;
       },
     enviarComentario() {
-      // Verifica si el comentario no está vacío
       if (this.nuevoComentario.trim() === '') {
         return;
       }
-      // Envía el comentario al backend utilizando axios
       const id = this.$route.params.idEstablecimiento;
       const nuevoComentarioDTO = {
         username: this.usuarioActual,
@@ -309,9 +302,7 @@ export default {
       };
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/establecimientos/${id}/nuevoComentario`, nuevoComentarioDTO)
           .then(() => {
-            // Si el comentario se envía correctamente, actualiza la lista de comentarios
             this.cargarComentarios();
-            // Limpia el área de texto después de enviar el comentario
             this.nuevoComentario = '';
           })
           .catch(error => {
@@ -349,14 +340,12 @@ export default {
       const id = this.$route.params.idEstablecimiento;
       console.log(imagenSeleccionada.id);
       try {
-        // Obtener el segmento Base64 de la imagen seleccionada
         const base64Image = imagenSeleccionada.split(',')[1];
 
-        // Realizar la petición POST al endpoint sin convertir a JSON
         const response = await fetch(`http://localhost:8080/ociosingluten/establecimientos/establecimientoFoto/${id}/fotomenos`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'text/plain' // Cambiar el tipo de contenido a text/plain
+            'Content-Type': 'text/plain'
           },
           body: base64Image
         });
@@ -415,17 +404,17 @@ export default {
 
         // Crea una instancia del mapa
         const map = new Map({
-          basemap: 'streets-navigation-vector' // Puedes cambiar el basemap según tus preferencias
+          basemap: 'streets-navigation-vector'
         });
 
         // Crea una instancia de MapView y asigna el mapa
         const view = new MapView({
-          container: this.$refs.map, // Debes asegurarte de que este elemento exista en tu template y tenga una referencia 'map'
+          container: this.$refs.map,
           map,
           center: [coordenadas[1], coordenadas[0]], // Invierte las coordenadas para ArcGIS API
-          zoom: 14, // Puedes ajustar el nivel de zoom según tus preferencias
+          zoom: 14,
           ui: {
-            components: [] // Solo incluye el componente de zoom
+            components: []
           }
         });
 
@@ -443,7 +432,7 @@ export default {
           geometry: point,
           symbol: {
             type: 'simple-marker',
-            color: 'yellow', // Puedes ajustar el color y el tamaño del marcador
+            color: 'yellow',
             size: '12px'
           }
         });
@@ -459,9 +448,8 @@ export default {
       const username = this.username;
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/favorito`, username)
           .then(() => {
-            // Si el comentario se envía correctamente, actualiza la lista de comentarios
             this.cargarComentarios();
-            this.esFavorito = true; // Actualiza el estado a favorito
+            this.esFavorito = true;
           })
           .catch(error => {
             console.error('Error al enviar el comentario:', error);
@@ -472,9 +460,8 @@ export default {
       const username = this.username;
       axios.post(`http://localhost:8080/ociosingluten/establecimientos/${id}/visitado`, username)
           .then(() => {
-            // Si el comentario se envía correctamente, actualiza la lista de comentarios
             this.cargarComentarios();
-            this.esVisitado = true; // Actualiza el estado a visitado
+            this.esVisitado = true;
           })
           .catch(error => {
             console.error('Error al enviar el comentario:', error);
@@ -524,7 +511,6 @@ export default {
       if (respuesta.trim() === '') {
         return;
       }
-      // Envía la respuesta al backend utilizando axios
       const nuevoComentarioDTO = {
         username: this.username,
         mensaje: respuesta
@@ -532,11 +518,8 @@ export default {
 
       axios.post(`http://localhost:8080/ociosingluten/comentario/${id}/nuevaRespuesta`, nuevoComentarioDTO)
           .then(() => {
-            // Si la respuesta se envía correctamente, actualiza la lista de comentarios
             this.cargarComentarios();
-            // Limpia el área de texto después de enviar la respuesta
             this.nuevaRespuesta[index] = '';
-            // Cierra el campo de respuesta
             this.toggleRespuesta(index);
           })
           .catch(error => {
@@ -550,7 +533,6 @@ export default {
 
       axios.delete(url)
           .then(() => {
-            // Si la respuesta se envía correctamente, actualiza la lista de comentarios
             this.cargarComentarios();
           })
           .catch(error => {
@@ -597,7 +579,6 @@ export default {
       this.mostrarFormularioEditar = !this.mostrarFormularioEditar;
     },
     async editarEstablecimiento() {
-      // Validar los campos antes de enviar la solicitud
       if (!this.validarFormulario()) {
         console.error('Error en la validación del formulario');
         return;
@@ -670,8 +651,6 @@ export default {
         alert("Codigo postal incorrecto");
       }
 
-
-      // Verificar si todos los campos son válidos
       return (
           this.nombreValido &&
           this.telefonoValido &&

@@ -2,23 +2,23 @@ import { createStore } from 'vuex';
 
 const store = createStore({
     state: {
-        token: localStorage.getItem('token') || null, // Obtener el token del almacenamiento local
-        username: localStorage.getItem('username') || null // Obtener el username del almacenamiento local
+        token: localStorage.getItem('token') || null,
+        username: localStorage.getItem('username') || null
     },
     mutations: {
         setToken(state, token) {
             state.token = token;
-            localStorage.setItem('token', token); // Guardar el token en el almacenamiento local
+            localStorage.setItem('token', token);
         },
         setUsername(state, username) {
             state.username = username;
-            localStorage.setItem('username', username); // Guardar el username en el almacenamiento local
+            localStorage.setItem('username', username);
         },
         clearAuthData(state) {
             state.token = null;
             state.username = null;
-            localStorage.removeItem('token'); // Eliminar el token del almacenamiento local al cerrar sesión
-            localStorage.removeItem('username'); // Eliminar el username del almacenamiento local al cerrar sesión
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
         }
     },
     actions: {

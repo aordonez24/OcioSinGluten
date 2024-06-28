@@ -18,7 +18,7 @@
               <button v-if="rol === 'ADMIN'" @click="eliminarUsuario" class="button2">Eliminar usuario</button>
             </div>
             <div v-else class="profile-picture-default">
-              <i class="fas fa-user"></i> <!-- Aquí debes usar el icono que desees -->
+              <i class="fas fa-user"></i>
             </div>
             <div class="seguidores-seguidos">
               <div class="seguidor-seguido">
@@ -85,7 +85,7 @@ export default {
       numSeguidores: '',
       siguiendo: false,
       rol: '',
-      archivado: '', // Nuevo dato para controlar si el usuario está archivado
+      archivado: '',
       hayFoto: false
     };
   },
@@ -123,7 +123,6 @@ export default {
         const yo = this.username;
         const response2 = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuarioUsername/${yo}`);
         this.rol = response2.data.rol;
-        //console.log(this.fotoPerfilURL.length);
       } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
         this.loading = false;
@@ -157,14 +156,12 @@ export default {
         const loggedInUsername = this.username;
         console.log(username);
         console.log(loggedInUsername);
-        // Verificar si el usuario intenta seguirse a sí mismo
         if (username === loggedInUsername) {
           console.error('No puedes seguirte a ti mismo.');
-          return; // Salir del método sin hacer nada más
+          return;
         }
 
         if (this.siguiendo) {
-          // Dejar de seguir
           await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidorMenos`, {
             data: {
               usernameQueSigueA: loggedInUsername,
@@ -180,7 +177,6 @@ export default {
         }
         window.location.reload();
 
-        // Actualizar estado de seguimiento
         this.siguiendo = !this.siguiendo;
       } catch (error) {
         console.error('Error al seguir/dejar de seguir al usuario:', error);
@@ -193,7 +189,7 @@ export default {
         const response = await axios.get(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/seguidos`);
         for (let i = 0; i < response.data.length; i++) {
           if (buscado === response.data[i].username) {
-            this.siguiendo = true; // Lo está siguiendo
+            this.siguiendo = true;
           }
         }
       } catch (error) {
@@ -206,16 +202,15 @@ export default {
         console.log(username);
         await axios.post(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/oculto`);
 
-        const emailUsuario = this.email; // Obtener el correo electrónico del usuario
+        const emailUsuario = this.email;
         const asunto = 'Tu cuenta ha sido suspendida temporalmente';
         const cuerpo = 'Hola,\n\nTu cuenta ha sido suspendida temporalmente por violar nuestras políticas durante 24 horas.\n\nAtentamente,\nOcio Sin Gluten';
 
-        // Crear el enlace para enviar el correo electrónico
         const mailtoLink = `mailto:${emailUsuario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
 
         window.location.href = mailtoLink;
 
-        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+        this.$router.push({ name: 'comunidad' });
       } catch (error) {
         console.error('Error al suspender el usuario:', error);
       }
@@ -234,7 +229,7 @@ export default {
 
         window.location.href = mailtoLink;
 
-        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+        this.$router.push({ name: 'comunidad' });
       } catch (error) {
         console.error('Error al restaurar el usuario:', error);
       }
@@ -245,7 +240,7 @@ export default {
         console.log(username);
         await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/usuarioMenos`);
 
-        const emailUsuario = this.email; // Obtener el correo electrónico del usuario
+        const emailUsuario = this.email;
         const asunto = 'Tu cuenta ha sido eliminada';
         const cuerpo = 'Hola,\n\nTu cuenta ha sido eliminada permanentemente por violar nuestras políticas. Para recuperarla, regístrese de nuevo.\n\nAtentamente,\nOcio Sin Gluten';
 
@@ -253,7 +248,7 @@ export default {
 
         window.location.href = mailtoLink;
 
-        this.$router.push({ name: 'comunidad' }); // Navegar a la página de lista de usuarios después de eliminar
+        this.$router.push({ name: 'comunidad' });
       } catch (error) {
         console.error('Error al eliminar el usuario:', error);
       }
@@ -266,23 +261,23 @@ export default {
 
 <style scoped>
 .container-principal {
-  min-height: calc(70vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
+  min-height: calc(70vh - 200px);
   width: 70vw;
-  margin: 50px auto 0; /* Eliminamos el margen inferior */
+  margin: 50px auto 0;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
   display: flex;
-  flex-direction: column; /* Asegura que el pie de página se coloque al final */
+  flex-direction: column;
   margin-bottom: 40px;
 }
 
 .button {
   display: block;
-  width: 100%; /* Ajusta este valor según el ancho deseado */
-  max-width: 200px; /* Opcional: establece un ancho máximo */
+  width: 100%;
+  max-width: 200px;
   margin-top: 10px;
   padding: 8px 12px;
   border-radius: 20px;
@@ -291,7 +286,7 @@ export default {
   border: 2px solid transparent;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: center; /* Asegura que el texto esté centrado */
+  text-align: center; /
 }
 
 .button:hover {
@@ -300,8 +295,8 @@ export default {
 
 .button2 {
   display: block;
-  width: 100%; /* Ajusta este valor según el ancho deseado */
-  max-width: 200px; /* Opcional: establece un ancho máximo */
+  width: 100%;
+  max-width: 200px;
   margin-top: 10px;
   padding: 8px 12px;
   border-radius: 20px;
@@ -310,7 +305,7 @@ export default {
   border: 2px solid transparent;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: center; /* Asegura que el texto esté centrado */
+  text-align: center;
 }
 
 .button2:hover {
@@ -350,7 +345,7 @@ export default {
 
 .seguidor-seguido {
   text-align: center;
-  margin-bottom: 120px; /* Agrega un margen inferior */
+  margin-bottom: 120px;
 }
 
 .seguidor-seguido:first-child {
@@ -365,7 +360,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 60px; /* Tamaño del icono */
+  font-size: 60px;
 }
 
 .seguidor-seguido p {
@@ -415,8 +410,8 @@ export default {
   padding: 20px;
   border-radius: 10px;
   color: white;
-  width: 80%; /* Cambia el ancho del div de los datos del usuario */
-  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+  width: 80%;
+  margin-top: 20px;
 }
 
 
@@ -463,19 +458,19 @@ footer-componente {
 .action-buttons-container {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Espacio entre los botones */
+  gap: 10px;
 }
 
 .profile-picture-default {
-  width: 150px; /* Ancho del contenedor */
-  height: 150px; /* Altura del contenedor */
-  border-radius: 50%; /* Para que el contenedor sea circular */
-  background-color: #ccc; /* Color de fondo del contenedor */
-  display: flex; /* Para centrar el icono vertical y horizontalmente */
-  align-items: center; /* Para centrar verticalmente */
-  justify-content: center; /* Para centrar horizontalmente */
-  font-size: 60px; /* Tamaño del icono de usuario */
-  color: #666; /* Color del icono de usuario */
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: #666;
 }
 
 .container1 {

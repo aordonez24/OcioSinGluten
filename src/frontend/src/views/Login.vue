@@ -76,12 +76,10 @@ export default {
 </script>
 
 <style scoped>
-/* login.css */
 
 @import url('https://fonts.googleapis.com/css?family=Montserrat');
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
-/* GLOBAL */
 
 * {
   margin: 0;
@@ -96,15 +94,15 @@ html, body {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }
 
 
 .container {
-  width: 510px; /* Ancho del viewport */
-  margin: 50px auto 100px; /* Centra el contenedor horizontalmente y deja un margen vertical de 50px arriba y 100px abajo */
+  width: 510px;
+  margin: 50px auto 100px;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
@@ -144,7 +142,7 @@ h1 {
 
 input[type="text"] {
   width: 100%;
-  margin-bottom: 10px; /* Ajusta el tamaño del espacio según tus preferencias */
+  margin-bottom: 10px;
   border-radius: 30px;
   border: 1px solid #DAE2F1;
   padding: 15px 20px;
@@ -162,7 +160,7 @@ form {
 
 input {
   width: 100%;
-  margin-bottom: 20px; /* Separación entre los campos */
+  margin-bottom: 20px;
   border-radius: 30px;
   border: 1px solid #DAE2F1;
   padding: 15px 20px;
@@ -219,7 +217,7 @@ input {
 }
 
 input[type="password"] {
-  padding-right: 30px; /* Espacio para el icono de un ojo */
+  padding-right: 30px;
 }
 
 .fa-eye {
@@ -239,31 +237,31 @@ input[type="password"] {
 
 @media screen and (max-width: 768px) {
   .container {
-    width: 90%; /* Cambia el ancho del contenedor para pantallas más pequeñas */
-    margin: 50px auto; /* Ajusta el margen vertical */
-    padding: 20px; /* Ajusta el padding */
+    width: 90%;
+    margin: 50px auto;
+    padding: 20px;
   }
 
   .form-background {
-    width: 100%; /* Ajusta el ancho del formulario */
-    padding: 20px; /* Ajusta el padding del formulario */
+    width: 100%;
+    padding: 20px;
   }
 
   h1 {
-    font-size: 24px; /* Ajusta el tamaño del título */
+    font-size: 24px;
   }
 
   input[type="text"],
   input[type="password"] {
-    width: 100%; /* Ajusta el ancho de los campos de entrada */
+    width: 100%;
   }
 
   button[type="submit"] {
-    width: 100%; /* Ajusta el ancho del botón */
+    width: 100%;
   }
 
   .login {
-    font-size: 16px; /* Ajusta el tamaño del texto de "¿Necesitas una cuenta?" */
+    font-size: 16px;
   }
 }
 

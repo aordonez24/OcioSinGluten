@@ -115,13 +115,13 @@ export default {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }
 
 .container-principal {
-  min-height: calc(100vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
+  min-height: calc(100vh - 200px);
   width: 90vw;
   max-width: 1200px;
   margin: 50px auto 0;
@@ -212,16 +212,16 @@ footer-componente {
 
 @media (max-width: 768px) {
   .container-principal {
-    padding: 10px; /* Ajuste el padding para que sea más compacto en pantallas pequeñas */
+    padding: 10px;
   }
   .followers-column, .following-column {
-    width: 100%; /* Ambas columnas ocupan el 100% del ancho disponible */
-    padding: 5px; /* Padding reducido para conservar espacio */
+    width: 100%;
+    padding: 5px;
   }
   .profile-pic {
-    width: 50px; /* Reduje el tamaño de la imagen de perfil para ajustarse mejor */
+    width: 50px;
     height: 50px;
-    border-radius: 50%; /* Añadí borde redondeado para mejorar aspecto en móviles */
+    border-radius: 50%;
   }
 }
 

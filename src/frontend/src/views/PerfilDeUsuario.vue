@@ -57,7 +57,6 @@
                 <button v-if="editing" @click="guardarCambios" class="cerrar-sesion-button2">Guardar</button>
               </div>
 
-              <!-- Formulario para cambiar contraseña -->
               <div v-if="changingPassword" class="change-password-form">
                 <h3>Cambiar Contraseña</h3>
                 <form @submit.prevent="submitCambiarContrasena">
@@ -130,11 +129,11 @@ export default {
     this.obtenerSeguidos();
   },
   methods: {
-    ...mapActions(['logout']), // Mapear la acción logout del store Vuex
+    ...mapActions(['logout']),
     async cerrarSesion() {
       try {
-        await this.logout(); // Llamar a la acción logout del store Vuex
-        this.$router.push('/'); // Redirigir a la página de inicio
+        await this.logout();
+        this.$router.push('/');
       } catch (error) {
         console.error('Error al cerrar sesión:', error);
       }
@@ -171,7 +170,6 @@ export default {
         const username = this.username;
         const response = await axios.delete(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/nofotoperfil`);
         if (response.status === 200) {
-          // Actualizar la vista después de eliminar la foto de perfil
           this.fotoPerfilURL = null;
           alert("Foto de perfil eliminada exitosamente");
         } else {
@@ -192,11 +190,10 @@ export default {
             const username = this.$route.params.username;
             await axios.post(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/fotoPerfil`, fotoPerfilBase64, {
               headers: {
-                'Content-Type': 'text/plain' // Establecer el tipo de contenido como texto plano
+                'Content-Type': 'text/plain'
               }
             });
-            // Recargar la página después de actualizar la foto de perfil
-            this.obtenerUsuario(); // Otra opción es solo actualizar la foto de perfil sin recargar la página
+            this.obtenerUsuario();
           } catch (error) {
             console.error('Error al actualizar la foto de perfil:', error);
           }
@@ -225,9 +222,8 @@ export default {
           return;
         }
 
-        // Si pasa la validación, realizar la solicitud de actualización
         await axios.put(`http://localhost:8080/ociosingluten/usuarios/perfilUsuario/${username}/nuevosDatos`, nuevosDatos);
-        this.editing = false; // Cambiar al modo de visualización después de guardar los cambios
+        this.editing = false;
         this.$router.push('/iniciaSesion');
 
       } catch (error) {
@@ -236,7 +232,7 @@ export default {
       }
     },
     iniciarVisitadosYFavs() {
-      const username = this.$route.params.username; // Nombre de usuario del perfil visitado
+      const username = this.$route.params.username;
       this.$router.push({ name: 'FavoritosYVisitados', params: { username: username } }); // Navegar al chat con ese usuario
     },
     async iniciarCambioContrasena() { //Async por operacion asincrona
@@ -252,7 +248,6 @@ export default {
     async submitCambiarContrasena() {
       try {
 
-          // Verificar que la nueva contraseña y la confirmación coincidan
           if (this.newPassword !== this.confirmPassword) {
             alert("Las contraseñas no coinciden.");
             return;
@@ -339,7 +334,7 @@ export default {
 <style scoped>
 .container-principal {
   width: 70vw;
-  margin: 50px auto 0; /* Eliminamos el margen inferior */
+  margin: 50px auto 0;
   padding: 45px;
   background-color: #fff;
   border-radius: 20px;
@@ -381,7 +376,7 @@ export default {
 
 .seguidor-seguido {
   text-align: center;
-  margin-bottom: 120px; /* Agrega un margen inferior */
+  margin-bottom: 120px;
 }
 
 .seguidor-seguido:first-child {
@@ -426,8 +421,8 @@ export default {
   padding: 20px;
   border-radius: 10px;
   color: white;
-  width: 80%; /* Cambia el ancho del div de los datos del usuario */
-  margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+  width: 80%;
+  margin-top: 20px;
 }
 
 
@@ -451,7 +446,7 @@ export default {
 }
 
 .button-separator {
-  width: 10px; /* Ajusta este valor para la separación deseada */
+  width: 10px;
 }
 
 .change-password-form {

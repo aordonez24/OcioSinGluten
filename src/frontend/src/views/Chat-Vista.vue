@@ -2,7 +2,7 @@
   <div>
     <header3/>
     <div class="container1">
-      <div class="container mt-5 mb-5"> <!-- Agregamos un margen inferior -->
+      <div class="container mt-5 mb-5">
       <div class="row">
         <!-- Formulario para enviar mensajes -->
         <div class="col-md-4">
@@ -95,7 +95,7 @@ export default {
           })
         });
       }
-      this.mensaje = ''; // Vaciar el campo de mensaje
+      this.mensaje = '';
     },
     mostrarMensaje(mensaje) {
       const body = JSON.parse(mensaje);
@@ -109,9 +109,9 @@ export default {
 
 <style scoped>
 .container {
-  min-height: calc(80vh - 200px); /* Ajusta este valor según la altura de tu encabezado y pie de página */
+  min-height: calc(80vh - 200px);
   width: 90%;
-  margin: 50px auto 0; /* Eliminamos el margen inferior */
+  margin: 50px auto 0;
   padding: 30px;
   background-color: #fff;
   border-radius: 20px;
@@ -119,23 +119,19 @@ export default {
   border: 1px solid #ccc;
 }
 
-/* Ajusta el tamaño del formulario para enviar mensajes */
 .mb-3 {
   max-width: 300px;
 }
 
-/* Añade margen entre los elementos del formulario */
 .mb-2 {
   margin-bottom: 10px;
 }
 
-/* Estilos para los mensajes */
 .chat-container {
   margin-left: -15px;
   margin-right: -15px;
 }
 
-/* Estilos para los mensajes */
 .mensaje {
 
   border: none;
@@ -148,23 +144,20 @@ export default {
   padding: 10px;
 }
 
-/* Estilos para los mensajes enviados */
 .mensaje-enviado {
-  background-color: #ffa500; /* Verde claro */
+  background-color: #ffa500;
 }
 
-/* Estilos para los mensajes recibidos */
 .mensaje-recibido {
-  background-color: #fcf8e3; /* Amarillo claro */
+  background-color: #fcf8e3;
 }
 
-/* Estilos para el nombre del remitente */
 .mensaje-nombre {
   font-weight: bold;
 }
 
 footer-componente {
-  margin-top: 20px; /* Ajusta este valor según el espacio que desees */
+  margin-top: 20px;
 }
 
 
@@ -185,7 +178,7 @@ footer-componente {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }

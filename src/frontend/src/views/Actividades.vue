@@ -47,10 +47,10 @@ export default {
   setup() {
     const actividades = ref([]);
     const searchQuery = ref('');
-    const mensajeEnviado = ref(false); // Agregar ref para mensajeEnviado
-    const namelon = ref(''); // Agregar ref para namelon
-    const email = ref(''); // Agregar ref para email
-    const message = ref(''); // Agregar ref para message
+    const mensajeEnviado = ref(false);
+    const namelon = ref('');
+    const email = ref('');
+    const message = ref('');
 
 
 
@@ -71,14 +71,13 @@ export default {
     };
 
     const handleSubmit = () => {
-      // Envío del formulario al servidor
       if(!validateForm()){
         return;
       }
       axios.post('http://localhost:8080/ociosingluten/quejas/nuevaQueja', {
-        nombre: namelon.value, // Acceder a los valores con .value
-        email: email.value, // Acceder a los valores con .value
-        mensaje: message.value // Acceder a los valores con .value
+        nombre: namelon.value,
+        email: email.value,
+        mensaje: message.value
       })
           .then(response => {
             console.log('Mensaje enviado con éxito:', response.data);
@@ -178,7 +177,7 @@ footer-componente {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }

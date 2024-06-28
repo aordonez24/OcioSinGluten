@@ -174,12 +174,12 @@ input[type="text"] {
 }
 
 .nombre {
-  color: inherit; /* Utiliza el color heredado del elemento padre */
-  text-decoration: none; /* Elimina el subrayado */
+  color: inherit;
+  text-decoration: none;
 }
 
 .nombre:hover {
-  color: inherit; /* Utiliza el color heredado del elemento padre */
+  color: inherit;
 }
 
 @media (max-width: 768px) {

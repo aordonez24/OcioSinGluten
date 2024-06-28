@@ -12,15 +12,15 @@ export default {
 
 <style scoped>
 .footer {
-  background-color: #9DD9D2; /* Color de fondo gris oscuro */
+  background-color: #9DD9D2;
   padding: 20px;
-  text-align: center; /* Centrar el texto */
+  text-align: center;
 }
 
 .footer p {
-  margin-top: 12px; /* Espacio entre el section y los síntomas */
-  color: black; /* Color del texto */
-  font-size: 18px; /* Tamaño de fuente */
-  text-decoration: underline; /* Subrayar el texto */
+  margin-top: 12px;
+  color: black;
+  font-size: 18px;
+  text-decoration: underline;
 }
 </style>

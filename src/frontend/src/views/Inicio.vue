@@ -81,7 +81,6 @@ export default {
             this.mensajeEnviado = true;
           })
           .catch(error => {
-            // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
     },
@@ -99,131 +98,130 @@ export default {
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+  font-family: 'Montserrat', sans-serif;
 }
 
 .main-section {
-  background-color: #353535; /* Color de fondo gris */
-  padding: 80px; /* Aumentar el padding para hacer la sección más grande */
-  color: rgb(244, 255, 253); /* Color de texto blanco */
-  text-align: center; /* Centrar texto */
+  background-color: #353535;
+  padding: 80px;
+  color: rgb(244, 255, 253);
+  text-align: center;
 
 }
 
 .main-section h2 {
-  color: rgb(244, 255, 253); /* Color de texto blanco */
-  text-align: center; /* Centrar el título de los síntomas */
-  margin-bottom: 20px; /* Agregar margen inferior al título */
-  font-size: 45px; /* Tamaño de fuente más grande */
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+  color: rgb(244, 255, 253);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 45px;
+  font-family: 'Montserrat', sans-serif;
 
 }
 
 .main-section h3 {
-  color: #ffcc74; /* Color de texto blanco */
-  text-align: center; /* Centrar el título de los síntomas */
+  color: #ffcc74;
+  text-align: center;
   margin-top: 40px;
-  font-size: 30px; /* Tamaño de fuente más grande */
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
+  font-size: 30px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .main-section p {
-  font-size: 26px; /* Tamaño de fuente más pequeño */
-  line-height: 1.4; /* Espaciado entre líneas más compacto */
-  max-width: 1000px; /* Ancho máximo del texto para evitar que se extienda demasiado */
-  margin: 0 auto; /* Centrar el texto horizontalmente */
+  font-size: 26px;
+  line-height: 1.4;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .symptoms-container {
   background-color: #ffffff; /* Color de fondo gris */
-  margin-top: 0; /* Espacio entre el section y los síntomas */
-  padding: 40px; /* Aumentar el padding para hacer la sección más grande */
+  margin-top: 0;
+  padding: 40px;
 }
 
 .symptoms-container h3 {
-  margin-top: -15px; /* Reducir margen superior del título */
-  text-align: center; /* Centrar el título de los síntomas */
-  margin-bottom: 30px; /* Agregar margen inferior al título */
-  font-family: 'Montserrat', sans-serif; /* Aplicar la fuente Montserrat */
-  font-size: 45px; /* Tamaño de fuente más grande */
+  margin-top: -15px;
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 45px;
 }
 
 .symptoms-columns {
   display: flex;
-  justify-content: center; /* Centrar las columnas horizontalmente */
+  justify-content: center;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px; /* Agregar un espacio entre las columnas */
+  gap: 20px;
 }
 
 
 .column-container {
-  width: 20%; /* Reducir el ancho de los contenedores para que estén más juntos */
-  margin: 0 20px; /* Agregar un margen entre las columnas */
-  text-align: center; /* Centrar el contenido de los contenedores */
+  width: 20%;
+  margin: 0 20px;
+  text-align: center;
 }
 
 .left-column ul,
 .right-column ul {
   padding-left: -10px;
-  list-style-type: none; /* Eliminar los puntos de la lista */
-  text-align: left; /* Alinear el texto de la lista a la izquierda */
+  list-style-type: none;
+  text-align: left;
 }
 .left-column ul li,
 .right-column ul li {
   list-style-type: none;
-  font-size: 22px; /* Cambia el tamaño de fuente de los síntomas */
-  white-space: nowrap; /* Evitar el salto de línea */
+  font-size: 22px;
+  white-space: nowrap;
 
 }
 
 
 .symptoms-column ul li {
   list-style-type: none;
-  font-size: 22px; /* Tamaño de fuente más grande */
+  font-size: 22px;
 }
 
 .footer {
-  background-color: #9DD9D2; /* Color de fondo gris oscuro */
+  background-color: #9DD9D2;
   padding: 20px;
-  text-align: center; /* Centrar el texto */
+  text-align: center;
 }
 
 .footer p {
-  margin-top: 12px; /* Espacio entre el section y los síntomas */
-  color: black; /* Color del texto */
-  font-size: 18px; /* Tamaño de fuente */
-  text-decoration: underline; /* Subrayar el texto */
+  margin-top: 12px;
+  color: black;
+  font-size: 18px;
+  text-decoration: underline;
 }
 
-/* Media Queries para pantallas pequeñas */
 @media (max-width: 768px) {
   .main-section {
-    padding: 20px 10px; /* Ajustar el padding para pantallas más pequeñas */
+    padding: 20px 10px;
   }
 
   .main-section h2 {
-    font-size: 25px; /* Ajustar el tamaño de fuente */
+    font-size: 25px;
   }
 
   .main-section h3 {
-    font-size: 20px; /* Ajustar el tamaño de fuente */
+    font-size: 20px;
   }
 
   .main-section p {
-    font-size: 16px; /* Ajustar el tamaño de fuente */
+    font-size: 16px;
   }
 
   .symptoms-container {
-    padding: 20px 10px; /* Ajustar el padding para pantallas más pequeñas */
+    padding: 20px 10px;
   }
 
   .symptoms-container h3 {
-    font-size: 25px; /* Ajustar el tamaño de fuente */
+    font-size: 25px;
   }
 
   .column-container {
-    flex: 1 1 100%; /* Permitir que las columnas se ocupen todo el ancho en pantallas pequeñas */
-    margin: 10px 0; /* Agregar un margen entre las columnas */
+    flex: 1 1 100%;
+    margin: 10px 0;
   }
 }
 

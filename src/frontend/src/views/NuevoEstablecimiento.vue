@@ -23,7 +23,6 @@ import FooterComponente from "@/components/footer.vue";
           </select>
         </div>
 
-        <!-- Campo de provincia -->
         <div v-if="mostrarProvincia" class="form-group">
           <label for="provincia">Provincia:</label>
           <select id="provincia" v-model="provincia" class="form-control" @change="provinciaSeleccionada">
@@ -31,7 +30,6 @@ import FooterComponente from "@/components/footer.vue";
           </select>
         </div>
 
-        <!-- Campo de localidad -->
         <div v-if="mostrarLocalidad" class="form-group">
           <label for="localidad">Localidad:</label>
           <select id="localidad" v-model="localidad" class="form-control">
@@ -189,13 +187,11 @@ export default {
         return false;
       }
 
-      // Validar que se haya seleccionado la provincia si es necesario
       if (this.mostrarProvincia && !this.provincia) {
         alert('Por favor, seleccione una provincia.');
         return false;
       }
 
-      // Validar que se haya seleccionado la localidad si es necesario
       if (this.mostrarLocalidad && !this.localidad) {
         alert('Por favor, seleccione una localidad.');
         return false;
@@ -258,7 +254,7 @@ export default {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }

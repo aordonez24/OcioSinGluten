@@ -38,9 +38,9 @@ export default {
   components: {FooterComponente, Header3, contacto},
   data() {
     return {
-      users: [], // Aquí se almacenarán todos los usuarios
-      filteredUsers: [], // Lista de usuarios filtrados por la barra de búsqueda
-      searchQuery: '', // Almacena el texto ingresado en la barra de búsqueda
+      users: [],
+      filteredUsers: [],
+      searchQuery: '',
       rol:''
     };
   },
@@ -90,7 +90,6 @@ export default {
             this.mensajeEnviado = true;
           })
           .catch(error => {
-            // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
     },
@@ -174,7 +173,7 @@ export default {
   border-radius: 10px;
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
   margin: 10px;
-  flex: 1 1 calc(33.333% - 20px); /* Ancho de la tarjeta en pantallas grandes */
+  flex: 1 1 calc(33.333% - 20px);
 }
 
 .user-info {
@@ -215,7 +214,6 @@ export default {
   text-align: center;
 }
 
-/* Media Queries */
 @media (max-width: 768px) {
   .welcome-text {
     font-size: 1.5rem;
@@ -226,7 +224,7 @@ export default {
   }
 
   .user-card {
-    flex: 1 1 calc(50% - 20px); /* Ancho de la tarjeta en pantallas medianas */
+    flex: 1 1 calc(50% - 20px);
     margin: 10px 5px;
   }
 
@@ -244,7 +242,7 @@ export default {
 
 @media (max-width: 480px) {
   .user-card {
-    flex: 1 1 100%; /* Ancho de la tarjeta en pantallas pequeñas */
+    flex: 1 1 100%;
     margin: 10px 0;
   }
 

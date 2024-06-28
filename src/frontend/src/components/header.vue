@@ -49,39 +49,39 @@ header {
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  justify-content: center; /* Centra horizontalmente */
-  text-align: center; /* Añade centrado horizontal a los elementos inline */
+  justify-content: center;
+  text-align: center;
 }
 
 .logo-container {
-  display: flex; /* Hacemos que el contenedor sea un flexbox */
-  align-items: center; /* Centramos los elementos verticalmente */
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 150px; /* Tamaño del logo */
+  width: 150px;
   height: 150px;
-  border-radius: 50%; /* Forma redonda */
-  margin-right: 20px; /* Ajustamos el margen derecho */
+  border-radius: 50%;
+  margin-right: 20px;
 }
 
 .title-container {
-  display: flex; /* Hacemos que el contenedor sea un flexbox */
-  flex-direction: column; /* Apilamos los elementos verticalmente */
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
-  font-size: 50px; /* Tamaño del título */
-  margin-bottom: 5px; /* Margen inferior para separar el título del subtítulo */
+  font-size: 50px;
+  margin-bottom: 5px;
 }
 
 .subtitle {
-  font-size: 20px; /* Tamaño del subtítulo */
-  margin-top: 0; /* Eliminar cualquier margen superior predeterminado */
+  font-size: 20px;
+  margin-top: 0;
 }
 
 nav {
-  margin-left: 30px; /* Reducir el margen izquierdo */
+  margin-left: 30px;
 }
 
 nav ul.main-links {
@@ -89,22 +89,19 @@ nav ul.main-links {
   padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center; /* Alinea los elementos al inicio */
-  margin-top: 10px; /* Ajusta el margen superior del contenedor de los botones */
+  justify-content: center;
+  margin-top: 10px;
   margin-left: 0;
 }
 
 nav ul.main-links li {
-  margin-right: 10px; /* Ajusta el margen entre botones */
+  margin-right: 10px;
 }
 
 nav ul.main-links li:last-child {
-  margin-right: 0; /* Quita el margen derecho del último botón */
+  margin-right: 0;
 }
 
-
-
-/* Estilo para todos los enlaces */
 nav ul li a {
   text-decoration: none;
   display: block;
@@ -123,18 +120,16 @@ nav ul li a:hover {
   border-color: transparent;
 }
 
-/* Estilo para el enlace de "Iniciar Sesión" */
 nav ul li:nth-child(4) a {
-  background-color: #9DD9D2; /* Color de fondo verde */
-  color: white; /* Color de texto blanco */
-  border-color: transparent; /* Sin borde */
+  background-color: #9DD9D2;
+  color: white;
+  border-color: transparent;
 }
 
-/* Estilo para el enlace de "Registrar Usuario" */
 nav ul li:nth-child(5) a {
-  background-color: #7F7F7F; /* Color de fondo azul */
-  color: white; /* Color de texto blanco */
-  border-color: transparent; /* Sin borde */
+  background-color: #7F7F7F;
+  color: white;
+  border-color: transparent;
 }
 
 nav ul li:nth-child(4) a:hover {
@@ -142,7 +137,7 @@ nav ul li:nth-child(4) a:hover {
   border-color: transparent;
 }
 
-/* Estilo para el enlace de "Registrar Usuario" */
+
 nav ul li:nth-child(5) a:hover {
   background-color: #ffa500;
   border-color: transparent;
@@ -162,7 +157,6 @@ nav ul li:nth-child(5) a:hover {
   background-color: #9DD9D2;
 }
 
-/* Media Queries para diseño responsive */
 @media (max-width: 992px) {
   .logo-container {
     flex-direction: column;

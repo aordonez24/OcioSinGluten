@@ -5,7 +5,6 @@
       <h1 class="text-center title">¡Pasa a formar parte de Ocio Sin Gluten!</h1>
       <p class="subtitle text-center">¡Introduzca sus datos para pasar a formar parte de la comunidad celiaca!</p>
       <form @submit.prevent="agregarUsuario" class="row">
-        <!-- Columna izquierda -->
         <div class="col-md-4">
           <div class="form-group">
             <label for="dni">DNI:</label>
@@ -30,7 +29,6 @@
             <span v-if="!mayorDeEdad" class="text-danger">Debes ser mayor de edad para registrarte.</span>
           </div>
         </div>
-        <!-- Columna central -->
         <div class="col-md-4">
           <div class="form-group">
             <label for="email">Email:</label>
@@ -83,7 +81,6 @@
             <span v-if="!passwordsCoinciden" class="text-danger">Las contraseñas no coinciden.</span>
           </div>
         </div>
-        <!-- Columna derecha -->
         <div class="col-md-4">
           <div class="form-group d-flex flex-column align-items-start">
             <label for="fotoPerfil">Foto de Perfil:</label>
@@ -148,14 +145,12 @@ export default {
       passwordValida: false,
       passwordsCoinciden: false,
       mayorDeEdad: false,
-      errorMessage: '',  // Variable para almacenar el mensaje de error
-      aceptarCondiciones: false  // Variable para verificar si se aceptaron las condiciones
+      errorMessage: '',
+      aceptarCondiciones: false
     }
   },
   mounted() {
-    // Escuchar el evento clic en el botón personalizado
     document.getElementById('seleccionarFotoPerfil').addEventListener('click', () => {
-      // Disparar el evento de clic en el input de tipo "file"
       document.getElementById('fotoPerfilInput').click();
     });
   },
@@ -187,7 +182,6 @@ export default {
         return;
       }
 
-      // Proceso de agregar usuario
       const formData = new FormData();
       formData.append('dni', this.nuevoUsuario.dni);
       formData.append('username', this.nuevoUsuario.username);
@@ -201,7 +195,6 @@ export default {
 
       UsuarioServicio.agregarUsuario(formData)
           .then(() => {
-            // Limpiar el formulario después de agregar el usuario
             this.nuevoUsuario = {
               dni: '',
               username: '',
@@ -214,9 +207,9 @@ export default {
               password: ''
             };
             this.confirmPassword = '';
-            this.errorMessage = '';  // Limpiar el mensaje de error
+            this.errorMessage = '';
             this.$emit('usuario-agregado');
-            this.$router.push('/iniciaSesion'); // Redirige al usuario a la página de inicio de sesión si no ha iniciado sesión
+            this.$router.push('/iniciaSesion');
           })
           .catch(error => {
             console.error('Error al agregar usuario:', error);
@@ -269,7 +262,6 @@ export default {
     onFileChange(event) {
       const selectedFile = event.target.files[0];
 
-      // Verificar si se seleccionó un archivo
       if (selectedFile) {
         if (!['image/jpeg', 'image/jpg'].includes(selectedFile.type)) {
           this.showFormatWarning = true;
@@ -286,7 +278,6 @@ export default {
 
         reader.readAsDataURL(selectedFile);
       } else {
-        // Si no se selecciona un archivo, limpiar la previsualización y resetear el aviso
         this.imagePreview = '';
         this.nuevoUsuario.fotoPerfil = null;
         this.showFormatWarning = false;
@@ -315,42 +306,39 @@ export default {
 .container1 {
   background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-repeat: no-repeat; /* Evitar que la imagen se repita */
+  background-repeat: no-repeat;
   background-size: cover;
   padding: 20px;
 }
 
-/* Estilos para pantallas más pequeñas */
 @media screen and (max-width: 768px) {
   .container1 {
     background-image: url("@/assets/images/_01d90abf-9b74-4813-b728-42c7b8f918a7.jpg");
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-repeat: no-repeat; /* Evitar que la imagen se repita */
+    background-repeat: no-repeat;
     background-size: cover;
     padding: 20px;
   }
 
   .container2 {
-    width: 90vw; /* Reducir el ancho del contenedor en pantallas más pequeñas */
+    width: 90vw;
     padding: 20px;
   }
 
-  /* Estilos para el título en dispositivos móviles */
   .title {
-    font-size: 24px; /* Tamaño del título para dispositivos móviles */
-    margin-bottom: 20px; /* Ajusta el margen inferior si es necesario */
+    font-size: 24px;
+    margin-bottom: 20px;
   }
 
 
-  /* Alinear el botón de enviar al centro */
   .form-group:last-child {
     text-align: center;
   }
 
-  /* Alinear el texto de aviso en el centro */
   .text-danger {
     text-align: center;
   }
+
   h1 {
     font-size: 22px;
     font-weight: bold;
@@ -360,21 +348,17 @@ export default {
   }
 }
 
-/* Estilos específicos para campos de entrada */
 @media screen and (max-width: 576px) {
-  /* Reducir el padding de los campos de entrada */
   .form-control {
     padding: 10px;
   }
 
-  /* Reducir el tamaño de la imagen de previsualización */
   .image-preview {
     width: 150px;
     height: 150px;
   }
 }
 
-/* Estilos para botones en pantallas más pequeñas */
 @media screen and (max-width: 576px) {
   .btn-primary {
     padding: 10px 20px;

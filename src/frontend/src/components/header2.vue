@@ -25,52 +25,51 @@ header {
   padding: 20px;
   box-shadow: 0px 2px 5px rgba(255, 255, 255, 0.1);
   display: flex;
-  flex-direction: column; /* Apilamos los elementos verticalmente */
-  align-items: center; /* Centramos los elementos horizontalmente */
-  text-align: center; /* Añade centrado horizontal a los elementos inline */
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .logo-container {
-  display: flex; /* Hacemos que el contenedor del logo sea un flexbox */
-  align-items: center; /* Centramos los elementos verticalmente */
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 150px; /* Tamaño del logo */
+  width: 150px;
   height: 150px;
-  border-radius: 50%; /* Forma redonda */
-  margin-right: 20px; /* Ajustamos el margen derecho */
+  border-radius: 50%;
+  margin-right: 20px;
 }
 
 .title-container {
-  display: flex; /* Hacemos que el contenedor del título sea un flexbox */
-  flex-direction: column; /* Apilamos los elementos verticalmente */
-  align-items: center; /* Centramos los elementos horizontalmente */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .title {
   color: #ffffff;
-  font-size: 50px; /* Tamaño del título */
-  margin-bottom: 15px; /* Margen inferior para separar el título del botón */
-  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  font-size: 50px;
+  margin-bottom: 15px;
+  white-space: nowrap;
 
-  /* Estilos para pantallas más pequeñas */
   @media screen and (max-width: 768px) {
-    font-size: 30px; /* Tamaño del título para dispositivos móviles */
-    margin-top: 5px; /* Ajusta el margen superior en dispositivos móviles */
+    font-size: 30px;
+    margin-top: 5px;
   }
 }
 
 p {
   color: #ffa500;
   font-size: 20px;
-  line-height: 1.5; /* Ajustamos el espaciado entre líneas para que sea más amplio */
-  margin-top: 10px; /* Aumentamos el margen superior */
-  margin-bottom: 10px; /* Aumentamos el margen inferior */
+  line-height: 1.5;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 nav {
-  margin: 0; /* Quitamos el margen izquierdo */
+  margin: 0;
 }
 
 nav ul.main-links {
@@ -78,13 +77,13 @@ nav ul.main-links {
   padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center; /* Centramos los elementos horizontalmente */
-  margin-top: 10px; /* Ajusta el margen superior del contenedor de los botones */
+  justify-content: center;
+  margin-top: 10px;
   margin-left: 0;
 }
 
 nav ul.main-links li {
-  margin-right: 0; /* Quitamos el margen entre botones */
+  margin-right: 0;
 }
 
 nav ul li a {

@@ -22,7 +22,6 @@
           <template v-if="isAuthenticated">
             <i class="far fa-thumbs-up like-icon"> {{establecimiento.numLikes}}</i>
           </template>
-          <!-- Mostrar solo el número de likes si el usuario no ha iniciado sesión -->
           <template v-else>
             <i class="far fa-thumbs-up like-icon"> {{establecimiento.numLikes}}</i>
           </template>
@@ -84,7 +83,6 @@ export default {
       }
     },
     filterEstablecimientos() {
-      // Filtrar establecimientos basado en la búsqueda
       this.establecimientosFiltrados = this.establecimientos.filter(establecimiento =>
           establecimiento.nombre.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           establecimiento.localidad.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -106,7 +104,6 @@ export default {
             this.mensajeEnviado = true;
           })
           .catch(error => {
-            // Manejar errores en caso de que la solicitud falle
             console.error('Error al enviar el mensaje:', error);
           });
     },
@@ -132,7 +129,7 @@ export default {
   border: 2px solid transparent;
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-decoration: none; /* Elimina el subrayado */
+  text-decoration: none;
 }
 
 .cerrar-sesion-button2:hover {
@@ -145,17 +142,17 @@ export default {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  border-radius: 10px; /* Bordes redondeados */
+  border-radius: 10px;
 }
 
 .titulo-subtitulo {
-  text-align: center; /* Centra el texto */
+  text-align: center;
 }
 
 .establecimientos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Columnas autoajustables */
-  gap: 20px; /* Espacio entre establecimientos */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .establecimiento {
@@ -171,87 +168,86 @@ export default {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra horizontalmente */
-  text-align: center; /* Centra el texto */
+  align-items: center;
+  text-align: center;
 }
 
 .titulo-subtitulo-nuevoEstablecimiento {
-  text-align: center; /* Centra el texto */
-  max-width: 1000px; /* Ancho máximo del contenedor */
+  text-align: center;
+  max-width: 1000px;
 }
 
 .titulo-nuevoEstablecimiento {
-  font-size: 24px; /* Tamaño de fuente del título */
-  line-height: 1.2; /* Espaciado entre líneas del título */
-  margin-bottom: 10px; /* Espaciado inferior del título */
+  font-size: 24px;
+  line-height: 1.2;
+  margin-bottom: 10px;
 }
 
 .subtitulo-nuevoEstablecimiento {
-  font-size: 20px; /* Tamaño de fuente del subtítulo */
-  line-height: 1.2; /* Espaciado entre líneas del subtítulo */
-  margin-bottom: 0; /* Elimina el espaciado inferior del subtítulo */
+  font-size: 20px;
+  line-height: 1.2;
+  margin-bottom: 0;
 }
 
 .social-icons a:hover {
-  color: #ffcc74; /* Cambiar el color al pasar el cursor */
+  color: #ffcc74;
 }
 
 .barra-busqueda {
-  margin-top: 20px; /* Espacio superior */
-  margin-bottom: 20px; /* Espacio inferior */
+  margin-top: 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  align-items: center; /* Centra horizontalmente */
+  align-items: center;
 }
 
 .barra-busqueda input {
   width: 100%;
-  max-width: 600px; /* Ancho máximo de la barra de búsqueda */
-  padding: 10px; /* Espacio interno */
-  border-radius: 5px; /* Bordes redondeados */
-  border: 1px solid #ccc; /* Borde */
-  box-sizing: border-box; /* Incluir padding y border en el ancho */
-  text-align: center; /* Centrar el texto */
+  max-width: 600px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .like-icon {
-  margin-left: 10px; /* Agrega un margen a la izquierda del icono */
+  margin-left: 10px;
 }
 
 .nombre {
-  color: inherit; /* Utiliza el color heredado del elemento padre */
-  text-decoration: none; /* Elimina el subrayado */
+  color: inherit;
+  text-decoration: none;
 }
 
 .nombre:hover {
-  color: inherit; /* Utiliza el color heredado del elemento padre */
+  color: inherit;
 }
 
 .mensaje-enviado h2 {
-  color: white; /* Cambiar el color del texto a blanco */
-  text-align: center; /* Asegurarse de que el texto esté centrado */
+  color: white;
+  text-align: center;
 }
 
-/* Media Queries para pantallas más pequeñas */
 @media (max-width: 768px) {
   .container-principal-establecimientos {
     padding: 20px;
   }
 
   .titulo-subtitulo {
-    padding: 0 10px; /* Añadir padding horizontal */
+    padding: 0 10px;
   }
 
   .barra-busqueda input {
-    width: 100%; /* Ancho completo en pantallas pequeñas */
+    width: 100%;
   }
 
   .establecimientos {
-    grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    grid-template-columns: 1fr;
   }
 
   .titulo-nuevoEstablecimiento {
-    font-size: 20px; /* Reducir tamaño de fuente */
+    font-size: 20px;
   }
 
 }

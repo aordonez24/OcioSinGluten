@@ -78,39 +78,39 @@ header {
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
-  justify-content: center; /* Centra horizontalmente */
-  text-align: center; /* Añade centrado horizontal a los elementos inline */
+  justify-content: center;
+  text-align: center;
 }
 
 .logo-container {
-  display: flex; /* Hacemos que el contenedor sea un flexbox */
-  align-items: center; /* Centramos los elementos verticalmente */
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  width: 150px; /* Tamaño del logo */
+  width: 150px;
   height: 150px;
-  border-radius: 50%; /* Forma redonda */
-  margin-right: 20px; /* Ajustamos el margen derecho */
+  border-radius: 50%;
+  margin-right: 20px;
 }
 
 .title-container {
-  display: flex; /* Hacemos que el contenedor sea un flexbox */
-  flex-direction: column; /* Apilamos los elementos verticalmente */
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
-  font-size: 50px; /* Tamaño del título */
-  margin-bottom: 5px; /* Margen inferior para separar el título del subtítulo */
+  font-size: 50px;
+  margin-bottom: 5px;
 }
 
 .subtitle {
-  font-size: 20px; /* Tamaño del subtítulo */
-  margin-top: 0; /* Eliminar cualquier margen superior predeterminado */
+  font-size: 20px;
+  margin-top: 0;
 }
 
 nav {
-  margin-left: 30px; /* Reducir el margen izquierdo */
+  margin-left: 30px;
 }
 
 nav ul.main-links {
@@ -118,22 +118,19 @@ nav ul.main-links {
   padding: 0;
   display: flex;
   align-items: center;
-  justify-content: center; /* Alinea los elementos al inicio */
-  margin-top: 10px; /* Ajusta el margen superior del contenedor de los botones */
+  justify-content: center;
+  margin-top: 10px;
   margin-left: 0;
 }
 
 nav ul.main-links li {
-  margin-right: 10px; /* Ajusta el margen entre botones */
+  margin-right: 10px;
 }
 
 nav ul.main-links li:last-child {
-  margin-right: 0; /* Quita el margen derecho del último botón */
+  margin-right: 0;
 }
 
-
-
-/* Estilo para todos los enlaces */
 nav ul li a {
   text-decoration: none;
   display: block;
@@ -153,11 +150,11 @@ nav ul li a:hover {
 }
 
 .welcome-message {
-  font-size: 26px; /* Tamaño del texto */
-  font-weight: bold; /* Negrita */
-  color: #ffa500; /* Color del texto */
-  margin-right: 10px; /* Margen derecho para separar del resto de los elementos */
-  display: inline; /* Hacer que el elemento sea en línea */
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffa500;
+  margin-right: 10px;
+  display: inline;
 }
 
 .welcome-link {
