@@ -450,6 +450,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   gap: 1rem;
 }
 
+/* En escritorio el mapa y las fotos acompañan mientras se leen las opiniones. */
+@media (min-width: 961px) {
+  .lateral {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: calc(var(--alto-cabecera) + 1.5rem);
+  }
+}
+
 .fotos {
   margin-top: 1.25rem;
 }

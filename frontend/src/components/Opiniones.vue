@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { MessageSquareText, Pencil, Star, Trash2 } from 'lucide-vue-next'
+import { MessageSquareText, Pencil, Star, ThumbsUp, Trash2 } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
@@ -28,8 +28,18 @@ const editando = ref(false)
 const enviando = ref(false)
 const borrador = reactive({ puntuacion: 0, mensaje: '' })
 
+const ORDENES = {
+  recientes: { texto: 'Más recientes', fn: (a, b) => new Date(b.creado_en) - new Date(a.creado_en) },
+  utiles: { texto: 'Más útiles', fn: (a, b) => b.num_utiles - a.num_utiles || new Date(b.creado_en) - new Date(a.creado_en) },
+  mejores: { texto: 'Mejor valoradas', fn: (a, b) => b.puntuacion - a.puntuacion },
+  peores: { texto: 'Peor valoradas', fn: (a, b) => a.puntuacion - b.puntuacion },
+}
+const orden = ref('recientes')
+
 const mia = computed(() => opiniones.value?.find((o) => o.autor.username === auth.usuario?.username))
-const resto = computed(() => opiniones.value?.filter((o) => o !== mia.value) ?? [])
+const resto = computed(() =>
+  (opiniones.value?.filter((o) => o !== mia.value) ?? []).sort(ORDENES[orden.value].fn),
+)
 const mostrarFormulario = computed(() => auth.autenticado && (!mia.value || editando.value))
 const distribucion = computed(() =>
   [5, 4, 3, 2, 1].map((n) => {
@@ -73,6 +83,21 @@ async function enviar() {
   }
 }
 
+// "Me resultó útil": respuesta inmediata; si el servidor falla, se deshace.
+async function alternarUtil(opinion) {
+  if (!auth.autenticado) return avisos.error('Inicia sesión para valorar opiniones')
+  const util = opinion.util
+  opinion.util = !util
+  opinion.num_utiles += util ? -1 : 1
+  try {
+    await api(`/comentarios/${opinion.id}/util`, { method: util ? 'DELETE' : 'PUT' })
+  } catch (e) {
+    opinion.util = util
+    opinion.num_utiles += util ? 1 : -1
+    avisos.error(e)
+  }
+}
+
 async function borrar(opinion) {
   const ok = await confirmar.pedir({
     titulo: opinion === mia.value ? '¿Borrar tu opinión?' : `¿Borrar la opinión de ${opinion.autor.username}?`,
@@ -94,7 +119,15 @@ onMounted(cargar)
 
 <template>
   <section class="opiniones" aria-labelledby="titulo-opiniones">
-    <h2 id="titulo-opiniones">Opiniones</h2>
+    <div class="cabecera">
+      <h2 id="titulo-opiniones">Opiniones</h2>
+      <label v-if="(opiniones?.length ?? 0) > 2" class="ordenar">
+        <span class="solo-lectores">Ordenar opiniones</span>
+        <select v-model="orden">
+          <option v-for="(o, clave) in ORDENES" :key="clave" :value="clave">{{ o.texto }}</option>
+        </select>
+      </label>
+    </div>
 
     <div v-if="opiniones?.length" class="resumen">
       <div class="media">
@@ -149,6 +182,21 @@ onMounted(cargar)
           </p>
           <Estrellas :valor="o.puntuacion" :tamano="14" />
           <p class="texto">{{ o.mensaje }}</p>
+          <p class="valoracion-opinion">
+            <button
+              v-if="o !== mia"
+              class="util"
+              :class="{ activo: o.util }"
+              :aria-pressed="o.util"
+              @click="alternarUtil(o)"
+            >
+              <ThumbsUp :size="15" :fill="o.util ? 'currentColor' : 'none'" aria-hidden="true" />
+              Útil<template v-if="o.num_utiles"> ({{ o.num_utiles }})</template>
+            </button>
+            <span v-else-if="o.num_utiles" class="suave pequeno">
+              A {{ o.num_utiles }} {{ o.num_utiles === 1 ? 'persona le ha' : 'personas les ha' }} resultado útil
+            </span>
+          </p>
         </div>
         <div class="acciones">
           <button v-if="o === mia" class="btn btn-icono btn-fantasma" title="Editar opinión" @click="empezarEdicion">
@@ -170,6 +218,54 @@ onMounted(cargar)
 </template>
 
 <style scoped>
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.cabecera h2 {
+  margin: 0;
+}
+
+.ordenar select {
+  width: auto;
+  min-height: 40px;
+  font-size: 0.9375rem;
+}
+
+.valoracion-opinion {
+  margin-top: 0.4rem !important;
+}
+
+.util {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.25rem 0.7rem;
+  margin-left: -0.7rem;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.util:hover {
+  background: var(--niebla);
+  color: var(--carbon);
+}
+
+.util.activo {
+  color: var(--turquesa-oscuro);
+}
+
 .resumen {
   display: flex;
   flex-wrap: wrap;

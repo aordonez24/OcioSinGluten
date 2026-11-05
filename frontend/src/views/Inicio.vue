@@ -23,6 +23,7 @@ const busqueda = ref('')
 const establecimientos = ref(null)
 const estadisticas = ref(null)
 const actividad = ref([])
+const guardados = ref([])
 
 const destacados = computed(() =>
   [...(establecimientos.value ?? [])]
@@ -53,6 +54,12 @@ onMounted(async () => {
   establecimientos.value = e.value ?? []
   estadisticas.value = s.value ?? null
   actividad.value = a.value ?? []
+})
+
+// Con sesión, la portada empieza por los sitios que la persona ha guardado.
+onMounted(async () => {
+  if (!auth.autenticado) return
+  guardados.value = await api(`/usuarios/${auth.usuario.username}/favoritos`).catch(() => [])
 })
 </script>
 
@@ -101,6 +108,18 @@ onMounted(async () => {
       <RouterLink to="/registro">crea una cuenta nueva</RouterLink>
       para pertenecer a la comunidad de Ocio Sin Gluten: opinar, guardar tus sitios y hablar en el chat.
     </p>
+  </section>
+
+  <section v-if="guardados.length" class="banda guardados" aria-labelledby="titulo-guardados">
+    <div class="interior">
+      <div class="cabecera-pagina">
+        <h2 id="titulo-guardados">Tus sitios guardados</h2>
+        <RouterLink :to="`/u/${auth.usuario.username}?tab=favoritos`">Ver todos tus guardados</RouterLink>
+      </div>
+      <div class="rejilla">
+        <EstablecimientoCard v-for="e in guardados.slice(0, 4)" :key="e.id" :establecimiento="e" />
+      </div>
+    </div>
   </section>
 
   <section class="banda" aria-labelledby="titulo-destacados">
@@ -284,6 +303,10 @@ onMounted(async () => {
   border-radius: var(--radio);
   overflow: hidden;
   background: #444;
+}
+
+.guardados + .banda {
+  padding-top: 0;
 }
 
 .invitacion {

@@ -7,6 +7,7 @@ import { ChevronDown, Inbox, LogOut, Plus, Settings, UserRound, Users, Activity 
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import Avatar from '@/components/Avatar.vue'
+import CampanaNotificaciones from '@/components/CampanaNotificaciones.vue'
 import logo from '@/assets/logo.webp'
 
 const auth = useAuth()
@@ -64,6 +65,7 @@ function salir() {
           <RouterLink to="/establecimientos/nuevo" class="btn btn-primario btn-pequeno anadir">
             <Plus :size="16" /> Añadir sitio
           </RouterLink>
+          <CampanaNotificaciones />
           <div ref="menu" class="menu-usuario">
             <button
               class="disparador"

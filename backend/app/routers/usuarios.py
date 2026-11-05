@@ -2,7 +2,15 @@ from fastapi import APIRouter, HTTPException, UploadFile, status
 from sqlalchemy import delete, func, insert, select
 from sqlalchemy.orm import joinedload, undefer
 
-from app.models import Comentario, Establecimiento, Usuario, favoritos, seguimientos, visitas
+from app.models import (
+    Comentario,
+    Establecimiento,
+    TipoNotificacion,
+    Usuario,
+    favoritos,
+    seguimientos,
+    visitas,
+)
 from app.schemas import (
     ArchivadoIn,
     EstablecimientoResumen,
@@ -22,7 +30,7 @@ from app.security import (
     hash_password,
     verificar_password,
 )
-from app.services.consultas import existe_fila, usuario_por_username
+from app.services.consultas import existe_fila, notificar, usuario_por_username
 from app.services.imagenes import borrar_imagenes, guardar_imagen
 
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
@@ -145,6 +153,7 @@ def seguir(username: str, db: DB, yo: UsuarioActual):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No puedes seguirte a ti mismo")
     if not existe_fila(db, seguimientos, seguidor_id=yo.id, seguido_id=otro.id):
         db.execute(insert(seguimientos).values(seguidor_id=yo.id, seguido_id=otro.id))
+        notificar(db, otro.id, yo.id, TipoNotificacion.SEGUIDOR)
         db.commit()
 
 

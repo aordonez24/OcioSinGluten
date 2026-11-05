@@ -8,7 +8,7 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 ## Funcionalidades
 
 - **Establecimientos** en lista o en mapa, ordenables por cercanía, con búsqueda que ignora tildes y filtros por provincia,
-  tipo de sitio y distintivos. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
+  tipo de sitio, precio y distintivos. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
   en la URL, así que se pueden compartir.
 - **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
   acreditado por una asociación de celíacos.
@@ -18,7 +18,8 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
   sin gluten o tiene datos mal; el aviso llega a la bandeja del equipo de administración.
 - Quien añade un sitio puede **editarlo** después (borrarlo solo puede el equipo de administración).
 - **Opiniones con estrellas** (1 a 5), una por persona y sitio, que se pueden editar. La valoración del
-  sitio es la media de las opiniones.
+  sitio es la media de las opiniones. Se pueden marcar como útiles y ordenar por utilidad o puntuación.
+- **Notificaciones** cuando alguien te sigue, opina sobre un sitio que añadiste o valora tu opinión.
 - **Perfiles** con actividad, opiniones, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
 - **Actividades** de la comunidad agrupadas por días, filtrables por tipo y por "de quienes sigo".
@@ -168,6 +169,8 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | PATCH | `/api/establecimientos/{id}` | Quien lo añadió o admin |
 | DELETE | `/api/establecimientos/{id}` | Admin |
 | PATCH | `/api/comentarios/{id}` (editar tu opinión) | Autor |
+| PUT/DELETE | `/api/comentarios/{id}/util` | Sesión |
+| GET, POST | `/api/notificaciones`, `/api/notificaciones/leidas` | Sesión |
 | DELETE | `/api/establecimientos/{id}/imagenes/{img}`, `/api/comentarios/{id}` | Autor o admin |
 | GET | `/api/usuarios` (comunidad) | Sesión |
 | GET | `/api/usuarios/{username}` (+ `/opiniones`, `/seguidores`, `/seguidos`, `/favoritos`, `/visitados`) | Público |

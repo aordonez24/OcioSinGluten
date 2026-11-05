@@ -19,13 +19,16 @@ from app.models import (
     Establecimiento,
     Mensaje,
     MotivoAviso,
+    Notificacion,
     Rol,
     TipoActividad,
+    TipoNotificacion,
     Usuario,
     ahora,
     favoritos,
     likes,
     seguimientos,
+    utiles,
     visitas,
 )
 from app.schemas import LETRAS_DNI
@@ -285,6 +288,32 @@ def cargar_demo() -> None:
             for seguido in aleatorio.sample(miembros, 2):
                 if seguido is not seguidor:
                     db.execute(insert(seguimientos).values(seguidor_id=seguidor.id, seguido_id=seguido.id))
+                    db.add(
+                        Notificacion(
+                            usuario_id=seguido.id,
+                            actor_id=seguidor.id,
+                            tipo=TipoNotificacion.SEGUIDOR,
+                            leida=aleatorio.random() < 0.5,
+                            creado_en=hace(aleatorio.uniform(0, 20)),
+                        )
+                    )
+
+        # Algunas opiniones le han resultado útiles a otras personas
+        db.flush()
+        for comentario in db.scalars(select(Comentario)):
+            otros = [m for m in miembros if m.id != comentario.autor_id]
+            for usuario in aleatorio.sample(otros, aleatorio.randint(0, 2)):
+                db.execute(insert(utiles).values(usuario_id=usuario.id, comentario_id=comentario.id))
+                db.add(
+                    Notificacion(
+                        usuario_id=comentario.autor_id,
+                        actor_id=usuario.id,
+                        tipo=TipoNotificacion.UTIL,
+                        establecimiento_id=comentario.establecimiento_id,
+                        leida=aleatorio.random() < 0.5,
+                        creado_en=hace(aleatorio.uniform(0, 10)),
+                    )
+                )
 
         db.add_all(sorted(actividades, key=lambda a: a.creado_en))
 

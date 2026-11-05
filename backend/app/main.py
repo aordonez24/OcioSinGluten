@@ -10,7 +10,16 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, get_settings
 from app.db import Base, engine
-from app.routers import actividades, auth, chat, consultas, establecimientos, estadisticas, usuarios
+from app.routers import (
+    actividades,
+    auth,
+    chat,
+    consultas,
+    establecimientos,
+    estadisticas,
+    notificaciones,
+    usuarios,
+)
 
 # Para que el manifiesto de la app instalable (PWA) se sirva con su tipo correcto.
 mimetypes.add_type("application/manifest+json", ".webmanifest")
@@ -73,7 +82,8 @@ def crear_app() -> FastAPI:
             respuesta.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
         return respuesta
 
-    for modulo in (auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat):
+    routers = (auth, usuarios, establecimientos, actividades, estadisticas, consultas, notificaciones, chat)
+    for modulo in routers:
         app.include_router(modulo.router)
     app.include_router(establecimientos.comentarios_router)
 

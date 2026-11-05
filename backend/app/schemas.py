@@ -12,7 +12,7 @@ from pydantic import (
     computed_field,
 )
 
-from app.models import Categoria, MotivoAviso, Rol, TipoActividad
+from app.models import Categoria, MotivoAviso, Rol, TipoActividad, TipoNotificacion
 
 # --------------------------------------------------------------------------- validadores
 
@@ -293,6 +293,8 @@ class ComentarioOut(Esquema):
     creado_en: FechaUTC
     editado_en: FechaUTC | None
     autor: UsuarioResumen
+    num_utiles: int = 0
+    util: bool = False  # si a quien consulta le ha resultado útil
 
 
 class OpinionDePerfil(Esquema):
@@ -312,6 +314,20 @@ class ActividadOut(Esquema):
     creado_en: FechaUTC
     usuario: UsuarioResumen
     establecimiento: EstablecimientoMini
+
+
+class NotificacionOut(Esquema):
+    id: int
+    tipo: TipoNotificacion
+    leida: bool
+    creado_en: FechaUTC
+    actor: UsuarioResumen
+    establecimiento: EstablecimientoMini | None
+
+
+class Notificaciones(BaseModel):
+    no_leidas: int
+    notificaciones: list[NotificacionOut]
 
 
 class MensajeOut(Esquema):

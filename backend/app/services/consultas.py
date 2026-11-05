@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, exists, select
 from sqlalchemy.orm import Session
 
-from app.models import Actividad, Establecimiento, TipoActividad, Usuario
+from app.models import Actividad, Establecimiento, Notificacion, TipoActividad, TipoNotificacion, Usuario
 
 
 def usuario_por_username(db: Session, username: str, *, incluir_archivados: bool = False) -> Usuario:
@@ -28,6 +28,30 @@ def existe_fila(db: Session, tabla, **filtros) -> bool:
 
 def registrar_actividad(db: Session, usuario_id: int, est_id: int, tipo: TipoActividad) -> None:
     db.add(Actividad(usuario_id=usuario_id, establecimiento_id=est_id, tipo=tipo))
+
+
+def notificar(
+    db: Session, para: int | None, actor: int, tipo: TipoNotificacion, est_id: int | None = None
+) -> None:
+    """Crea una notificación (nunca para uno mismo) sin repetir una igual que aún no se ha leído."""
+    if para is None or para == actor:
+        return
+    mismo_sitio = (
+        Notificacion.establecimiento_id.is_(est_id)
+        if est_id is None
+        else (Notificacion.establecimiento_id == est_id)
+    )
+    repetida = db.scalar(
+        select(Notificacion.id).where(
+            Notificacion.usuario_id == para,
+            Notificacion.actor_id == actor,
+            Notificacion.tipo == tipo,
+            mismo_sitio,
+            Notificacion.leida.is_(False),
+        )
+    )
+    if not repetida:
+        db.add(Notificacion(usuario_id=para, actor_id=actor, tipo=tipo, establecimiento_id=est_id))
 
 
 def borrar_actividad(db: Session, usuario_id: int, est_id: int, tipo: TipoActividad) -> None:

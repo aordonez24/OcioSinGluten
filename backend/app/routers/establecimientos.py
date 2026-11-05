@@ -8,10 +8,12 @@ from app.models import (
     Establecimiento,
     Imagen,
     TipoActividad,
+    TipoNotificacion,
     Usuario,
     ahora,
     favoritos,
     likes,
+    utiles,
     visitas,
 )
 from app.schemas import (
@@ -30,6 +32,7 @@ from app.services.consultas import (
     borrar_actividad,
     establecimiento_o_404,
     existe_fila,
+    notificar,
     registrar_actividad,
 )
 from app.services.geocoding import geocodificar
@@ -203,19 +206,23 @@ _rutas_marca("visita", visitas, TipoActividad.VISITA)
 
 
 @router.get("/{est_id}/comentarios", response_model=list[ComentarioOut])
-def comentarios(est_id: int, db: DB):
+def comentarios(est_id: int, db: DB, yo: UsuarioOpcional):
     establecimiento_o_404(db, est_id)
-    return db.scalars(
+    lista = db.scalars(
         select(Comentario)
         .join(Comentario.autor)
         .where(Comentario.establecimiento_id == est_id, Usuario.archivado.is_(False))
         .order_by(Comentario.creado_en.desc(), Comentario.id.desc())
     ).all()
+    mis_utiles = set()
+    if yo is not None:
+        mis_utiles = set(db.scalars(select(utiles.c.comentario_id).where(utiles.c.usuario_id == yo.id)))
+    return [ComentarioOut.model_validate(c).model_copy(update={"util": c.id in mis_utiles}) for c in lista]
 
 
 @router.post("/{est_id}/comentarios", response_model=ComentarioOut, status_code=status.HTTP_201_CREATED)
 def opinar(est_id: int, datos: ComentarioIn, db: DB, yo: UsuarioActual):
-    establecimiento_o_404(db, est_id)
+    est = establecimiento_o_404(db, est_id)
     ya_opino = db.scalar(
         select(Comentario.id).where(Comentario.establecimiento_id == est_id, Comentario.autor_id == yo.id)
     )
@@ -226,6 +233,7 @@ def opinar(est_id: int, datos: ComentarioIn, db: DB, yo: UsuarioActual):
     comentario = Comentario(establecimiento_id=est_id, autor_id=yo.id, **datos.model_dump())
     db.add(comentario)
     registrar_actividad(db, yo.id, est_id, TipoActividad.COMENTARIO)
+    notificar(db, est.creado_por_id, yo.id, TipoNotificacion.OPINION, est_id)
     db.commit()
     db.refresh(comentario)
     return comentario
@@ -253,6 +261,32 @@ def editar_opinion(comentario_id: int, datos: ComentarioUpdate, db: DB, yo: Usua
         comentario.editado_en = ahora()
         db.commit()
     return comentario
+
+
+def _marcar_util(db: Session, comentario_id: int, yo: Usuario, activo: bool) -> None:
+    comentario = db.get(Comentario, comentario_id)
+    if comentario is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Opinión no encontrada")
+    if comentario.autor_id == yo.id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "No puedes valorar tu propia opinión")
+    filtro = {"usuario_id": yo.id, "comentario_id": comentario_id}
+    ya_existe = existe_fila(db, utiles, **filtro)
+    if activo and not ya_existe:
+        db.execute(insert(utiles).values(**filtro))
+        notificar(db, comentario.autor_id, yo.id, TipoNotificacion.UTIL, comentario.establecimiento_id)
+    elif not activo and ya_existe:
+        db.execute(delete(utiles).filter_by(**filtro))
+    db.commit()
+
+
+@comentarios_router.put("/{comentario_id}/util", status_code=status.HTTP_204_NO_CONTENT)
+def marcar_util(comentario_id: int, db: DB, yo: UsuarioActual):
+    _marcar_util(db, comentario_id, yo, True)
+
+
+@comentarios_router.delete("/{comentario_id}/util", status_code=status.HTTP_204_NO_CONTENT)
+def desmarcar_util(comentario_id: int, db: DB, yo: UsuarioActual):
+    _marcar_util(db, comentario_id, yo, False)
 
 
 @comentarios_router.delete("/{comentario_id}", status_code=status.HTTP_204_NO_CONTENT)

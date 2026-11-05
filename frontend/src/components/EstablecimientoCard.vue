@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Heart, WheatOff } from 'lucide-vue-next'
-import { CATEGORIAS } from '@/catalogo'
+import { CATEGORIAS, PRECIOS } from '@/catalogo'
 import { formatoDistancia, nota } from '@/utils'
 import Estrellas from '@/components/Estrellas.vue'
 import Portada from '@/components/Portada.vue'
@@ -21,7 +21,12 @@ const lugar = computed(() =>
       <span v-if="e.todo_sin_gluten" class="sello"><WheatOff :size="14" aria-hidden="true" /> 100 % sin gluten</span>
     </div>
     <div class="cuerpo">
-      <p class="categoria">{{ categoria }} en {{ lugar }}</p>
+      <p class="categoria">
+        <span>{{ categoria }} en {{ lugar }}</span>
+        <span v-if="e.precio" class="precio" :title="PRECIOS[e.precio].texto">
+          {{ PRECIOS[e.precio].simbolo }}<span class="solo-lectores">, {{ PRECIOS[e.precio].texto.toLowerCase() }}</span>
+        </span>
+      </p>
       <h3>{{ e.nombre }}</h3>
       <p v-if="e.todo_sin_gluten" class="sello-linea"><WheatOff :size="14" aria-hidden="true" /> 100 % sin gluten</p>
       <p class="pie">
@@ -92,9 +97,19 @@ const lugar = computed(() =>
 }
 
 .categoria {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin: 0;
   font-size: 0.875rem;
   color: var(--texto-suave);
+}
+
+.precio {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--carbon);
+  letter-spacing: 0.05em;
 }
 
 h3 {

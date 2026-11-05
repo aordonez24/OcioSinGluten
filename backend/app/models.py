@@ -54,6 +54,12 @@ class MotivoAviso(enum.StrEnum):
     OTRO = "otro"
 
 
+class TipoNotificacion(enum.StrEnum):
+    SEGUIDOR = "seguidor"  # alguien empieza a seguirte
+    OPINION = "opinion"  # alguien opina sobre un sitio que añadiste
+    UTIL = "util"  # a alguien le resulta útil tu opinión
+
+
 class TipoActividad(enum.StrEnum):
     PUBLICACION = "publicacion"
     COMENTARIO = "comentario"
@@ -86,6 +92,14 @@ seguimientos = Table(
 favoritos = _tabla_usuario_establecimiento("favoritos")
 visitas = _tabla_usuario_establecimiento("visitas")
 likes = _tabla_usuario_establecimiento("likes")
+# Opiniones que a alguien le han resultado útiles
+utiles = Table(
+    "utiles",
+    Base.metadata,
+    Column("usuario_id", ForeignKey("usuarios.id", ondelete="CASCADE"), primary_key=True),
+    Column("comentario_id", ForeignKey("comentarios.id", ondelete="CASCADE"), primary_key=True, index=True),
+    Column("creado_en", DateTime(timezone=True), default=ahora, nullable=False),
+)
 
 
 class Usuario(Base):
@@ -156,6 +170,10 @@ class Comentario(Base):
 
     autor: Mapped[Usuario] = relationship(lazy="joined")
     establecimiento: Mapped["Establecimiento"] = relationship(viewonly=True)
+
+    num_utiles: Mapped[int] = column_property(
+        select(func.count()).where(utiles.c.comentario_id == id).correlate_except(utiles).scalar_subquery()
+    )
 
 
 class Establecimiento(Base):
@@ -253,6 +271,25 @@ class Consulta(Base):
     motivo: Mapped[MotivoAviso | None] = mapped_column(Enum(MotivoAviso, native_enum=False))
 
     establecimiento: Mapped[Establecimiento | None] = relationship(viewonly=True)
+
+
+class Notificacion(Base):
+    """Aviso para una persona: alguien la sigue, opina en un sitio suyo o valora su opinión."""
+
+    __tablename__ = "notificaciones"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), index=True)
+    actor_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"))
+    tipo: Mapped[TipoNotificacion] = mapped_column(Enum(TipoNotificacion, native_enum=False))
+    establecimiento_id: Mapped[int | None] = mapped_column(
+        ForeignKey("establecimientos.id", ondelete="CASCADE")
+    )
+    leida: Mapped[bool] = mapped_column(default=False)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+
+    actor: Mapped[Usuario] = relationship(foreign_keys=[actor_id], lazy="joined")
+    establecimiento: Mapped[Establecimiento | None] = relationship(lazy="joined", viewonly=True)
 
 
 class Mensaje(Base):

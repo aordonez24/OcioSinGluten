@@ -274,3 +274,32 @@ def test_ficha_sugiere_sitios_cercanos_y_la_app_es_instalable(pagina):
     respuesta = pagina.request.get("/manifest.webmanifest")
     assert respuesta.headers["content-type"].startswith("application/manifest+json")
     assert respuesta.json()["display"] == "standalone"
+
+
+def test_opinion_util_llega_como_notificacion(pagina):
+    entrar(pagina, "marcos@example.com", "Marcos1234")
+    pagina.goto("/establecimientos/1")  # Celiaco Feliz: tiene una opinión de sara
+    boton = pagina.locator(".opinion", has_text="sara").locator("button.util")
+    if boton.get_attribute("aria-pressed") == "true":  # la demo reparte "útiles" al azar
+        with pagina.expect_response(lambda r: "/util" in r.url and r.request.method == "DELETE"):
+            boton.click()
+    with pagina.expect_response(lambda r: "/util" in r.url and r.request.method == "PUT"):
+        boton.click()
+    expect(boton).to_have_attribute("aria-pressed", "true")
+    expect(pagina.locator(".opinion.propia button.util")).to_have_count(0)  # la propia no se valora
+
+    pagina.evaluate("localStorage.clear()")
+    entrar(pagina, "sara@example.com", "Sara12345")
+    campana = pagina.locator(".campana .boton")
+    expect(campana).to_have_attribute("aria-label", re.compile(r"sin leer"))
+    campana.click()
+    expect(pagina.locator(".campana .panel")).to_contain_text("marcos ha marcado como útil tu opinión sobre Celiaco Feliz")
+    expect(pagina.locator(".campana .contador")).to_have_count(0)  # al abrirla se marcan como leídas
+
+
+def test_filtro_por_precio(pagina):
+    pagina.goto("/establecimientos")
+    pagina.select_option("select[aria-label='Precio']", "3")
+    expect(pagina).to_have_url(re.compile(r"precio=3"))
+    expect(pagina.locator(".tarjeta-est")).to_have_count(1)
+    expect(pagina.locator(".tarjeta-est")).to_contain_text("Mesón La Loma")

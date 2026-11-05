@@ -8,9 +8,11 @@ import DialogoConfirmar from '@/components/DialogoConfirmar.vue'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
+import { useNotificaciones } from '@/stores/notificaciones'
 
 const auth = useAuth()
 const avisos = useAvisos()
+const notificaciones = useNotificaciones()
 const route = useRoute()
 const router = useRouter()
 
@@ -18,6 +20,13 @@ const router = useRouter()
 onMounted(() => {
   if (auth.autenticado) api('/auth/yo').then((u) => (auth.usuario = u)).catch(() => {})
 })
+
+// Las notificaciones se consultan solo mientras hay sesión.
+watch(
+  () => auth.autenticado,
+  (autenticado) => (autenticado ? notificaciones.empezar() : notificaciones.parar()),
+  { immediate: true },
+)
 
 // Si la sesión caduca estando en una página privada, se vuelve al login.
 watch(

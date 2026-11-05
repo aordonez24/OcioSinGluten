@@ -7,7 +7,7 @@ import { useAuth } from '@/stores/auth'
 import { coincide, distanciaKm } from '@/utils'
 import { useUbicacion } from '@/composables'
 import { useAvisos } from '@/stores/avisos'
-import { CATEGORIAS, DISTINTIVOS } from '@/catalogo'
+import { CATEGORIAS, DISTINTIVOS, PRECIOS } from '@/catalogo'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
@@ -35,6 +35,7 @@ const provincia = filtro('provincia')
 const orden = filtro('orden', 'valoracion')
 const vista = filtro('vista', 'lista')
 const categoria = filtro('tipo')
+const precio = filtro('precio')
 const distintivosTexto = filtro('con')
 const distintivos = computed(() => distintivosTexto.value.split(',').filter(Boolean))
 
@@ -89,6 +90,7 @@ const filtrados = computed(() =>
   conDistancia.value
     .filter((e) => !provincia.value || e.provincia === provincia.value)
     .filter((e) => !categoria.value || e.categoria === categoria.value)
+    .filter((e) => !precio.value || String(e.precio) === precio.value)
     .filter((e) => distintivos.value.every((d) => e[d]))
     .filter((e) => coincide(busqueda.value, e.nombre, e.localidad, e.provincia, e.calle))
     .sort(ORDENES[orden.value] ?? ORDENES.valoracion),
@@ -98,9 +100,11 @@ const puntos = computed(() =>
 )
 const filtrosAbiertos = ref(false)
 const numFiltros = computed(
-  () => [provincia.value, categoria.value].filter(Boolean).length + distintivos.value.length,
+  () => [provincia.value, categoria.value, precio.value].filter(Boolean).length + distintivos.value.length,
 )
-const hayFiltros = computed(() => Boolean(busqueda.value || provincia.value || categoria.value || distintivos.value.length))
+const hayFiltros = computed(() =>
+  Boolean(busqueda.value || provincia.value || categoria.value || precio.value || distintivos.value.length),
+)
 
 function limpiarFiltros() {
   textoBusqueda.value = ''
@@ -172,6 +176,10 @@ onMounted(async () => {
         <select v-model="categoria" aria-label="Tipo de sitio">
           <option value="">Todos los tipos</option>
           <option v-for="(c, clave) in CATEGORIAS" :key="clave" :value="clave">{{ c.texto }}</option>
+        </select>
+        <select v-model="precio" aria-label="Precio">
+          <option value="">Cualquier precio</option>
+          <option v-for="(p, n) in PRECIOS" :key="n" :value="String(n)">{{ p.simbolo }} {{ p.texto }}</option>
         </select>
         <select v-model="orden" aria-label="Ordenar por">
           <option value="valoracion">Mejor valorados</option>

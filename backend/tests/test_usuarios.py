@@ -244,3 +244,58 @@ def test_actividad_de_quienes_sigo(client):
     feed = client.get("/api/actividades?siguiendo=true", headers=h_ana).json()
     assert [a["usuario"]["username"] for a in feed] == ["bea"]
     assert len(client.get("/api/actividades").json()) == 2
+
+
+def test_notificaciones(client):
+    h_ana = registrar(client, "ana", 0)
+    h_bea = registrar(client, "bea", 1)
+    est = crear_establecimiento(client, h_ana)
+
+    assert client.get("/api/notificaciones").status_code == 401
+    assert client.get("/api/notificaciones", headers=h_ana).json() == {"no_leidas": 0, "notificaciones": []}
+
+    # Bea sigue a Ana (dos veces: no se repite) y opina sobre el sitio que Ana añadió
+    client.put("/api/usuarios/ana/seguir", headers=h_bea)
+    client.delete("/api/usuarios/ana/seguir", headers=h_bea)
+    client.put("/api/usuarios/ana/seguir", headers=h_bea)
+    r = client.post(
+        f"/api/establecimientos/{est['id']}/comentarios",
+        json={"puntuacion": 5, "mensaje": "Genial"},
+        headers=h_bea,
+    )
+    opinion_id = r.json()["id"]
+
+    datos = client.get("/api/notificaciones", headers=h_ana).json()
+    assert datos["no_leidas"] == 2
+    assert [n["tipo"] for n in datos["notificaciones"]] == ["opinion", "seguidor"]
+    assert datos["notificaciones"][0]["actor"]["username"] == "bea"
+    assert datos["notificaciones"][0]["establecimiento"]["nombre"] == "Celiaco Feliz"
+
+    assert client.post("/api/notificaciones/leidas", headers=h_ana).status_code == 204
+    assert client.get("/api/notificaciones", headers=h_ana).json()["no_leidas"] == 0
+
+    # A Ana le resulta útil la opinión de Bea: le llega a Bea
+    assert client.put(f"/api/comentarios/{opinion_id}/util", headers=h_ana).status_code == 204
+    [nota] = client.get("/api/notificaciones", headers=h_bea).json()["notificaciones"]
+    assert nota["tipo"] == "util"
+
+
+def test_opiniones_utiles(client):
+    h_ana = registrar(client, "ana", 0)
+    h_bea = registrar(client, "bea", 1)
+    est = crear_establecimiento(client, h_ana)
+    url = f"/api/establecimientos/{est['id']}/comentarios"
+    opinion_id = client.post(url, json={"puntuacion": 4, "mensaje": "Bien"}, headers=h_ana).json()["id"]
+
+    assert client.put(f"/api/comentarios/{opinion_id}/util", headers=h_ana).status_code == 400  # la propia
+    assert client.put(f"/api/comentarios/{opinion_id}/util").status_code == 401
+    client.put(f"/api/comentarios/{opinion_id}/util", headers=h_bea)
+    client.put(f"/api/comentarios/{opinion_id}/util", headers=h_bea)  # idempotente
+
+    [vista_bea] = client.get(url, headers=h_bea).json()
+    assert (vista_bea["num_utiles"], vista_bea["util"]) == (1, True)
+    [anonima] = client.get(url).json()
+    assert (anonima["num_utiles"], anonima["util"]) == (1, False)
+
+    client.delete(f"/api/comentarios/{opinion_id}/util", headers=h_bea)
+    assert client.get(url).json()[0]["num_utiles"] == 0
