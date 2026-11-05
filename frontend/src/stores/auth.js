@@ -8,8 +8,9 @@ export const useAuth = defineStore('auth', () => {
   const autenticado = computed(() => Boolean(token.value && usuario.value))
   const esAdmin = computed(() => usuario.value?.rol === 'admin')
 
-  watch(token, (t) => (t ? localStorage.setItem('token', t) : localStorage.removeItem('token')))
-  watch(usuario, (u) => localStorage.setItem('usuario', JSON.stringify(u)), { deep: true })
+  // Se guarda de forma síncrona: si se recarga justo después de iniciar sesión, no se pierde.
+  watch(token, (t) => (t ? localStorage.setItem('token', t) : localStorage.removeItem('token')), { flush: 'sync' })
+  watch(usuario, (u) => localStorage.setItem('usuario', JSON.stringify(u)), { deep: true, flush: 'sync' })
 
   function iniciarSesion({ access_token, usuario: datos }) {
     token.value = access_token

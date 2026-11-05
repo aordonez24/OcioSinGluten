@@ -86,9 +86,12 @@ onBeforeUnmount(() => {
             class="mensaje"
             :class="{ mio: esMio(m), seguido: m.seguido }"
           >
-            <RouterLink v-if="!esMio(m)" :to="`/u/${m.autor.username}`" class="avatar-hueco" :tabindex="m.seguido ? -1 : 0">
-              <Avatar v-if="!m.seguido" :usuario="m.autor" :tamano="32" />
-            </RouterLink>
+            <template v-if="!esMio(m)">
+              <span v-if="m.seguido" class="avatar-hueco"></span>
+              <RouterLink v-else :to="`/u/${m.autor.username}`" class="avatar-hueco">
+                <Avatar :usuario="m.autor" :tamano="32" />
+              </RouterLink>
+            </template>
             <div class="burbuja">
               <RouterLink v-if="!esMio(m) && !m.seguido" :to="`/u/${m.autor.username}`" class="autor">
                 {{ m.autor.username }}

@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { NOMBRES_PROVINCIAS, PROVINCIAS } from '@/provincias'
 import { validar } from '@/utils'
+import { CATEGORIAS, DISTINTIVOS } from '@/catalogo'
 
 const props = defineProps({
   inicial: { type: Object, default: () => ({}) },
@@ -13,9 +14,11 @@ const props = defineProps({
 const emit = defineEmits(['guardar', 'cancelar'])
 
 const CAMPOS = ['nombre', 'telefono', 'calle', 'cod_postal', 'localidad', 'provincia', 'pais']
-const datos = reactive(
-  Object.fromEntries(CAMPOS.map((c) => [c, props.inicial[c] ?? (c === 'pais' ? 'España' : '')])),
-)
+const datos = reactive({
+  ...Object.fromEntries(CAMPOS.map((c) => [c, String(props.inicial[c] ?? (c === 'pais' ? 'España' : ''))])),
+  categoria: props.inicial.categoria ?? 'restaurante',
+  ...Object.fromEntries(DISTINTIVOS.map((d) => [d.clave, Boolean(props.inicial[d.clave])])),
+})
 const intentado = ref(false)
 
 const errores = computed(() => ({
@@ -45,6 +48,25 @@ function enviar() {
       <input v-model="datos.nombre" maxlength="60" :aria-invalid="!!err('nombre')" />
       <span class="error-campo">{{ err('nombre') }}</span>
     </label>
+
+    <label>
+      Tipo de sitio
+      <select v-model="datos.categoria">
+        <option v-for="(c, clave) in CATEGORIAS" :key="clave" :value="clave">{{ c.texto }}</option>
+      </select>
+    </label>
+
+    <fieldset class="distintivos">
+      <legend>¿Qué ofrece para personas celíacas? <span class="ayuda">Marca lo que sepas con seguridad</span></legend>
+      <label v-for="d in DISTINTIVOS" :key="d.clave" class="distintivo" :class="{ marcado: datos[d.clave] }">
+        <input v-model="datos[d.clave]" type="checkbox" />
+        <component :is="d.icono" :size="20" />
+        <span>
+          <strong>{{ d.texto }}</strong>
+          <span class="ayuda">{{ d.descripcion }}</span>
+        </span>
+      </label>
+    </fieldset>
 
     <div class="dos-columnas">
       <label>
@@ -100,3 +122,58 @@ function enviar() {
     </div>
   </form>
 </template>
+
+<style scoped>
+.distintivos {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.distintivos legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.distintivo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.distintivo input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--verde);
+}
+
+.distintivo svg {
+  flex-shrink: 0;
+  color: var(--texto-suave);
+}
+
+.distintivo > span {
+  display: grid;
+  line-height: 1.3;
+}
+
+.distintivo.marcado {
+  border-color: var(--verde);
+  background: #f1faf3;
+}
+
+.distintivo.marcado svg {
+  color: var(--verde);
+}
+</style>

@@ -26,7 +26,7 @@ def test_crear_y_listar(client):
     assert duplicado.status_code == 409
 
 
-def test_like_favorito_visita_y_valoracion(client):
+def test_like_favorito_y_visita(client):
     h_ana = registrar(client, "ana", 0)
     h_bea = registrar(client, "bea", 1)
     est_id = crear_establecimiento(client, h_ana)["id"]
@@ -40,7 +40,6 @@ def test_like_favorito_visita_y_valoracion(client):
 
     detalle = client.get(url, headers=h_ana).json()
     assert (detalle["num_likes"], detalle["num_visitas"]) == (1, 2)
-    assert detalle["valoracion"] == 2.5  # la mitad de quienes lo visitaron dieron like
     assert detalle["me_gusta"] and detalle["favorito"] and detalle["visitado"]
     assert client.get(url, headers=h_bea).json()["me_gusta"] is False
 
@@ -67,7 +66,7 @@ def test_solo_admin_edita_y_borra(client):
     assert r.status_code == 200 and r.json()["nombre"] == "Nuevo nombre"
 
     client.post(f"{url}/imagenes", files={"archivo": ("a.png", imagen_png(), "image/png")}, headers=h_ana)
-    client.post(f"{url}/comentarios", json={"mensaje": "Muy rico"}, headers=h_ana)
+    client.post(f"{url}/comentarios", json={"puntuacion": 5, "mensaje": "Muy rico"}, headers=h_ana)
     imagen_url = client.get(url).json()["imagenes"][0]["url"]
 
     assert client.delete(url, headers=h_admin).status_code == 204
@@ -99,21 +98,73 @@ def test_imagenes(client):
     assert client.get(url).json()["imagenes"] == []
 
 
-def test_comentarios(client):
+def test_opiniones_con_puntuacion(client):
     h_ana = registrar(client, "ana", 0)
     h_bea = registrar(client, "bea", 1)
+    h_carla = registrar(client, "carla", 2)
     est_id = crear_establecimiento(client, h_ana)["id"]
     url = f"/api/establecimientos/{est_id}/comentarios"
 
-    assert client.post(url, json={"mensaje": "x" * 281}, headers=h_bea).status_code == 422
-    assert client.post(url, json={"mensaje": "   "}, headers=h_bea).status_code == 422
-    comentario = client.post(url, json={"mensaje": " ¡Todo sin gluten! "}, headers=h_bea).json()
-    assert comentario["mensaje"] == "¡Todo sin gluten!"
-    assert comentario["autor"]["username"] == "bea"
+    for malo in (
+        {"puntuacion": 5, "mensaje": "x" * 501},
+        {"puntuacion": 5, "mensaje": "   "},
+        {"puntuacion": 0, "mensaje": "Cero estrellas no existe"},
+        {"puntuacion": 6, "mensaje": "Demasiadas"},
+        {"mensaje": "Sin puntuación"},
+    ):
+        assert client.post(url, json=malo, headers=h_bea).status_code == 422, malo
 
-    assert client.delete(f"/api/comentarios/{comentario['id']}", headers=h_ana).status_code == 403
-    assert client.delete(f"/api/comentarios/{comentario['id']}", headers=h_bea).status_code == 204
-    assert client.get(url).json() == []
+    opinion = client.post(url, json={"puntuacion": 4, "mensaje": " ¡Todo sin gluten! "}, headers=h_bea).json()
+    assert opinion["mensaje"] == "¡Todo sin gluten!" and opinion["puntuacion"] == 4
+    assert opinion["autor"]["username"] == "bea" and opinion["editado_en"] is None
+
+    # Una opinión por persona y sitio
+    otra = client.post(url, json={"puntuacion": 1, "mensaje": "Otra vez"}, headers=h_bea)
+    assert otra.status_code == 409
+
+    client.post(url, json={"puntuacion": 5, "mensaje": "Genial"}, headers=h_carla)
+    est = client.get(f"/api/establecimientos/{est_id}").json()
+    assert (est["valoracion"], est["num_opiniones"]) == (4.5, 2)
+
+    # Editar: solo la autora (ni siquiera un admin puede cambiar lo que opina otra persona)
+    editar = f"/api/comentarios/{opinion['id']}"
+    assert client.patch(editar, json={"puntuacion": 1}, headers=h_ana).status_code == 403
+    editada = client.patch(editar, json={"puntuacion": 2}, headers=h_bea).json()
+    assert editada["puntuacion"] == 2 and editada["mensaje"] == "¡Todo sin gluten!"
+    assert editada["editado_en"] is not None
+    assert client.get(f"/api/establecimientos/{est_id}").json()["valoracion"] == 3.5
+
+    # Borrar: autora o admin; también desaparece del feed de actividad
+    assert client.delete(editar, headers=h_ana).status_code == 403
+    assert client.delete(editar, headers=h_bea).status_code == 204
+    assert [c["autor"]["username"] for c in client.get(url).json()] == ["carla"]
+    assert "comentario" not in [a["tipo"] for a in client.get("/api/actividades?usuario=bea").json()]
+
+
+def test_categoria_y_distintivos(client):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(client, h, categoria="panaderia", todo_sin_gluten=True, cocina_separada=True)
+    assert est["categoria"] == "panaderia"
+    assert (est["todo_sin_gluten"], est["cocina_separada"], est["carta_sin_gluten"]) == (True, True, False)
+    assert (
+        client.post(
+            "/api/establecimientos",
+            json={
+                "nombre": "X",
+                "telefono": "953000000",
+                "calle": "C",
+                "cod_postal": "23001",
+                "localidad": "Jaén",
+                "provincia": "Jaén",
+                "categoria": "discoteca",
+            },
+            headers=h,
+        ).status_code
+        == 422
+    )
+
+    listado = client.get("/api/establecimientos").json()[0]
+    assert listado["categoria"] == "panaderia" and listado["todo_sin_gluten"] is True
 
 
 def test_actividades_y_consultas(client):
@@ -121,7 +172,11 @@ def test_actividades_y_consultas(client):
     h_admin = registrar(client, "jefa", 1)
     hacer_admin("jefa")
     est_id = crear_establecimiento(client, h_ana)["id"]
-    client.post(f"/api/establecimientos/{est_id}/comentarios", json={"mensaje": "Hola"}, headers=h_ana)
+    client.post(
+        f"/api/establecimientos/{est_id}/comentarios",
+        json={"puntuacion": 5, "mensaje": "Hola"},
+        headers=h_ana,
+    )
 
     actividades = client.get("/api/actividades").json()
     assert [a["tipo"] for a in actividades] == ["comentario", "publicacion"]

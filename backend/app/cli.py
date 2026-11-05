@@ -13,6 +13,7 @@ from sqlalchemy import insert, select
 from app.db import Base, SessionLocal, engine
 from app.models import (
     Actividad,
+    Categoria,
     Comentario,
     Establecimiento,
     Mensaje,
@@ -49,25 +50,107 @@ USUARIOS = [
 ]
 
 ESTABLECIMIENTOS = [
-    # nombre, calle, cp, localidad, provincia, lat, lon
-    ("Celiaco Feliz", "Calle Maestra 10", "23002", "Jaén", "Jaén", 37.7692, -3.7903),
-    ("Horno Sin Trigo", "Calle Reyes Católicos 5", "18009", "Granada", "Granada", 37.1760, -3.5986),
-    ("La Pizzería Libre", "Calle Larios 2", "29005", "Málaga", "Málaga", 36.7194, -4.4211),
-    ("Taberna El Arroz", "Calle Sierpes 40", "41004", "Sevilla", "Sevilla", 37.3925, -5.9945),
-    ("Burger Zero", "Calle de Fuencarral 70", "28004", "Madrid", "Madrid", 40.4255, -3.7020),
-    ("Dulce Celíaca", "Carrer de Verdi 12", "08012", "Barcelona", "Barcelona", 41.4035, 2.1570),
-    ("Mesón La Loma", "Calle Real 22", "23400", "Úbeda", "Jaén", 38.0107, -3.3700),
-    ("Arrocería Mediterránea", "Calle de Colón 15", "46004", "Valencia", "Valencia", 39.4690, -0.3720),
+    # nombre, calle, cp, localidad, provincia, lat, lon, categoría, distintivos
+    (
+        "Celiaco Feliz",
+        "Calle Maestra 10",
+        "23002",
+        "Jaén",
+        "Jaén",
+        37.7692,
+        -3.7903,
+        Categoria.RESTAURANTE,
+        {"todo_sin_gluten", "acreditado"},
+    ),
+    (
+        "Horno Sin Trigo",
+        "Calle Reyes Católicos 5",
+        "18009",
+        "Granada",
+        "Granada",
+        37.1760,
+        -3.5986,
+        Categoria.PANADERIA,
+        {"todo_sin_gluten", "acreditado"},
+    ),
+    (
+        "La Pizzería Libre",
+        "Calle Larios 2",
+        "29005",
+        "Málaga",
+        "Málaga",
+        36.7194,
+        -4.4211,
+        Categoria.RESTAURANTE,
+        {"carta_sin_gluten", "cocina_separada"},
+    ),
+    (
+        "Taberna El Arroz",
+        "Calle Sierpes 40",
+        "41004",
+        "Sevilla",
+        "Sevilla",
+        37.3925,
+        -5.9945,
+        Categoria.BAR,
+        {"carta_sin_gluten"},
+    ),
+    (
+        "Burger Zero",
+        "Calle de Fuencarral 70",
+        "28004",
+        "Madrid",
+        "Madrid",
+        40.4255,
+        -3.7020,
+        Categoria.RESTAURANTE,
+        {"carta_sin_gluten", "cocina_separada", "acreditado"},
+    ),
+    (
+        "Dulce Celíaca",
+        "Carrer de Verdi 12",
+        "08012",
+        "Barcelona",
+        "Barcelona",
+        41.4035,
+        2.1570,
+        Categoria.CAFETERIA,
+        {"todo_sin_gluten"},
+    ),
+    (
+        "Mesón La Loma",
+        "Calle Real 22",
+        "23400",
+        "Úbeda",
+        "Jaén",
+        38.0107,
+        -3.3700,
+        Categoria.RESTAURANTE,
+        {"carta_sin_gluten"},
+    ),
+    (
+        "Heladería Polo Norte",
+        "Calle de Colón 15",
+        "46004",
+        "Valencia",
+        "Valencia",
+        39.4690,
+        -0.3720,
+        Categoria.HELADERIA,
+        {"carta_sin_gluten", "acreditado"},
+    ),
 ]
 
 OPINIONES = [
-    "Carta sin gluten muy completa y el personal sabe perfectamente lo que es la contaminación cruzada.",
-    "Las croquetas sin gluten están de escándalo. Volveré seguro.",
-    "Freidora separada para lo sin gluten. Por fin puedo pedir patatas tranquila.",
-    "Buen sitio, aunque los fines de semana hay que reservar.",
-    "Tienen pan sin gluten de verdad, no el típico industrial. ¡Un 10!",
-    "Postres caseros aptos. La tarta de queso es imprescindible.",
-    "Me explicaron cada plato con detalle. Muy recomendable para celíacos.",
+    # puntuación, texto
+    (5, "Carta sin gluten muy completa y el personal sabe perfectamente lo que es la contaminación cruzada."),
+    (5, "Las croquetas sin gluten están de escándalo. Volveré seguro."),
+    (4, "Freidora separada para lo sin gluten. Por fin puedo pedir patatas tranquila."),
+    (3, "Buen sitio, aunque los fines de semana hay que reservar y el servicio va lento."),
+    (5, "Tienen pan sin gluten de verdad, no el típico industrial. ¡Un 10!"),
+    (4, "Postres caseros aptos. La tarta de queso es imprescindible."),
+    (2, "Me tuvieron que preguntar en cocina si los platos eran aptos. Les falta formación."),
+    (4, "Me explicaron cada plato con detalle. Muy recomendable para celíacos."),
 ]
 
 MENSAJES = [
@@ -110,7 +193,8 @@ def cargar_demo() -> None:
         def hace(dias: float):
             return ahora() - timedelta(days=dias, minutes=aleatorio.randint(0, 600))
 
-        for n, (nombre, calle, cp, localidad, provincia, lat, lon) in enumerate(ESTABLECIMIENTOS):
+        for n, fila in enumerate(ESTABLECIMIENTOS):
+            nombre, calle, cp, localidad, provincia, lat, lon, categoria, distintivos = fila
             autor = aleatorio.choice(list(usuarios.values()))
             est = Establecimiento(
                 nombre=nombre,
@@ -123,6 +207,8 @@ def cargar_demo() -> None:
                 longitud=lon,
                 creado_por_id=autor.id,
                 creado_en=hace(40 - n * 3),
+                categoria=categoria,
+                **dict.fromkeys(distintivos, True),
             )
             db.add(est)
             db.flush()
@@ -160,11 +246,13 @@ def cargar_demo() -> None:
                 if aleatorio.random() < 0.4:
                     db.execute(insert(favoritos).values(**fila))
                 if aleatorio.random() < 0.6:
+                    puntuacion, texto = aleatorio.choice(OPINIONES)
                     db.add(
                         Comentario(
                             establecimiento_id=est.id,
                             autor_id=usuario.id,
-                            mensaje=aleatorio.choice(OPINIONES),
+                            puntuacion=puntuacion,
+                            mensaje=texto,
                             creado_en=cuando,
                         )
                     )

@@ -168,7 +168,11 @@ def test_eliminar_usuario_borra_en_cascada(client):
     h_bea = registrar(client, "bea", 1)
     est = crear_establecimiento(client, h_ana)
     client.put(f"/api/establecimientos/{est['id']}/like", headers=h_bea)
-    client.post(f"/api/establecimientos/{est['id']}/comentarios", json={"mensaje": "Genial"}, headers=h_bea)
+    client.post(
+        f"/api/establecimientos/{est['id']}/comentarios",
+        json={"puntuacion": 5, "mensaje": "Genial"},
+        headers=h_bea,
+    )
     client.put("/api/usuarios/ana/seguir", headers=h_bea)
 
     assert client.delete("/api/usuarios/bea", headers=h_ana).status_code == 403
@@ -208,6 +212,10 @@ def test_comunidad_y_contadores_de_perfil(client):
 
     est = crear_establecimiento(client, h_ana)
     client.put(f"/api/establecimientos/{est['id']}/visita", headers=h_ana)
-    client.post(f"/api/establecimientos/{est['id']}/comentarios", json={"mensaje": "Top"}, headers=h_ana)
+    client.post(
+        f"/api/establecimientos/{est['id']}/comentarios",
+        json={"puntuacion": 4, "mensaje": "Top"},
+        headers=h_ana,
+    )
     perfil = client.get("/api/usuarios/ana").json()
     assert (perfil["num_opiniones"], perfil["num_visitados"], perfil["num_seguidos"]) == (1, 1, 1)

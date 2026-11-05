@@ -3,7 +3,7 @@ import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 
 import { useRouter } from 'vue-router'
 import {
   ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Footprints, Heart, ImagePlus, MapPin,
-  MessageSquareText, Navigation, Pencil, Phone, Share2, Store, Trash2, X,
+  Navigation, Pencil, Phone, Share2, Store, Trash2, X,
 } from 'lucide-vue-next'
 import { api, conArchivo } from '@/api'
 import { ponerTitulo } from '@/router'
@@ -11,10 +11,12 @@ import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
 import { hace } from '@/utils'
-import Avatar from '@/components/Avatar.vue'
+import { CATEGORIAS } from '@/catalogo'
+import Distintivos from '@/components/Distintivos.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 import Estrellas from '@/components/Estrellas.vue'
 import EstablecimientoForm from '@/components/EstablecimientoForm.vue'
+import Opiniones from '@/components/Opiniones.vue'
 import Portada from '@/components/Portada.vue'
 
 const Mapa = defineAsyncComponent(() => import('@/components/Mapa.vue'))
@@ -27,9 +29,6 @@ const router = useRouter()
 
 const est = ref(null)
 const noExiste = ref(false)
-const comentarios = ref([])
-const nuevoComentario = ref('')
-const publicando = ref(false)
 const editando = ref(false)
 const errorEdicion = ref('')
 const guardando = ref(false)
@@ -46,11 +45,12 @@ const urlComoLlegar = computed(() => {
     : `${direccion.value}, ${est.value.provincia}, ${est.value.pais}`
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}`
 })
+const categoria = computed(() => CATEGORIAS[est.value?.categoria] ?? CATEGORIAS.otro)
 const puedeBorrar = (autorId) => auth.esAdmin || auth.usuario?.id === autorId
 
 async function cargar() {
   try {
-    ;[est.value, comentarios.value] = await Promise.all([api(base), api(`${base}/comentarios`)])
+    est.value = await api(base)
     ponerTitulo(est.value.nombre)
   } catch (e) {
     if (e.status === 404) noExiste.value = true
@@ -124,27 +124,10 @@ async function borrarImagen(imagen) {
   }
 }
 
-async function comentar() {
-  publicando.value = true
-  try {
-    const c = await api(`${base}/comentarios`, { method: 'POST', body: { mensaje: nuevoComentario.value } })
-    comentarios.value.unshift(c)
-    nuevoComentario.value = ''
-  } catch (e) {
-    avisos.error(e)
-  } finally {
-    publicando.value = false
-  }
-}
-
-async function borrarComentario(c) {
-  if (!(await confirmar.pedir({ titulo: '¿Borrar esta opinión?', texto: `"${c.mensaje}"`, accion: 'Borrar' }))) return
-  try {
-    await api(`/comentarios/${c.id}`, { method: 'DELETE' })
-    comentarios.value = comentarios.value.filter((x) => x.id !== c.id)
-  } catch (e) {
-    avisos.error(e)
-  }
+// Tras opinar/editar/borrar una opinión se actualiza la valoración media.
+async function refrescarValoracion() {
+  const { valoracion, num_opiniones } = await api(base)
+  Object.assign(est.value, { valoracion, num_opiniones })
 }
 
 async function guardarEdicion(datos) {
@@ -216,6 +199,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
         <div class="contenido">
           <template v-if="!editando">
+            <p class="categoria"><component :is="categoria.icono" :size="15" /> {{ categoria.texto }}</p>
             <div class="titulo">
               <h1>{{ est.nombre }}</h1>
               <div v-if="auth.esAdmin" class="fila">
@@ -225,7 +209,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
             </div>
             <p class="resumen">
               <Estrellas :valor="est.valoracion" />
-              <span class="suave">{{ est.num_visitas }} {{ est.num_visitas === 1 ? 'visita' : 'visitas' }} · {{ comentarios.length }} opiniones</span>
+              <a href="#titulo-opiniones" class="suave">
+                <strong v-if="est.valoracion">{{ est.valoracion.toFixed(1) }}</strong>
+                {{ est.num_opiniones }} {{ est.num_opiniones === 1 ? 'opinión' : 'opiniones' }}
+              </a>
+              <span class="suave">· {{ est.num_visitas }} {{ est.num_visitas === 1 ? 'visita' : 'visitas' }}</span>
             </p>
 
             <div class="acciones">
@@ -240,6 +228,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
               </button>
               <button class="btn btn-icono" title="Compartir" @click="compartir"><Share2 :size="18" /></button>
             </div>
+
+            <Distintivos :establecimiento="est" detallado class="distintivos" />
+            <p v-if="!est.todo_sin_gluten && !est.carta_sin_gluten && !est.cocina_separada && !est.acreditado" class="sin-datos suave pequeno">
+              Aún no sabemos qué opciones sin gluten ofrece. Si has estado, cuéntalo en tu opinión.
+            </p>
 
             <ul class="lista-limpia datos">
               <li><MapPin :size="18" /> {{ direccion }} · {{ est.provincia }}, {{ est.pais }}</li>
@@ -298,50 +291,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
         </section>
       </aside>
 
-      <section class="tarjeta opiniones">
-        <h2>Opiniones de la comunidad</h2>
-        <form v-if="auth.autenticado" class="nuevo" @submit.prevent="comentar">
-          <Avatar :usuario="auth.usuario" :tamano="40" />
-          <div class="campo">
-            <textarea
-              v-model="nuevoComentario"
-              maxlength="280"
-              rows="2"
-              placeholder="¿Qué tal la experiencia sin gluten? ¿Tenían carta específica, cocina separada…?"
-            ></textarea>
-            <div class="fila">
-              <span class="suave pequeno">{{ nuevoComentario.length }}/280</span>
-              <button class="btn btn-primario btn-pequeno" :disabled="!nuevoComentario.trim() || publicando">Publicar</button>
-            </div>
-          </div>
-        </form>
-        <p v-else class="aviso-sesion">
-          <RouterLink :to="{ path: '/entrar', query: { volver: $route.fullPath } }">Inicia sesión</RouterLink>
-          para contar tu experiencia.
-        </p>
-
-        <ul v-if="comentarios.length" class="lista-limpia">
-          <li v-for="c in comentarios" :key="c.id" class="comentario">
-            <RouterLink :to="`/u/${c.autor.username}`"><Avatar :usuario="c.autor" :tamano="40" /></RouterLink>
-            <div>
-              <p class="meta">
-                <RouterLink :to="`/u/${c.autor.username}`">{{ c.autor.username }}</RouterLink>
-                <span class="suave"> · {{ hace(c.creado_en) }}</span>
-              </p>
-              <p>{{ c.mensaje }}</p>
-            </div>
-            <button
-              v-if="auth.esAdmin || auth.usuario?.username === c.autor.username"
-              class="btn btn-icono btn-fantasma"
-              title="Borrar opinión"
-              @click="borrarComentario(c)"
-            >
-              <Trash2 :size="16" />
-            </button>
-          </li>
-        </ul>
-        <EstadoVacio v-else :icono="MessageSquareText" titulo="Sin opiniones todavía" texto="Cuéntale a la comunidad qué tal se come aquí sin gluten." />
-      </section>
+      <Opiniones class="opiniones" :est-id="est.id" :valoracion="est.valoracion" @cambio="refrescarValoracion" />
     </div>
 
     <div v-if="ampliada !== null" class="visor" role="dialog" aria-modal="true" aria-label="Foto ampliada" @click.self="ampliada = null">
@@ -388,6 +338,33 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
 .contenido {
   padding: 1.5rem;
+}
+
+.categoria {
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--coral-oscuro);
+}
+
+.resumen a {
+  text-decoration: none;
+}
+
+.distintivos {
+  margin-top: 1.5rem;
+}
+
+.sin-datos {
+  margin: 1.25rem 0 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radio-sm);
+  background: var(--crema);
 }
 
 .titulo {
@@ -471,46 +448,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
 .opiniones {
   grid-column: 1;
-}
-
-.nuevo {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.nuevo .campo {
-  flex: 1;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.nuevo .fila {
-  justify-content: space-between;
-}
-
-.aviso-sesion {
-  padding: 0.85rem 1rem;
-  background: var(--crema-2);
-  border-radius: var(--radio-sm);
-}
-
-.comentario {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0.75rem;
-  padding: 1rem 0;
-  border-top: 1px solid var(--borde);
-}
-
-.comentario p {
-  margin: 0;
-}
-
-.meta a {
-  font-weight: 700;
-  color: inherit;
-  text-decoration: none;
 }
 
 .visor {

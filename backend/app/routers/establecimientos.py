@@ -8,6 +8,7 @@ from app.models import (
     Imagen,
     TipoActividad,
     Usuario,
+    ahora,
     favoritos,
     likes,
     visitas,
@@ -15,6 +16,7 @@ from app.models import (
 from app.schemas import (
     ComentarioIn,
     ComentarioOut,
+    ComentarioUpdate,
     EstablecimientoDetalle,
     EstablecimientoIn,
     EstablecimientoResumen,
@@ -180,9 +182,16 @@ def comentarios(est_id: int, db: DB):
 
 
 @router.post("/{est_id}/comentarios", response_model=ComentarioOut, status_code=status.HTTP_201_CREATED)
-def comentar(est_id: int, datos: ComentarioIn, db: DB, yo: UsuarioActual):
+def opinar(est_id: int, datos: ComentarioIn, db: DB, yo: UsuarioActual):
     establecimiento_o_404(db, est_id)
-    comentario = Comentario(establecimiento_id=est_id, autor_id=yo.id, mensaje=datos.mensaje)
+    ya_opino = db.scalar(
+        select(Comentario.id).where(Comentario.establecimiento_id == est_id, Comentario.autor_id == yo.id)
+    )
+    if ya_opino:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Ya has opinado sobre este sitio; puedes editar tu opinión"
+        )
+    comentario = Comentario(establecimiento_id=est_id, autor_id=yo.id, **datos.model_dump())
     db.add(comentario)
     registrar_actividad(db, yo.id, est_id, TipoActividad.COMENTARIO)
     db.commit()
@@ -193,12 +202,30 @@ def comentar(est_id: int, datos: ComentarioIn, db: DB, yo: UsuarioActual):
 comentarios_router = APIRouter(prefix="/api/comentarios", tags=["establecimientos"])
 
 
-@comentarios_router.delete("/{comentario_id}", status_code=status.HTTP_204_NO_CONTENT)
-def borrar_comentario(comentario_id: int, db: DB, yo: UsuarioActual):
+def _opinion_propia(db: Session, comentario_id: int, yo: Usuario, *, admin_puede: bool) -> Comentario:
     comentario = db.get(Comentario, comentario_id)
     if comentario is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Comentario no encontrado")
-    if comentario.autor_id != yo.id and not yo.es_admin:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Solo puedes borrar tus propios comentarios")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Opinión no encontrada")
+    if comentario.autor_id != yo.id and not (admin_puede and yo.es_admin):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Solo puedes modificar tus propias opiniones")
+    return comentario
+
+
+@comentarios_router.patch("/{comentario_id}", response_model=ComentarioOut)
+def editar_opinion(comentario_id: int, datos: ComentarioUpdate, db: DB, yo: UsuarioActual):
+    comentario = _opinion_propia(db, comentario_id, yo, admin_puede=False)
+    cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
+    if cambios:
+        for campo, valor in cambios.items():
+            setattr(comentario, campo, valor)
+        comentario.editado_en = ahora()
+        db.commit()
+    return comentario
+
+
+@comentarios_router.delete("/{comentario_id}", status_code=status.HTTP_204_NO_CONTENT)
+def borrar_opinion(comentario_id: int, db: DB, yo: UsuarioActual):
+    comentario = _opinion_propia(db, comentario_id, yo, admin_puede=True)
+    borrar_actividad(db, comentario.autor_id, comentario.establecimiento_id, TipoActividad.COMENTARIO)
     db.delete(comentario)
     db.commit()

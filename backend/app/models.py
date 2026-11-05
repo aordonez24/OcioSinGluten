@@ -14,6 +14,7 @@ from sqlalchemy import (
     Enum,
     Float,
     ForeignKey,
+    SmallInteger,
     String,
     Table,
     Text,
@@ -33,6 +34,15 @@ def ahora() -> datetime:
 class Rol(enum.StrEnum):
     COMUN = "comun"
     ADMIN = "admin"
+
+
+class Categoria(enum.StrEnum):
+    RESTAURANTE = "restaurante"
+    CAFETERIA = "cafeteria"
+    PANADERIA = "panaderia"
+    BAR = "bar"
+    HELADERIA = "heladeria"
+    OTRO = "otro"
 
 
 class TipoActividad(enum.StrEnum):
@@ -119,6 +129,25 @@ class Imagen(Base):
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
+class Comentario(Base):
+    """Opinión de una persona sobre un establecimiento (una por persona y sitio)."""
+
+    __tablename__ = "comentarios"
+    __table_args__ = (UniqueConstraint("establecimiento_id", "autor_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    establecimiento_id: Mapped[int] = mapped_column(
+        ForeignKey("establecimientos.id", ondelete="CASCADE"), index=True
+    )
+    autor_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"))
+    puntuacion: Mapped[int] = mapped_column(SmallInteger)
+    mensaje: Mapped[str] = mapped_column(String(500))
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+    editado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    autor: Mapped[Usuario] = relationship(lazy="joined")
+
+
 class Establecimiento(Base):
     __tablename__ = "establecimientos"
     __table_args__ = (UniqueConstraint("nombre", "cod_postal"),)
@@ -131,6 +160,14 @@ class Establecimiento(Base):
     localidad: Mapped[str] = mapped_column(String(60))
     provincia: Mapped[str] = mapped_column(String(60))
     pais: Mapped[str] = mapped_column(String(60), default="España")
+    categoria: Mapped[Categoria] = mapped_column(
+        Enum(Categoria, native_enum=False), default=Categoria.RESTAURANTE
+    )
+    # Distintivos importantes para personas celíacas
+    todo_sin_gluten: Mapped[bool] = mapped_column(default=False)
+    carta_sin_gluten: Mapped[bool] = mapped_column(default=False)
+    cocina_separada: Mapped[bool] = mapped_column(default=False)
+    acreditado: Mapped[bool] = mapped_column(default=False)
     latitud: Mapped[float | None] = mapped_column(Float)
     longitud: Mapped[float | None] = mapped_column(Float)
     creado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))
@@ -149,6 +186,19 @@ class Establecimiento(Base):
         .correlate_except(visitas)
         .scalar_subquery()
     )
+    num_opiniones: Mapped[int] = column_property(
+        select(func.count(Comentario.id))
+        .where(Comentario.establecimiento_id == id)
+        .correlate_except(Comentario)
+        .scalar_subquery()
+    )
+    # Media de las puntuaciones de las opiniones (None si nadie ha opinado todavía).
+    valoracion: Mapped[float | None] = column_property(
+        select(func.round(func.avg(Comentario.puntuacion), 1))
+        .where(Comentario.establecimiento_id == id)
+        .correlate_except(Comentario)
+        .scalar_subquery()
+    )
     portada: Mapped[str | None] = column_property(
         select(Imagen.fichero)
         .where(Imagen.establecimiento_id == id)
@@ -157,27 +207,6 @@ class Establecimiento(Base):
         .correlate_except(Imagen)
         .scalar_subquery()
     )
-
-    @property
-    def valoracion(self) -> float | None:
-        """Estrellas (0-5): proporción de visitantes que han dado like."""
-        if not self.num_visitas:
-            return None
-        return round(min(self.num_likes / self.num_visitas, 1) * 5, 1)
-
-
-class Comentario(Base):
-    __tablename__ = "comentarios"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    establecimiento_id: Mapped[int] = mapped_column(
-        ForeignKey("establecimientos.id", ondelete="CASCADE"), index=True
-    )
-    autor_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"))
-    mensaje: Mapped[str] = mapped_column(String(280))
-    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
-
-    autor: Mapped[Usuario] = relationship(lazy="joined")
 
 
 class Actividad(Base):

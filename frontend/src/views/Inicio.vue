@@ -19,7 +19,7 @@ const actividad = ref([])
 
 const destacados = computed(() =>
   [...(establecimientos.value ?? [])]
-    .sort((a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_likes - a.num_likes)
+    .sort((a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_opiniones - a.num_opiniones)
     .slice(0, 4),
 )
 

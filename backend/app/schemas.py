@@ -12,7 +12,7 @@ from pydantic import (
     computed_field,
 )
 
-from app.models import Rol, TipoActividad
+from app.models import Categoria, Rol, TipoActividad
 
 # --------------------------------------------------------------------------- validadores
 
@@ -172,6 +172,11 @@ class EstablecimientoIn(BaseModel):
     localidad: _texto(60)
     provincia: _texto(60)
     pais: _texto(60) = "España"
+    categoria: Categoria = Categoria.RESTAURANTE
+    todo_sin_gluten: bool = False
+    carta_sin_gluten: bool = False
+    cocina_separada: bool = False
+    acreditado: bool = False
 
 
 class EstablecimientoUpdate(BaseModel):
@@ -182,6 +187,11 @@ class EstablecimientoUpdate(BaseModel):
     localidad: _texto(60) | None = None
     provincia: _texto(60) | None = None
     pais: _texto(60) | None = None
+    categoria: Categoria | None = None
+    todo_sin_gluten: bool | None = None
+    carta_sin_gluten: bool | None = None
+    cocina_separada: bool | None = None
+    acreditado: bool | None = None
 
 
 class EstablecimientoResumen(Esquema):
@@ -193,8 +203,14 @@ class EstablecimientoResumen(Esquema):
     localidad: str
     provincia: str
     pais: str
+    categoria: Categoria
+    todo_sin_gluten: bool
+    carta_sin_gluten: bool
+    cocina_separada: bool
+    acreditado: bool
     num_likes: int
     num_visitas: int
+    num_opiniones: int
     valoracion: float | None
     latitud: float | None
     longitud: float | None
@@ -235,14 +251,25 @@ class EstablecimientoMini(Esquema):
 # ------------------------------------------------------------- comentarios, actividad, chat, consultas
 
 
+Puntuacion = Annotated[int, Field(ge=1, le=5, description="Estrellas de 1 a 5")]
+
+
 class ComentarioIn(BaseModel):
-    mensaje: _texto(280)
+    puntuacion: Puntuacion
+    mensaje: _texto(500)
+
+
+class ComentarioUpdate(BaseModel):
+    puntuacion: Puntuacion | None = None
+    mensaje: _texto(500) | None = None
 
 
 class ComentarioOut(Esquema):
     id: int
+    puntuacion: int
     mensaje: str
     creado_en: FechaUTC
+    editado_en: FechaUTC | None
     autor: UsuarioResumen
 
 

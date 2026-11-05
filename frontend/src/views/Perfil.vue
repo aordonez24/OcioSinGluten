@@ -141,12 +141,12 @@ onMounted(cargar)
           <span v-if="perfil.rol === 'admin'" class="chip ok">Administración</span>
           <span v-if="perfil.archivado" class="chip peligro">Cuenta suspendida</span>
         </p>
-        <dl class="cifras">
-          <button @click="pestana = 'actividad'"><dt>Opiniones</dt><dd>{{ perfil.num_opiniones }}</dd></button>
-          <button @click="pestana = 'visitados'"><dt>Visitados</dt><dd>{{ perfil.num_visitados }}</dd></button>
-          <button @click="pestana = 'seguidores'"><dt>Seguidores</dt><dd>{{ perfil.num_seguidores }}</dd></button>
-          <button @click="pestana = 'seguidos'"><dt>Siguiendo</dt><dd>{{ perfil.num_seguidos }}</dd></button>
-        </dl>
+        <div class="cifras">
+          <button @click="pestana = 'actividad'"><strong>{{ perfil.num_opiniones }}</strong> Opiniones</button>
+          <button @click="pestana = 'visitados'"><strong>{{ perfil.num_visitados }}</strong> Visitados</button>
+          <button @click="pestana = 'seguidores'"><strong>{{ perfil.num_seguidores }}</strong> Seguidores</button>
+          <button @click="pestana = 'seguidos'"><strong>{{ perfil.num_seguidos }}</strong> Siguiendo</button>
+        </div>
       </div>
       <div class="acciones">
         <RouterLink v-if="esMio" to="/ajustes" class="btn"><Settings :size="17" /> Editar perfil</RouterLink>
@@ -259,9 +259,11 @@ onMounted(cargar)
 
 .cifras button {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: flex-start;
   font: inherit;
+  font-size: 0.78rem;
+  color: var(--texto-suave);
   border: 1px solid var(--borde);
   background: var(--crema);
   border-radius: var(--radio-sm);
@@ -273,15 +275,10 @@ onMounted(cargar)
   border-color: var(--naranja);
 }
 
-.cifras dt {
-  font-size: 0.78rem;
-  color: var(--texto-suave);
-}
-
-.cifras dd {
-  margin: 0;
+.cifras strong {
   font-weight: 800;
   font-size: 1.15rem;
+  color: var(--texto);
 }
 
 .moderacion {

@@ -5,6 +5,7 @@ import { LayoutGrid, Map, Search, SearchX, Store } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { coincide } from '@/utils'
+import { CATEGORIAS, DISTINTIVOS } from '@/catalogo'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
@@ -29,6 +30,15 @@ const busqueda = filtro('q')
 const provincia = filtro('provincia')
 const orden = filtro('orden', 'valoracion')
 const vista = filtro('vista', 'lista')
+const categoria = filtro('tipo')
+const distintivosTexto = filtro('con')
+const distintivos = computed(() => distintivosTexto.value.split(',').filter(Boolean))
+
+function alternarDistintivo(clave) {
+  const actuales = new Set(distintivos.value)
+  actuales.has(clave) ? actuales.delete(clave) : actuales.add(clave)
+  distintivosTexto.value = [...actuales].join(',')
+}
 
 // La búsqueda se escribe en un campo local y se pasa a la URL con un pequeño retardo.
 const textoBusqueda = ref(busqueda.value)
@@ -39,7 +49,8 @@ watch(textoBusqueda, (v) => {
 })
 
 const ORDENES = {
-  valoracion: (a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_likes - a.num_likes,
+  valoracion: (a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_opiniones - a.num_opiniones,
+  opiniones: (a, b) => b.num_opiniones - a.num_opiniones,
   visitas: (a, b) => b.num_visitas - a.num_visitas,
   nombre: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
 }
@@ -50,13 +61,15 @@ const provincias = computed(() =>
 const filtrados = computed(() =>
   (establecimientos.value ?? [])
     .filter((e) => !provincia.value || e.provincia === provincia.value)
+    .filter((e) => !categoria.value || e.categoria === categoria.value)
+    .filter((e) => distintivos.value.every((d) => e[d]))
     .filter((e) => coincide(busqueda.value, e.nombre, e.localidad, e.provincia, e.calle))
     .sort(ORDENES[orden.value] ?? ORDENES.valoracion),
 )
 const puntos = computed(() =>
   filtrados.value.map((e) => ({ ...e, titulo: e.nombre, subtitulo: `${e.localidad} · ${e.provincia}` })),
 )
-const hayFiltros = computed(() => Boolean(busqueda.value || provincia.value))
+const hayFiltros = computed(() => Boolean(busqueda.value || provincia.value || categoria.value || distintivos.value.length))
 
 function limpiarFiltros() {
   textoBusqueda.value = ''
@@ -95,8 +108,13 @@ onMounted(async () => {
         <option value="">Todas las provincias</option>
         <option v-for="p in provincias" :key="p">{{ p }}</option>
       </select>
+      <select v-model="categoria" aria-label="Tipo de sitio">
+        <option value="">Todos los tipos</option>
+        <option v-for="(c, clave) in CATEGORIAS" :key="clave" :value="clave">{{ c.texto }}</option>
+      </select>
       <select v-model="orden" aria-label="Ordenar por">
         <option value="valoracion">Mejor valorados</option>
+        <option value="opiniones">Más opiniones</option>
         <option value="visitas">Más visitados</option>
         <option value="nombre">Nombre (A-Z)</option>
       </select>
@@ -107,6 +125,18 @@ onMounted(async () => {
         <button :aria-pressed="vista === 'mapa'" title="Ver en mapa" @click="vista = 'mapa'">
           <Map :size="18" /> Mapa
         </button>
+      </div>
+      <div class="chips distintivos" role="group" aria-label="Filtrar por distintivos">
+        <button
+          v-for="d in DISTINTIVOS"
+          :key="d.clave"
+          :aria-pressed="distintivos.includes(d.clave)"
+          :title="d.descripcion"
+          @click="alternarDistintivo(d.clave)"
+        >
+          <component :is="d.icono" :size="15" /> {{ d.texto }}
+        </button>
+        <button v-if="hayFiltros" class="quitar" @click="limpiarFiltros">Quitar filtros</button>
       </div>
     </div>
 
@@ -168,6 +198,23 @@ onMounted(async () => {
 
 .filtros select {
   width: auto;
+}
+
+.distintivos {
+  flex-basis: 100%;
+}
+
+.distintivos button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.distintivos .quitar {
+  border-color: transparent;
+  background: none;
+  color: var(--coral-oscuro);
+  text-decoration: underline;
 }
 
 .interruptor {

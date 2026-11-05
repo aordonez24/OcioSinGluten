@@ -7,11 +7,15 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 
 ## Funcionalidades
 
-- **Explorar** establecimientos en lista o en mapa, con búsqueda que ignora tildes, filtro por provincia
-  y orden por valoración, visitas o nombre. Los filtros quedan en la URL, así que se pueden compartir.
+- **Explorar** establecimientos en lista o en mapa, con búsqueda que ignora tildes y filtros por provincia,
+  tipo de sitio y distintivos. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
+  en la URL, así que se pueden compartir.
+- **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
+  acreditado por una asociación de celíacos.
 - **Ficha de cada sitio**: mapa, "cómo llegar", me gusta, "he estado", guardar en favoritos, compartir,
   galería de fotos y opiniones.
-- **Valoración** de 0 a 5 estrellas: proporción de quienes lo visitaron que le dieron me gusta.
+- **Opiniones con estrellas** (1 a 5), una por persona y sitio, que se pueden editar. La valoración del
+  sitio es la media de las opiniones.
 - **Perfiles** con actividad, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
 - **Actividad** de la comunidad agrupada por días y filtrable por tipo.
@@ -30,7 +34,7 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 | Tiempo real | WebSockets nativos |
 | Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF |
 | Frontend | Vue 3 (`<script setup>`), Vite, Pinia, Vue Router, Leaflet + OpenStreetMap |
-| Calidad | pytest, ruff, GitHub Actions |
+| Calidad | pytest, ruff, Playwright (e2e), axe-core (accesibilidad), GitHub Actions |
 
 ## Puesta en marcha
 
@@ -102,7 +106,20 @@ ruff check app tests   # análisis estático
 ruff format app tests  # formato
 ```
 
-GitHub Actions ejecuta los tests, el linter y la compilación del frontend en cada push.
+### Pruebas de extremo a extremo y accesibilidad
+
+Arrancan la aplicación real con datos de demo en una base de datos temporal y la manejan con un navegador:
+registro, búsqueda, alta de un sitio, opiniones, chat, moderación, navegación móvil… Además auditan las
+páginas principales con [axe-core](https://github.com/dequelabs/axe-core) (WCAG 2.1 AA).
+
+```bash
+cd frontend && npm install && npm run build && cd ..
+pip install -r e2e/requirements.txt
+playwright install chromium        # o usa un navegador instalado: E2E_NAVEGADOR=msedge
+pytest e2e
+```
+
+GitHub Actions ejecuta los tests, el linter, la compilación del frontend y las pruebas e2e en cada push.
 
 ## Estructura
 
@@ -126,6 +143,7 @@ frontend/
     stores/            Estado global: sesión, avisos y diálogo de confirmación
     components/        Cabecera, barra móvil, tarjetas, mapa, formularios…
     views/             Páginas
+e2e/                   Pruebas de extremo a extremo y de accesibilidad
 Dockerfile             Imagen de producción (frontend + backend)
 ```
 
@@ -142,6 +160,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | POST | `/api/establecimientos`, `/{id}/imagenes`, `/{id}/comentarios` | Sesión |
 | PUT/DELETE | `/api/establecimientos/{id}/like` · `/favorito` · `/visita` | Sesión |
 | PATCH/DELETE | `/api/establecimientos/{id}` | Admin |
+| PATCH | `/api/comentarios/{id}` (editar tu opinión) | Autor |
 | DELETE | `/api/establecimientos/{id}/imagenes/{img}`, `/api/comentarios/{id}` | Autor o admin |
 | GET | `/api/usuarios` (comunidad) | Sesión |
 | GET | `/api/usuarios/{username}` (+ `/seguidores`, `/seguidos`, `/favoritos`, `/visitados`) | Público |

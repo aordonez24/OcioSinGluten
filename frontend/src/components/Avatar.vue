@@ -24,7 +24,8 @@ const iniciales = computed(() => (props.usuario.nombre || props.usuario.username
     v-else
     class="avatar inicial"
     :style="{ width: `${tamano}px`, height: `${tamano}px`, fontSize: `${tamano * 0.45}px` }"
-    aria-hidden="true"
+    role="img"
+    :aria-label="`Foto de ${usuario.username}`"
   >
     {{ iniciales }}
   </span>

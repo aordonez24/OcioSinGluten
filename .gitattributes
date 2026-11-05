@@ -1,0 +1,7 @@
+# Saltos de línea homogéneos (LF) en el repositorio, sea cual sea el sistema operativo.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
