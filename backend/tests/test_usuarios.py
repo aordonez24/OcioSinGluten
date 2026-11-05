@@ -219,3 +219,13 @@ def test_comunidad_y_contadores_de_perfil(client):
     )
     perfil = client.get("/api/usuarios/ana").json()
     assert (perfil["num_opiniones"], perfil["num_visitados"], perfil["num_seguidos"]) == (1, 1, 1)
+
+
+def test_cabeceras_de_seguridad(client):
+    r = client.get("/api/estadisticas")
+    assert r.headers["x-content-type-options"] == "nosniff"
+    assert r.headers["x-frame-options"] == "DENY"
+    csp = r.headers["content-security-policy"]
+    assert "script-src 'self'" in csp and "frame-ancestors 'none'" in csp
+    # La documentación interactiva (Swagger) usa un CDN: no se le aplica la CSP
+    assert "content-security-policy" not in client.get("/docs").headers

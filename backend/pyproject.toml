@@ -19,3 +19,6 @@ ignore = ["B008"]  # Depends()/Query() como valor por defecto es el patrón de F
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]  # las aserciones largas se leen mejor en una línea
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "conftest"]

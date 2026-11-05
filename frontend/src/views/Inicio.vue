@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, MapPinned, MessageCircleHeart, Users, ArrowRight } from 'lucide-vue-next'
+import { Search, LocateFixed, MessageCircleHeart, Users, ArrowRight } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { hace } from '@/utils'
@@ -64,6 +64,11 @@ onMounted(async () => {
           <input v-model="busqueda" type="search" placeholder="Busca un sitio, una ciudad o una provincia…" aria-label="Buscar" />
           <button class="btn btn-primario">Buscar</button>
         </form>
+        <p class="unete">
+          <RouterLink :to="{ path: '/establecimientos', query: { orden: 'cerca' } }" class="cerca">
+            <LocateFixed :size="16" /> Ver sitios cerca de mí
+          </RouterLink>
+        </p>
         <p v-if="!auth.autenticado" class="unete">
           ¿Aún no formas parte? <RouterLink to="/registro">Crea tu cuenta gratis</RouterLink>
         </p>
@@ -211,6 +216,12 @@ onMounted(async () => {
 
 .unete {
   font-size: 0.95rem !important;
+}
+
+.cerca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .unete a {

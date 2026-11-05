@@ -80,16 +80,42 @@ def navegador():
         nav.close()
 
 
-@pytest.fixture
-def pagina(navegador, url_base):
-    """Página nueva (sin sesión) que falla el test si hay errores de JavaScript en la consola."""
-    contexto = navegador.new_context(base_url=url_base, viewport={"width": 1280, "height": 860})
-    page = contexto.new_page()
+def _vigilar(page) -> list[str]:
+    """Recoge errores de JavaScript y violaciones de la Content Security Policy."""
     errores = []
     page.on("pageerror", lambda e: errores.append(str(e)))
+    page.on(
+        "console",
+        lambda m: m.type == "error" and "Content Security Policy" in m.text and errores.append(m.text),
+    )
+    return errores
+
+
+@pytest.fixture
+def pagina(navegador, url_base):
+    """Página nueva (sin sesión) que falla el test si hay errores de JavaScript o de la CSP."""
+    contexto = navegador.new_context(base_url=url_base, viewport={"width": 1280, "height": 860})
+    page = contexto.new_page()
+    errores = _vigilar(page)
     yield page
     contexto.close()
-    assert not errores, f"Errores de JavaScript: {errores}"
+    assert not errores, f"Errores en el navegador: {errores}"
+
+
+@pytest.fixture
+def pagina_en_jaen(navegador, url_base):
+    """Página con la ubicación del navegador simulada en el centro de Jaén."""
+    contexto = navegador.new_context(
+        base_url=url_base,
+        viewport={"width": 1280, "height": 860},
+        geolocation={"latitude": 37.7796, "longitude": -3.7849},
+        permissions=["geolocation"],
+    )
+    page = contexto.new_page()
+    errores = _vigilar(page)
+    yield page
+    contexto.close()
+    assert not errores, f"Errores en el navegador: {errores}"
 
 
 @pytest.fixture
@@ -97,8 +123,11 @@ def movil(navegador, url_base):
     contexto = navegador.new_context(
         base_url=url_base, viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True
     )
-    yield contexto.new_page()
+    page = contexto.new_page()
+    errores = _vigilar(page)
+    yield page
     contexto.close()
+    assert not errores, f"Errores en el navegador: {errores}"
 
 
 def en_ruta(ruta: str):

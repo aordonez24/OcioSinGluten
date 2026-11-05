@@ -2,8 +2,9 @@
 
 import re
 
-from conftest import en_ruta, entrar
 from playwright.sync_api import expect
+
+from conftest import en_ruta, entrar
 
 
 def test_portada_y_busqueda(pagina):
@@ -116,10 +117,16 @@ def test_comunidad_perfil_y_chat(pagina):
     entrar(pagina, "marcos@example.com", "Marcos1234")
     pagina.goto("/comunidad")
     boton = pagina.locator(".usuario", has_text="@javi").locator("button")
+
+    def pulsar_y_esperar(metodo):
+        # El botón cambia al instante (respuesta optimista): se espera también al servidor.
+        with pagina.expect_response(lambda r: "/seguir" in r.url and r.request.method == metodo):
+            boton.click()
+
     if "Siguiendo" in boton.inner_text():  # en la demo los seguimientos son aleatorios
-        boton.click()
+        pulsar_y_esperar("DELETE")
         expect(boton).to_have_text(re.compile("Seguir"))
-    boton.click()
+    pulsar_y_esperar("PUT")
     expect(boton).to_have_text(re.compile("Siguiendo"))
 
     pagina.goto("/u/marcos?tab=seguidos")
@@ -183,3 +190,25 @@ def test_navegacion_movil(movil):
     movil.click(".disparador")
     movil.click("[role=menuitem]:has-text('Comunidad')")
     movil.wait_for_url(en_ruta("/comunidad"))
+
+
+def test_cerca_de_mi_ordena_por_distancia(pagina_en_jaen):
+    pagina_en_jaen.goto("/establecimientos")
+    pagina_en_jaen.click("button:has-text('Cerca de mí')")
+    expect(pagina_en_jaen).to_have_url(re.compile(r"orden=cerca"))
+    tarjetas = pagina_en_jaen.locator(".tarjeta-est")
+    # Desde el centro de Jaén lo más cercano es Celiaco Feliz y después Mesón La Loma (Úbeda)
+    expect(tarjetas.nth(0)).to_contain_text("Celiaco Feliz")
+    expect(tarjetas.nth(1)).to_contain_text("Mesón La Loma")
+    expect(tarjetas.nth(0).locator(".distancia")).to_have_text(re.compile(r"a \d+(,\d)? k?m"))
+    # Barcelona es lo más lejano; los sitios sin coordenadas (sin distancia) van detrás
+    con_distancia = pagina_en_jaen.locator(".tarjeta-est:has(.distancia)")
+    expect(con_distancia.nth(-1)).to_contain_text("Dulce Celíaca")
+
+
+def test_detalle_carga_mapa_sin_violar_la_csp(pagina):
+    pagina.goto("/establecimientos/1")
+    expect(pagina.locator(".leaflet-container")).to_be_visible()
+    expect(pagina.locator("a:has-text('Cómo llegar')")).to_have_attribute(
+        "href", re.compile("google.com/maps")
+    )

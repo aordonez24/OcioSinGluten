@@ -24,6 +24,25 @@ async def lifespan(_: FastAPI):
     yield
 
 
+def politica_contenido(request: Request) -> str:
+    """Content Security Policy: solo se ejecuta código propio, aunque alguien consiga inyectar HTML."""
+    host = request.headers.get("host", "")
+    return "; ".join(
+        [
+            "default-src 'self'",
+            "script-src 'self'",
+            "style-src 'self' 'unsafe-inline'",  # estilos dinámicos de Vue y Leaflet
+            "img-src 'self' data: blob: https://*.tile.openstreetmap.org",  # blob: previsualizar fotos
+            f"connect-src 'self' ws://{host} wss://{host}",  # API y chat
+            "font-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+        ]
+    )
+
+
 def crear_app() -> FastAPI:
     ajustes = get_settings()
     app = FastAPI(title="Ocio Sin Gluten", version="2.0", lifespan=lifespan)
@@ -42,6 +61,9 @@ def crear_app() -> FastAPI:
         respuesta.headers.setdefault("X-Content-Type-Options", "nosniff")
         respuesta.headers.setdefault("X-Frame-Options", "DENY")
         respuesta.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        respuesta.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(self)")
+        if not request.url.path.startswith(("/docs", "/redoc")):  # Swagger UI carga recursos de un CDN
+            respuesta.headers.setdefault("Content-Security-Policy", politica_contenido(request))
         if request.url.path.startswith("/assets/") or request.url.path.startswith("/uploads/"):
             # Los ficheros tienen nombre único (hash/uuid): se pueden cachear para siempre.
             respuesta.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")

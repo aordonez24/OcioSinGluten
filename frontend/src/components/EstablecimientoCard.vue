@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Heart, MapPin, WheatOff } from 'lucide-vue-next'
 import { CATEGORIAS } from '@/catalogo'
+import { formatoDistancia } from '@/utils'
 import Estrellas from '@/components/Estrellas.vue'
 import Portada from '@/components/Portada.vue'
 
@@ -21,6 +22,7 @@ const categoria = computed(() => CATEGORIAS[props.establecimiento.categoria] ?? 
       <p class="lugar suave">
         <MapPin :size="15" /> {{ establecimiento.localidad }}
         <span v-if="establecimiento.localidad !== establecimiento.provincia">· {{ establecimiento.provincia }}</span>
+        <strong v-if="establecimiento.distancia != null" class="distancia">a {{ formatoDistancia(establecimiento.distancia) }}</strong>
       </p>
       <div class="pie">
         <span class="nota">
@@ -109,6 +111,13 @@ h3 {
   align-items: center;
   gap: 0.3rem;
   font-size: 0.88rem;
+}
+
+.distancia {
+  margin-left: auto;
+  color: var(--coral-oscuro);
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .pie {

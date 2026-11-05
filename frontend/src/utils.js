@@ -78,3 +78,15 @@ export function hace(iso) {
   }
   return 'ahora mismo'
 }
+
+/** Distancia en km entre dos puntos { latitud, longitud } (fórmula del haversine). */
+export function distanciaKm(a, b) {
+  const rad = (g) => (g * Math.PI) / 180
+  const dLat = rad(b.latitud - a.latitud)
+  const dLon = rad(b.longitud - a.longitud)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.latitud)) * Math.cos(rad(b.latitud)) * Math.sin(dLon / 2) ** 2
+  return 2 * 6371 * Math.asin(Math.sqrt(h))
+}
+
+export const formatoDistancia = (km) =>
+  km < 1 ? `${Math.round(km * 1000)} m` : `${km < 10 ? km.toFixed(1).replace('.', ',') : Math.round(km)} km`

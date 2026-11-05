@@ -193,8 +193,12 @@ onBeforeUnmount(() => {
 
 time {
   font-size: 0.7rem;
-  opacity: 0.7;
+  color: var(--texto-suave);
   justify-self: end;
+}
+
+.mio time {
+  color: #fff;
 }
 
 .escribir {

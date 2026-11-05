@@ -1,10 +1,12 @@
 <script setup>
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { LayoutGrid, Map, Search, SearchX, Store } from 'lucide-vue-next'
+import { LayoutGrid, LocateFixed, Map, Search, SearchX, SlidersHorizontal, Store } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
-import { coincide } from '@/utils'
+import { coincide, distanciaKm } from '@/utils'
+import { useUbicacion } from '@/composables'
+import { useAvisos } from '@/stores/avisos'
 import { CATEGORIAS, DISTINTIVOS } from '@/catalogo'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
@@ -13,6 +15,8 @@ import EstadoVacio from '@/components/EstadoVacio.vue'
 const Mapa = defineAsyncComponent(() => import('@/components/Mapa.vue'))
 
 const auth = useAuth()
+const avisos = useAvisos()
+const { ubicacion, buscando, pedir: pedirUbicacion } = useUbicacion()
 const route = useRoute()
 const router = useRouter()
 
@@ -53,13 +57,36 @@ const ORDENES = {
   opiniones: (a, b) => b.num_opiniones - a.num_opiniones,
   visitas: (a, b) => b.num_visitas - a.num_visitas,
   nombre: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
+  // Los sitios sin coordenadas van al final.
+  cerca: (a, b) => (a.distancia ?? Infinity) - (b.distancia ?? Infinity),
 }
+
+// "Cerca de mí": al elegir ese orden se pide la ubicación; si se deniega, se vuelve al orden normal.
+watch(
+  orden,
+  async (valor) => {
+    if (valor !== 'cerca' || ubicacion.value) return
+    try {
+      await pedirUbicacion()
+    } catch (e) {
+      avisos.error(e)
+      orden.value = 'valoracion'
+    }
+  },
+  { immediate: true },
+)
 
 const provincias = computed(() =>
   [...new Set((establecimientos.value ?? []).map((e) => e.provincia))].sort((a, b) => a.localeCompare(b, 'es')),
 )
+const conDistancia = computed(() =>
+  (establecimientos.value ?? []).map((e) => ({
+    ...e,
+    distancia: ubicacion.value && e.latitud != null ? distanciaKm(ubicacion.value, e) : null,
+  })),
+)
 const filtrados = computed(() =>
-  (establecimientos.value ?? [])
+  conDistancia.value
     .filter((e) => !provincia.value || e.provincia === provincia.value)
     .filter((e) => !categoria.value || e.categoria === categoria.value)
     .filter((e) => distintivos.value.every((d) => e[d]))
@@ -68,6 +95,10 @@ const filtrados = computed(() =>
 )
 const puntos = computed(() =>
   filtrados.value.map((e) => ({ ...e, titulo: e.nombre, subtitulo: `${e.localidad} · ${e.provincia}` })),
+)
+const filtrosAbiertos = ref(false)
+const numFiltros = computed(
+  () => [provincia.value, categoria.value].filter(Boolean).length + distintivos.value.length,
 )
 const hayFiltros = computed(() => Boolean(busqueda.value || provincia.value || categoria.value || distintivos.value.length))
 
@@ -99,44 +130,64 @@ onMounted(async () => {
     </div>
 
     <div class="filtros tarjeta">
-      <label class="buscador">
-        <span class="solo-lectores">Buscar</span>
-        <Search :size="18" />
-        <input v-model="textoBusqueda" type="search" placeholder="Nombre, localidad o calle…" />
-      </label>
-      <select v-model="provincia" aria-label="Provincia">
-        <option value="">Todas las provincias</option>
-        <option v-for="p in provincias" :key="p">{{ p }}</option>
-      </select>
-      <select v-model="categoria" aria-label="Tipo de sitio">
-        <option value="">Todos los tipos</option>
-        <option v-for="(c, clave) in CATEGORIAS" :key="clave" :value="clave">{{ c.texto }}</option>
-      </select>
-      <select v-model="orden" aria-label="Ordenar por">
-        <option value="valoracion">Mejor valorados</option>
-        <option value="opiniones">Más opiniones</option>
-        <option value="visitas">Más visitados</option>
-        <option value="nombre">Nombre (A-Z)</option>
-      </select>
-      <div class="interruptor" role="group" aria-label="Vista">
-        <button :aria-pressed="vista === 'lista'" title="Ver en lista" @click="vista = 'lista'">
-          <LayoutGrid :size="18" /> Lista
+      <div class="principal">
+        <label class="buscador">
+          <span class="solo-lectores">Buscar</span>
+          <Search :size="18" />
+          <input v-model="textoBusqueda" type="search" placeholder="Nombre, localidad o calle…" />
+        </label>
+        <button
+          class="btn cerca"
+          :class="{ 'btn-activo': orden === 'cerca' }"
+          :aria-pressed="orden === 'cerca'"
+          :disabled="buscando"
+          @click="orden = orden === 'cerca' ? 'valoracion' : 'cerca'"
+        >
+          <LocateFixed :size="17" />
+          <template v-if="buscando">Buscando…</template>
+          <span v-else>Cerca<span class="de-mi"> de mí</span></span>
         </button>
-        <button :aria-pressed="vista === 'mapa'" title="Ver en mapa" @click="vista = 'mapa'">
-          <Map :size="18" /> Mapa
+        <div class="interruptor" role="group" aria-label="Vista">
+          <button :aria-pressed="vista === 'lista'" title="Ver en lista" @click="vista = 'lista'">
+            <LayoutGrid :size="18" /> <span class="etiqueta">Lista</span>
+          </button>
+          <button :aria-pressed="vista === 'mapa'" title="Ver en mapa" @click="vista = 'mapa'">
+            <Map :size="18" /> <span class="etiqueta">Mapa</span>
+          </button>
+        </div>
+        <button class="btn mostrar-filtros" :aria-expanded="filtrosAbiertos" @click="filtrosAbiertos = !filtrosAbiertos">
+          <SlidersHorizontal :size="17" /> Filtros<span v-if="numFiltros" class="contador">{{ numFiltros }}</span>
         </button>
       </div>
-      <div class="chips distintivos" role="group" aria-label="Filtrar por distintivos">
-        <button
-          v-for="d in DISTINTIVOS"
-          :key="d.clave"
-          :aria-pressed="distintivos.includes(d.clave)"
-          :title="d.descripcion"
-          @click="alternarDistintivo(d.clave)"
-        >
-          <component :is="d.icono" :size="15" /> {{ d.texto }}
-        </button>
-        <button v-if="hayFiltros" class="quitar" @click="limpiarFiltros">Quitar filtros</button>
+
+      <div class="extra" :class="{ abierto: filtrosAbiertos }">
+        <select v-model="provincia" aria-label="Provincia">
+          <option value="">Todas las provincias</option>
+          <option v-for="p in provincias" :key="p">{{ p }}</option>
+        </select>
+        <select v-model="categoria" aria-label="Tipo de sitio">
+          <option value="">Todos los tipos</option>
+          <option v-for="(c, clave) in CATEGORIAS" :key="clave" :value="clave">{{ c.texto }}</option>
+        </select>
+        <select v-model="orden" aria-label="Ordenar por">
+          <option value="valoracion">Mejor valorados</option>
+          <option value="opiniones">Más opiniones</option>
+          <option value="visitas">Más visitados</option>
+          <option value="nombre">Nombre (A-Z)</option>
+          <option value="cerca" hidden>Más cercanos</option>
+        </select>
+        <div class="chips distintivos" role="group" aria-label="Filtrar por distintivos">
+          <button
+            v-for="d in DISTINTIVOS"
+            :key="d.clave"
+            :aria-pressed="distintivos.includes(d.clave)"
+            :title="d.descripcion"
+            @click="alternarDistintivo(d.clave)"
+          >
+            <component :is="d.icono" :size="15" /> {{ d.texto }}
+          </button>
+          <button v-if="hayFiltros" class="quitar" @click="limpiarFiltros">Quitar filtros</button>
+        </div>
       </div>
     </div>
 
@@ -189,37 +240,31 @@ onMounted(async () => {
 
 <style scoped>
 .filtros {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 0.75rem;
   padding: 0.85rem;
   margin-bottom: 1.5rem;
 }
 
-.filtros select {
-  width: auto;
-}
-
-.distintivos {
-  flex-basis: 100%;
-}
-
-.distintivos button {
-  display: inline-flex;
+.principal,
+.extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   align-items: center;
-  gap: 0.35rem;
 }
 
-.distintivos .quitar {
-  border-color: transparent;
-  background: none;
-  color: var(--coral-oscuro);
-  text-decoration: underline;
+.principal .buscador {
+  flex: 1;
+  max-width: none;
+}
+
+.extra select {
+  width: auto;
 }
 
 .interruptor {
   display: flex;
-  margin-left: auto;
   border: 1px solid var(--borde);
   border-radius: 999px;
   padding: 3px;
@@ -246,6 +291,35 @@ onMounted(async () => {
   color: var(--crema);
 }
 
+.mostrar-filtros {
+  display: none;
+}
+
+.contador {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.distintivos button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.distintivos .quitar {
+  border-color: transparent;
+  background: none;
+  color: var(--coral-oscuro);
+  text-decoration: underline;
+}
+
 .pie {
   text-align: center;
   margin-top: 2rem;
@@ -261,17 +335,52 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
-  .filtros select {
-    flex: 1;
-  }
-
-  .buscador {
-    max-width: none;
+  .principal .buscador {
     flex-basis: 100%;
   }
 
-  .interruptor {
-    margin-left: 0;
+  .mostrar-filtros {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .principal {
+    gap: 0.4rem;
+  }
+
+  .principal .btn {
+    padding-inline: 0.75rem;
+  }
+
+  .interruptor button {
+    padding-inline: 0.65rem;
+  }
+
+  .interruptor .etiqueta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  /* En móvil los filtros avanzados se pliegan para que los resultados se vean antes. */
+  .extra {
+    display: none;
+  }
+
+  .extra.abierto {
+    display: flex;
+  }
+
+  .extra select {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .de-mi {
+    display: none;
   }
 }
 </style>
