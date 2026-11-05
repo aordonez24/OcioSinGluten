@@ -1,0 +1,21 @@
+[project]
+name = "ociosingluten"
+version = "2.0.0"
+description = "Red social para encontrar ocio y restauración sin gluten"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]  # aviso interno de Starlette
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]  # Depends()/Query() como valor por defecto es el patrón de FastAPI
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # las aserciones largas se leen mejor en una línea

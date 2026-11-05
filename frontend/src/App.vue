@@ -1,0 +1,112 @@
+<script setup>
+import { onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import AppHeader from '@/components/AppHeader.vue'
+import AppFooter from '@/components/AppFooter.vue'
+import BarraMovil from '@/components/BarraMovil.vue'
+import DialogoConfirmar from '@/components/DialogoConfirmar.vue'
+import { api } from '@/api'
+import { useAuth } from '@/stores/auth'
+import { useAvisos } from '@/stores/avisos'
+
+const auth = useAuth()
+const avisos = useAvisos()
+const route = useRoute()
+const router = useRouter()
+
+// Comprueba que la sesión guardada sigue siendo válida y refresca los datos (p. ej. el rol).
+onMounted(() => {
+  if (auth.autenticado) api('/auth/yo').then((u) => (auth.usuario = u)).catch(() => {})
+})
+
+// Si la sesión caduca estando en una página privada, se vuelve al login.
+watch(
+  () => auth.autenticado,
+  (autenticado) => {
+    if (!autenticado && (route.meta.sesion || route.meta.admin)) {
+      avisos.error('Tu sesión ha caducado. Vuelve a iniciar sesión.')
+      router.push({ name: 'login', query: { volver: route.fullPath } })
+    }
+  },
+)
+</script>
+
+<template>
+  <a href="#contenido" class="saltar">Saltar al contenido</a>
+  <AppHeader />
+  <main id="contenido">
+    <RouterView :key="$route.path" />
+  </main>
+  <AppFooter />
+  <BarraMovil />
+  <DialogoConfirmar />
+
+  <div class="avisos" aria-live="polite">
+    <TransitionGroup name="aviso">
+      <button v-for="a in avisos.lista" :key="a.id" class="aviso" :class="a.tipo" @click="avisos.cerrar(a.id)">
+        {{ a.texto }}
+      </button>
+    </TransitionGroup>
+  </div>
+</template>
+
+<style scoped>
+.saltar {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 200;
+  background: var(--blanco);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radio-sm);
+}
+
+.saltar:focus {
+  top: 0.5rem;
+}
+
+.avisos {
+  position: fixed;
+  bottom: calc(1rem + var(--alto-barra-movil));
+  right: 1rem;
+  left: auto;
+  display: grid;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.aviso {
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radio-sm);
+  color: #fff;
+  background: var(--verde);
+  box-shadow: var(--sombra-alta);
+  max-width: 380px;
+}
+
+.aviso.error {
+  background: var(--rojo);
+}
+
+.aviso-enter-from,
+.aviso-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.aviso-enter-active,
+.aviso-leave-active {
+  transition: all 0.2s;
+}
+
+@media (max-width: 760px) {
+  .avisos {
+    left: 1rem;
+  }
+}
+</style>

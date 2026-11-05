@@ -1,0 +1,217 @@
+"""Utilidades de línea de comandos.
+
+python -m app.cli admin correo@ejemplo.com   # convierte una cuenta en administradora
+python -m app.cli demo                       # carga datos de ejemplo en una BD vacía
+"""
+
+import argparse
+import random
+from datetime import date, timedelta
+
+from sqlalchemy import insert, select
+
+from app.db import Base, SessionLocal, engine
+from app.models import (
+    Actividad,
+    Comentario,
+    Establecimiento,
+    Mensaje,
+    Rol,
+    TipoActividad,
+    Usuario,
+    ahora,
+    favoritos,
+    likes,
+    seguimientos,
+    visitas,
+)
+from app.schemas import LETRAS_DNI
+from app.security import hash_password
+
+
+def hacer_admin(email: str) -> None:
+    with SessionLocal() as db:
+        usuario = db.scalar(select(Usuario).where(Usuario.email == email.lower()))
+        if usuario is None:
+            raise SystemExit(f"No existe ninguna cuenta con el email {email}")
+        usuario.rol = Rol.ADMIN
+        db.commit()
+    print(f"{usuario.username} ahora es administrador.")
+
+
+USUARIOS = [
+    # username, nombre, apellidos, contraseña, rol
+    ("admin", "Admin", "Ocio Sin Gluten", "Admin1234", Rol.ADMIN),
+    ("lucia", "Lucía", "García Ruiz", "Lucia1234", Rol.COMUN),
+    ("marcos", "Marcos", "López Martín", "Marcos1234", Rol.COMUN),
+    ("sara", "Sara", "Jiménez Torres", "Sara12345", Rol.COMUN),
+    ("javi", "Javier", "Moreno Díaz", "Javi12345", Rol.COMUN),
+]
+
+ESTABLECIMIENTOS = [
+    # nombre, calle, cp, localidad, provincia, lat, lon
+    ("Celiaco Feliz", "Calle Maestra 10", "23002", "Jaén", "Jaén", 37.7692, -3.7903),
+    ("Horno Sin Trigo", "Calle Reyes Católicos 5", "18009", "Granada", "Granada", 37.1760, -3.5986),
+    ("La Pizzería Libre", "Calle Larios 2", "29005", "Málaga", "Málaga", 36.7194, -4.4211),
+    ("Taberna El Arroz", "Calle Sierpes 40", "41004", "Sevilla", "Sevilla", 37.3925, -5.9945),
+    ("Burger Zero", "Calle de Fuencarral 70", "28004", "Madrid", "Madrid", 40.4255, -3.7020),
+    ("Dulce Celíaca", "Carrer de Verdi 12", "08012", "Barcelona", "Barcelona", 41.4035, 2.1570),
+    ("Mesón La Loma", "Calle Real 22", "23400", "Úbeda", "Jaén", 38.0107, -3.3700),
+    ("Arrocería Mediterránea", "Calle de Colón 15", "46004", "Valencia", "Valencia", 39.4690, -0.3720),
+]
+
+OPINIONES = [
+    "Carta sin gluten muy completa y el personal sabe perfectamente lo que es la contaminación cruzada.",
+    "Las croquetas sin gluten están de escándalo. Volveré seguro.",
+    "Freidora separada para lo sin gluten. Por fin puedo pedir patatas tranquila.",
+    "Buen sitio, aunque los fines de semana hay que reservar.",
+    "Tienen pan sin gluten de verdad, no el típico industrial. ¡Un 10!",
+    "Postres caseros aptos. La tarta de queso es imprescindible.",
+    "Me explicaron cada plato con detalle. Muy recomendable para celíacos.",
+]
+
+MENSAJES = [
+    ("lucia", "¡Hola a todos! ¿Alguien conoce algún sitio sin gluten en Córdoba?"),
+    ("marcos", "En Córdoba no, pero en Granada el Horno Sin Trigo está genial."),
+    ("sara", "Confirmo lo del Horno Sin Trigo, sus magdalenas son lo mejor 😋"),
+    ("javi", "Este finde voy a Málaga, apunto La Pizzería Libre."),
+]
+
+
+def _dni(numero: int) -> str:
+    return f"{numero:08d}{LETRAS_DNI[numero % 23]}"
+
+
+def cargar_demo() -> None:
+    aleatorio = random.Random(42)
+    with SessionLocal() as db:
+        if db.scalar(select(Usuario.id).limit(1)):
+            raise SystemExit("La base de datos ya tiene datos; no se carga la demo.")
+
+        usuarios = {}
+        for i, (username, nombre, apellidos, password, rol) in enumerate(USUARIOS):
+            usuarios[username] = Usuario(
+                username=username,
+                email=f"{username}@example.com",
+                dni=_dni(10000000 + i),
+                password_hash=hash_password(password),
+                nombre=nombre,
+                apellidos=apellidos,
+                fecha_nacimiento=date(1985 + i * 3, 1 + i, 10 + i),
+                telefono=f"60000000{i}",
+                rol=rol,
+                creado_en=ahora() - timedelta(days=60 - i * 5),
+            )
+        db.add_all(usuarios.values())
+        db.flush()
+        miembros = [u for u in usuarios.values() if u.username != "admin"]
+        actividades = []  # se insertan al final en orden cronológico (el feed se ordena por id)
+
+        def hace(dias: float):
+            return ahora() - timedelta(days=dias, minutes=aleatorio.randint(0, 600))
+
+        for n, (nombre, calle, cp, localidad, provincia, lat, lon) in enumerate(ESTABLECIMIENTOS):
+            autor = aleatorio.choice(list(usuarios.values()))
+            est = Establecimiento(
+                nombre=nombre,
+                telefono=f"9530000{n:02d}",
+                calle=calle,
+                cod_postal=cp,
+                localidad=localidad,
+                provincia=provincia,
+                latitud=lat,
+                longitud=lon,
+                creado_por_id=autor.id,
+                creado_en=hace(40 - n * 3),
+            )
+            db.add(est)
+            db.flush()
+            actividades.append(
+                Actividad(
+                    usuario_id=autor.id,
+                    establecimiento_id=est.id,
+                    tipo=TipoActividad.PUBLICACION,
+                    creado_en=est.creado_en,
+                )
+            )
+
+            for usuario in aleatorio.sample(miembros, aleatorio.randint(1, len(miembros))):
+                cuando = hace(aleatorio.uniform(0, 30))
+                fila = {"usuario_id": usuario.id, "establecimiento_id": est.id, "creado_en": cuando}
+                db.execute(insert(visitas).values(**fila))
+                actividades.append(
+                    Actividad(
+                        usuario_id=usuario.id,
+                        establecimiento_id=est.id,
+                        tipo=TipoActividad.VISITA,
+                        creado_en=cuando,
+                    )
+                )
+                if aleatorio.random() < 0.7:
+                    db.execute(insert(likes).values(**fila))
+                    actividades.append(
+                        Actividad(
+                            usuario_id=usuario.id,
+                            establecimiento_id=est.id,
+                            tipo=TipoActividad.LIKE,
+                            creado_en=cuando,
+                        )
+                    )
+                if aleatorio.random() < 0.4:
+                    db.execute(insert(favoritos).values(**fila))
+                if aleatorio.random() < 0.6:
+                    db.add(
+                        Comentario(
+                            establecimiento_id=est.id,
+                            autor_id=usuario.id,
+                            mensaje=aleatorio.choice(OPINIONES),
+                            creado_en=cuando,
+                        )
+                    )
+                    actividades.append(
+                        Actividad(
+                            usuario_id=usuario.id,
+                            establecimiento_id=est.id,
+                            tipo=TipoActividad.COMENTARIO,
+                            creado_en=cuando,
+                        )
+                    )
+
+        for seguidor in miembros:
+            for seguido in aleatorio.sample(miembros, 2):
+                if seguido is not seguidor:
+                    db.execute(insert(seguimientos).values(seguidor_id=seguidor.id, seguido_id=seguido.id))
+
+        db.add_all(sorted(actividades, key=lambda a: a.creado_en))
+
+        for i, (username, texto) in enumerate(MENSAJES):
+            db.add(
+                Mensaje(
+                    autor_id=usuarios[username].id,
+                    texto=texto,
+                    creado_en=ahora() - timedelta(minutes=90 - i * 12),
+                )
+            )
+        db.commit()
+
+    print("Demo cargada. Cuentas (email / contraseña):")
+    for username, *_, password, rol in USUARIOS:
+        print(f"  {username}@example.com / {password}{'  (admin)' if rol == Rol.ADMIN else ''}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="python -m app.cli")
+    sub = parser.add_subparsers(dest="comando", required=True)
+    sub.add_parser("admin", help="Convierte una cuenta en administradora").add_argument("email")
+    sub.add_parser("demo", help="Carga datos de ejemplo")
+    args = parser.parse_args()
+
+    Base.metadata.create_all(engine)
+    if args.comando == "admin":
+        hacer_admin(args.email)
+    else:
+        cargar_demo()
+
+
+if __name__ == "__main__":
+    main()
