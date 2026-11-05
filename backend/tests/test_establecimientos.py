@@ -52,14 +52,20 @@ def test_like_favorito_y_visita(client):
     assert "like" not in tipos and "visita" in tipos
 
 
-def test_solo_admin_edita_y_borra(client):
+def test_permisos_de_edicion_y_borrado(client):
     h_ana = registrar(client, "ana", 0)
     h_admin = registrar(client, "jefa", 1)
+    h_otro = registrar(client, "otro", 2)
     hacer_admin("jefa")
-    est_id = crear_establecimiento(client, h_ana)["id"]
+    est = crear_establecimiento(client, h_ana)
+    est_id = est["id"]
     url = f"/api/establecimientos/{est_id}"
+    assert est["puede_editar"] is True
+    assert client.get(url, headers=h_otro).json()["puede_editar"] is False
 
-    assert client.patch(url, json={"nombre": "Nuevo"}, headers=h_ana).status_code == 403
+    # Quien lo añadió puede corregirlo; el resto no. Borrar solo puede el equipo de administración.
+    assert client.patch(url, json={"nombre": "Nuevo"}, headers=h_otro).status_code == 403
+    assert client.patch(url, json={"nombre": "Nuevo"}, headers=h_ana).status_code == 200
     assert client.delete(url, headers=h_ana).status_code == 403
 
     r = client.patch(url, json={"nombre": "Nuevo nombre", "telefono": "611111111"}, headers=h_admin)
@@ -226,3 +232,48 @@ def test_estadisticas_y_detalle_con_autor(client):
     }
     detalle = client.get(f"/api/establecimientos/{est['id']}").json()
     assert detalle["creado_por"]["username"] == "ana"
+
+
+def test_informacion_practica(client):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(client, h, precio=2, horario="De lunes a viernes", web="celiacofeliz.es")
+    assert (est["precio"], est["horario"], est["web"]) == (2, "De lunes a viernes", "https://celiacofeliz.es")
+    url = f"/api/establecimientos/{est['id']}"
+
+    assert client.patch(url, json={"web": "no es una web"}, headers=h).status_code == 422
+    assert client.patch(url, json={"precio": 4}, headers=h).status_code == 422
+    # Cadena vacía y precio 0 borran el dato
+    r = client.patch(url, json={"web": "", "horario": "", "precio": 0}, headers=h).json()
+    assert (r["precio"], r["horario"], r["web"]) == (None, None, None)
+    assert client.get("/api/establecimientos").json()[0]["precio"] is None
+
+
+def test_avisos_de_un_sitio_llegan_a_administracion(client):
+    h_ana = registrar(client, "ana", 0)
+    h_admin = registrar(client, "jefa", 1)
+    hacer_admin("jefa")
+    est = crear_establecimiento(client, h_admin)
+    url = f"/api/establecimientos/{est['id']}/avisos"
+
+    assert client.post(url, json={"motivo": "cerrado"}).status_code == 401
+    assert client.post(url, json={"motivo": "inventado"}, headers=h_ana).status_code == 422
+    r = client.post(url, json={"motivo": "cerrado", "mensaje": "Han cerrado en verano"}, headers=h_ana)
+    assert r.status_code == 201
+
+    [aviso] = client.get("/api/consultas", headers=h_admin).json()
+    assert aviso["motivo"] == "cerrado"
+    assert aviso["nombre"] == "ana" and aviso["email"] == "ana@example.com"
+    assert aviso["establecimiento"]["nombre"] == "Celiaco Feliz"
+
+
+def test_opiniones_en_el_perfil(client):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(client, h)
+    client.post(
+        f"/api/establecimientos/{est['id']}/comentarios",
+        json={"puntuacion": 4, "mensaje": "Muy bien"},
+        headers=h,
+    )
+    [opinion] = client.get("/api/usuarios/ana/opiniones").json()
+    assert opinion["puntuacion"] == 4
+    assert opinion["establecimiento"]["nombre"] == "Celiaco Feliz"

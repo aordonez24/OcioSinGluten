@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, UploadFile, status
 from sqlalchemy import delete, func, insert, select
-from sqlalchemy.orm import undefer
+from sqlalchemy.orm import joinedload, undefer
 
 from app.models import Comentario, Establecimiento, Usuario, favoritos, seguimientos, visitas
 from app.schemas import (
     ArchivadoIn,
     EstablecimientoResumen,
+    OpinionDePerfil,
     PasswordCambio,
     UsuarioComunidad,
     UsuarioPerfil,
@@ -174,6 +175,17 @@ def favoritos_de(username: str, db: DB):
 @router.get("/{username}/visitados", response_model=list[EstablecimientoResumen])
 def visitados_de(username: str, db: DB):
     return _establecimientos_de(db, username, visitas)
+
+
+@router.get("/{username}/opiniones", response_model=list[OpinionDePerfil])
+def opiniones_de(username: str, db: DB):
+    usuario = usuario_por_username(db, username)
+    return db.scalars(
+        select(Comentario)
+        .options(joinedload(Comentario.establecimiento))
+        .where(Comentario.autor_id == usuario.id)
+        .order_by(Comentario.creado_en.desc())
+    ).all()
 
 
 # ----------------------------------------------------------------- moderación

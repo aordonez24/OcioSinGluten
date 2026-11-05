@@ -1,4 +1,4 @@
-from conftest import hacer_admin, imagen_png, registrar
+from conftest import crear_establecimiento, hacer_admin, imagen_png, registrar
 
 
 def test_registro_y_login(client):
@@ -229,3 +229,18 @@ def test_cabeceras_de_seguridad(client):
     assert "script-src 'self'" in csp and "frame-ancestors 'none'" in csp
     # La documentación interactiva (Swagger) usa un CDN: no se le aplica la CSP
     assert "content-security-policy" not in client.get("/docs").headers
+
+
+def test_actividad_de_quienes_sigo(client):
+    h_ana = registrar(client, "ana", 0)
+    h_bea = registrar(client, "bea", 1)
+    h_carlos = registrar(client, "carlos", 2)
+    crear_establecimiento(client, h_bea)
+    crear_establecimiento(client, h_carlos, nombre="Otro sitio")
+
+    assert client.get("/api/actividades?siguiendo=true").status_code == 401
+    assert client.get("/api/actividades?siguiendo=true", headers=h_ana).json() == []
+    client.put("/api/usuarios/bea/seguir", headers=h_ana)
+    feed = client.get("/api/actividades?siguiendo=true", headers=h_ana).json()
+    assert [a["usuario"]["username"] for a in feed] == ["bea"]
+    assert len(client.get("/api/actividades").json()) == 2

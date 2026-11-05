@@ -12,13 +12,17 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
   en la URL, así que se pueden compartir.
 - **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
   acreditado por una asociación de celíacos.
-- **Ficha de cada sitio**: mapa, "cómo llegar", me gusta, "he estado", guardar en favoritos, compartir,
-  galería de fotos y opiniones.
+- **Ficha de cada sitio**: mapa, "cómo llegar", horario, web y rango de precio, me gusta, "he estado",
+  guardar en favoritos, compartir, galería de fotos, opiniones y otros sitios sin gluten cercanos.
+- **Avisar de un error**: cualquier miembro puede avisar de que un sitio ha cerrado, ya no tiene opciones
+  sin gluten o tiene datos mal; el aviso llega a la bandeja del equipo de administración.
+- Quien añade un sitio puede **editarlo** después (borrarlo solo puede el equipo de administración).
 - **Opiniones con estrellas** (1 a 5), una por persona y sitio, que se pueden editar. La valoración del
   sitio es la media de las opiniones.
-- **Perfiles** con actividad, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
+- **Perfiles** con actividad, opiniones, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
-- **Actividad** de la comunidad agrupada por días y filtrable por tipo.
+- **Actividades** de la comunidad agrupadas por días, filtrables por tipo y por "de quienes sigo".
+- **Instalable en el móvil** como una app (manifiesto PWA con iconos y accesos directos).
 - **Administración**: editar o eliminar establecimientos, suspender o eliminar cuentas y gestionar las
   consultas del formulario de contacto.
 - **Privacidad**: el DNI, el email, el teléfono y la fecha de nacimiento solo los ven la propia persona
@@ -159,17 +163,19 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | GET | `/api/estadisticas` | Público |
 | GET | `/api/establecimientos`, `/api/establecimientos/{id}`, `/{id}/comentarios` | Público |
 | POST | `/api/establecimientos`, `/{id}/imagenes`, `/{id}/comentarios` | Sesión |
-| PUT/DELETE | `/api/establecimientos/{id}/like` · `/favorito` · `/visita` | Sesión |
-| PATCH/DELETE | `/api/establecimientos/{id}` | Admin |
+| PUT/DELETE | `/api/establecimientos/{id}/like`, `/favorito`, `/visita` | Sesión |
+| POST | `/api/establecimientos/{id}/avisos` (avisar de un error) | Sesión |
+| PATCH | `/api/establecimientos/{id}` | Quien lo añadió o admin |
+| DELETE | `/api/establecimientos/{id}` | Admin |
 | PATCH | `/api/comentarios/{id}` (editar tu opinión) | Autor |
 | DELETE | `/api/establecimientos/{id}/imagenes/{img}`, `/api/comentarios/{id}` | Autor o admin |
 | GET | `/api/usuarios` (comunidad) | Sesión |
-| GET | `/api/usuarios/{username}` (+ `/seguidores`, `/seguidos`, `/favoritos`, `/visitados`) | Público |
+| GET | `/api/usuarios/{username}` (+ `/opiniones`, `/seguidores`, `/seguidos`, `/favoritos`, `/visitados`) | Público |
 | PATCH/PUT/DELETE | `/api/usuarios/yo`, `/yo/password`, `/yo/foto` | Sesión |
 | PUT/DELETE | `/api/usuarios/{username}/seguir` | Sesión |
 | PATCH | `/api/usuarios/{username}/archivado` | Admin |
 | DELETE | `/api/usuarios/{username}` | La propia cuenta o admin |
-| GET | `/api/actividades?usuario=&limite=&antes_de=` | Público |
+| GET | `/api/actividades?usuario=&limite=&antes_de=&siguiendo=` | Público (`siguiendo`, con sesión) |
 | POST | `/api/consultas` | Público |
 | GET/DELETE | `/api/consultas` | Admin |
 | WS | `/api/chat?token=` | Sesión |

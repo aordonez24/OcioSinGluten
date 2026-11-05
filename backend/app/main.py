@@ -1,4 +1,5 @@
 import logging
+import mimetypes
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -10,6 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from app.config import Settings, get_settings
 from app.db import Base, engine
 from app.routers import actividades, auth, chat, consultas, establecimientos, estadisticas, usuarios
+
+# Para que el manifiesto de la app instalable (PWA) se sirva con su tipo correcto.
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 
 @asynccontextmanager

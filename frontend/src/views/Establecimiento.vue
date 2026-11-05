@@ -2,7 +2,7 @@
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Footprints, Heart, ImagePlus, MapPin,
+  ArrowLeft, Bookmark, ChevronLeft, ChevronRight, Clock, Footprints, Globe, Heart, ImagePlus, MapPin, Wallet,
   Navigation, Pencil, Phone, Share2, Store, Trash2, X,
 } from 'lucide-vue-next'
 import { api, conArchivo } from '@/api'
@@ -11,7 +11,9 @@ import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
 import { hace, nota } from '@/utils'
-import { CATEGORIAS } from '@/catalogo'
+import { CATEGORIAS, PRECIOS } from '@/catalogo'
+import AvisoProblema from '@/components/AvisoProblema.vue'
+import SitiosCercanos from '@/components/SitiosCercanos.vue'
 import Distintivos from '@/components/Distintivos.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 import Estrellas from '@/components/Estrellas.vue'
@@ -46,6 +48,7 @@ const urlComoLlegar = computed(() => {
 })
 const categoria = computed(() => CATEGORIAS[est.value?.categoria] ?? CATEGORIAS.otro)
 const puedeBorrar = (autorId) => auth.esAdmin || auth.usuario?.id === autorId
+const webVisible = computed(() => est.value?.web?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''))
 
 async function cargar() {
   try {
@@ -202,9 +205,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
           <p class="categoria">{{ categoria.texto }} en {{ est.localidad }}</p>
           <div class="titulo">
             <h1>{{ est.nombre }}</h1>
-            <div v-if="auth.esAdmin" class="fila">
-              <button class="btn btn-icono" title="Editar" @click="editando = true"><Pencil :size="18" /></button>
-              <button class="btn btn-icono btn-peligro" title="Eliminar" @click="eliminar"><Trash2 :size="18" /></button>
+            <div v-if="est.puede_editar || auth.esAdmin" class="fila">
+              <button v-if="est.puede_editar" class="btn btn-icono" title="Editar" @click="editando = true"><Pencil :size="18" /></button>
+              <button v-if="auth.esAdmin" class="btn btn-icono btn-peligro" title="Eliminar" @click="eliminar"><Trash2 :size="18" /></button>
             </div>
           </div>
           <p class="resumen">
@@ -239,6 +242,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
           <ul class="lista-limpia datos">
             <li><MapPin :size="18" aria-hidden="true" /> {{ direccion }}, {{ est.provincia }} ({{ est.pais }})</li>
             <li><Phone :size="18" aria-hidden="true" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
+            <li v-if="est.horario" class="horario"><Clock :size="18" aria-hidden="true" /> <span>{{ est.horario }}</span></li>
+            <li v-if="est.web">
+              <Globe :size="18" aria-hidden="true" />
+              <a :href="est.web" target="_blank" rel="noopener nofollow">{{ webVisible }}</a>
+            </li>
+            <li v-if="est.precio">
+              <Wallet :size="18" aria-hidden="true" />
+              <span><strong>{{ PRECIOS[est.precio].simbolo }}</strong> {{ PRECIOS[est.precio].texto }}</span>
+            </li>
             <li v-if="est.creado_por" class="suave pequeno">
               <span>
                 Lo añadió
@@ -247,6 +259,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
               </span>
             </li>
           </ul>
+          <div class="avisar-error"><AvisoProblema :est-id="est.id" /></div>
         </template>
 
         <template v-else>
@@ -293,6 +306,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
       </aside>
 
       <Opiniones class="opiniones" :est-id="est.id" :valoracion="est.valoracion" @cambio="refrescarValoracion" />
+      <SitiosCercanos class="ancho-completo" :establecimiento="est" />
     </div>
 
     <div v-if="ampliada !== null" class="visor" role="dialog" aria-modal="true" aria-label="Foto ampliada" @click.self="ampliada = null">
@@ -407,6 +421,23 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   display: flex;
   align-items: center;
   gap: 0.65rem;
+}
+
+.datos .horario {
+  align-items: flex-start;
+  white-space: pre-line;
+}
+
+.datos .horario svg {
+  margin-top: 0.2rem;
+}
+
+.avisar-error {
+  margin: 0.75rem 0 0;
+}
+
+.ancho-completo {
+  grid-column: 1 / -1;
 }
 
 .datos svg {

@@ -45,6 +45,15 @@ class Categoria(enum.StrEnum):
     OTRO = "otro"
 
 
+class MotivoAviso(enum.StrEnum):
+    """Por qué alguien avisa de un problema con un establecimiento."""
+
+    CERRADO = "cerrado"
+    SIN_OPCIONES = "sin_opciones"  # ya no ofrece opciones sin gluten
+    DATOS_INCORRECTOS = "datos_incorrectos"
+    OTRO = "otro"
+
+
 class TipoActividad(enum.StrEnum):
     PUBLICACION = "publicacion"
     COMENTARIO = "comentario"
@@ -146,6 +155,7 @@ class Comentario(Base):
     editado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     autor: Mapped[Usuario] = relationship(lazy="joined")
+    establecimiento: Mapped["Establecimiento"] = relationship(viewonly=True)
 
 
 class Establecimiento(Base):
@@ -168,6 +178,10 @@ class Establecimiento(Base):
     carta_sin_gluten: Mapped[bool] = mapped_column(default=False)
     cocina_separada: Mapped[bool] = mapped_column(default=False)
     acreditado: Mapped[bool] = mapped_column(default=False)
+    # Información práctica (opcional)
+    precio: Mapped[int | None] = mapped_column(SmallInteger)  # 1 = económico … 3 = caro
+    horario: Mapped[str | None] = mapped_column(String(300))
+    web: Mapped[str | None] = mapped_column(String(200))
     latitud: Mapped[float | None] = mapped_column(Float)
     longitud: Mapped[float | None] = mapped_column(Float)
     creado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))
@@ -223,6 +237,8 @@ class Actividad(Base):
 
 
 class Consulta(Base):
+    """Mensaje para el equipo de administración: del formulario de contacto o un aviso sobre un sitio."""
+
     __tablename__ = "consultas"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -230,6 +246,13 @@ class Consulta(Base):
     email: Mapped[str] = mapped_column(String(254))
     mensaje: Mapped[str] = mapped_column(Text)
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+    # Solo en los avisos sobre un establecimiento
+    establecimiento_id: Mapped[int | None] = mapped_column(
+        ForeignKey("establecimientos.id", ondelete="CASCADE")
+    )
+    motivo: Mapped[MotivoAviso | None] = mapped_column(Enum(MotivoAviso, native_enum=False))
+
+    establecimiento: Mapped[Establecimiento | None] = relationship(viewonly=True)
 
 
 class Mensaje(Base):

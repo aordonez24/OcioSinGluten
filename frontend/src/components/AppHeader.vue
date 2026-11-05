@@ -51,7 +51,7 @@ function salir() {
 
       <nav class="principal" aria-label="Principal">
         <RouterLink to="/" exact-active-class="activo">Inicio</RouterLink>
-        <RouterLink to="/establecimientos" active-class="activo">Establecimientos</RouterLink>
+        <RouterLink to="/establecimientos" :class="{ activo: route.path.startsWith('/establecimientos') }">Establecimientos</RouterLink>
         <RouterLink to="/actividad" active-class="activo">Actividades</RouterLink>
         <template v-if="auth.autenticado">
           <RouterLink to="/comunidad" active-class="activo">Comunidad</RouterLink>

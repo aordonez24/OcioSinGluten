@@ -70,18 +70,34 @@ def test_anadir_sitio_opinar_y_editar(pagina, imagen):
     pagina.fill("label:has-text('Localidad') input", "Linares")
     pagina.fill("label:has-text('Dirección') input", "Calle Corredera 3")
     pagina.fill("label:has-text('Código postal') input", "23700")
+    pagina.select_option("label:has-text('Precio') select", "1")
+    pagina.fill("label:has-text('Horario') textarea", "De lunes a sábado, de 8:00 a 14:00")
+    pagina.fill("label:has-text('Web') input", "no es una web")
+    pagina.click("text=Publicar establecimiento")
+    expect(pagina.locator(".error-campo", has_text="dirección web")).to_be_visible()
+    pagina.fill("label:has-text('Web') input", "cafeceliaco.es")
     pagina.click("text=Publicar establecimiento")
 
     pagina.wait_for_url(re.compile(r"/establecimientos/\d+$"))
     expect(pagina.locator("h1")).to_have_text("Café Celíaco")
-    expect(pagina.locator(".categoria")).to_contain_text("Cafetería")
+    expect(pagina.locator(".ficha .categoria")).to_contain_text("Cafetería")
     expect(pagina.locator(".distintivos")).to_contain_text("Cocina separada")
+    expect(pagina.locator(".datos")).to_contain_text("De lunes a sábado")
+    expect(pagina.locator(".datos a[href='https://cafeceliaco.es']")).to_have_text("cafeceliaco.es")
+    expect(pagina.locator(".datos")).to_contain_text("Económico")
+
+    # Quien lo añade puede corregirlo (pero no borrarlo)
+    expect(pagina.locator("button[title='Eliminar']")).to_have_count(0)
+    pagina.click("button[title='Editar']")
+    pagina.fill("label:has-text('Horario') textarea", "")
+    pagina.click("form button.btn-primario:has-text('Guardar')")
+    expect(pagina.locator(".datos")).not_to_contain_text("De lunes a sábado")
 
     # Acciones con respuesta inmediata
     pagina.click("button:has-text('Me gusta')")
     expect(pagina.locator("button:has-text('Me gusta') .cuenta")).to_have_text("1")
-    pagina.click("button:has-text('Guardar')")
-    expect(pagina.locator("button:has-text('Guardado')")).to_be_visible()
+    pagina.click(".acciones button:has-text('Guardar')")
+    expect(pagina.locator(".acciones button:has-text('Guardado')")).to_be_visible()
 
     # Foto
     pagina.set_input_files("label:has-text('Añadir') input", imagen)
@@ -106,10 +122,10 @@ def test_anadir_sitio_opinar_y_editar(pagina, imagen):
 
     # Borrarla pasa por el diálogo de confirmación
     pagina.click("button[title='Borrar opinión']")
-    pagina.click("dialog button:has-text('Cancelar')")
+    pagina.click("dialog[open] button:has-text('Cancelar')")
     expect(pagina.locator(".opinion.propia")).to_have_count(1)
     pagina.click("button[title='Borrar opinión']")
-    pagina.click("dialog button:has-text('Borrar')")
+    pagina.click("dialog[open] button:has-text('Borrar')")
     expect(pagina.locator(".opinion.propia")).to_have_count(0)
 
 
@@ -172,7 +188,7 @@ def test_admin_modera_y_recibe_consultas(pagina):
 
     pagina.goto("/u/javi")
     pagina.click(".moderacion button:has-text('Suspender')")
-    pagina.click("dialog button:has-text('Suspender')")
+    pagina.click("dialog[open] button:has-text('Suspender')")
     expect(pagina.locator(".chip", has_text="Cuenta suspendida")).to_be_visible()
     pagina.click(".moderacion button:has-text('Restaurar')")
     expect(pagina.locator(".chip", has_text="Cuenta suspendida")).to_have_count(0)
@@ -212,3 +228,49 @@ def test_detalle_carga_mapa_sin_violar_la_csp(pagina):
     expect(pagina.locator("a:has-text('Cómo llegar')")).to_have_attribute(
         "href", re.compile("google.com/maps")
     )
+
+
+def test_avisar_de_un_error_llega_a_administracion(pagina):
+    pagina.goto("/establecimientos/1")
+    pagina.click("button:has-text('Avisar de un error')")
+    pagina.wait_for_url(en_ruta("/entrar"))  # hace falta sesión
+
+    entrar(pagina, "sara@example.com", "Sara12345")
+    pagina.goto("/establecimientos/1")
+    pagina.click("button:has-text('Avisar de un error')")
+    dialogo = pagina.locator("dialog[open]")
+    dialogo.locator("button:has-text('Enviar aviso')").click()
+    expect(dialogo.locator(".alerta")).to_contain_text("Elige")
+    dialogo.locator("label:has-text('Ha cerrado')").click()
+    dialogo.locator("textarea").fill("Hoy estaba cerrado con un cartel de traspaso")
+    dialogo.locator("button:has-text('Enviar aviso')").click()
+    expect(pagina.locator(".aviso", has_text="Gracias por avisar")).to_be_visible()
+
+    pagina.evaluate("localStorage.clear()")
+    entrar(pagina, "admin@example.com", "Admin1234")
+    pagina.goto("/consultas")
+    aviso = pagina.locator("li", has_text="cartel de traspaso")
+    expect(aviso.locator(".aviso-sitio")).to_contain_text("Ha cerrado")
+    expect(aviso.locator(".aviso-sitio a")).to_have_attribute("href", "/establecimientos/1")
+
+
+def test_perfil_opiniones_y_actividad_de_quienes_sigo(pagina):
+    pagina.goto("/u/marcos")  # otras pruebas renombran o suspenden a otras cuentas de la demo
+    pagina.click(".cifras button:has-text('opini')")
+    expect(pagina).to_have_url(re.compile(r"tab=opiniones"))
+    expect(pagina.locator("[role=tab][aria-selected=true]")).to_contain_text("Opiniones")
+    expect(pagina.locator(".opiniones li").first.locator(".sitio a")).to_be_visible()
+
+    entrar(pagina, "marcos@example.com", "Marcos1234")
+    pagina.goto("/actividad")
+    with pagina.expect_response(lambda r: "siguiendo=true" in r.url and r.ok):
+        pagina.click("button:has-text('De quienes sigo')")
+    expect(pagina.locator("button:has-text('De quienes sigo')")).to_have_attribute("aria-pressed", "true")
+
+
+def test_ficha_sugiere_sitios_cercanos_y_la_app_es_instalable(pagina):
+    pagina.goto("/establecimientos/1")  # Celiaco Feliz, en Jaén
+    expect(pagina.locator(".cercanos .tarjeta-est")).to_contain_text(["Mesón La Loma"])
+    respuesta = pagina.request.get("/manifest.webmanifest")
+    assert respuesta.headers["content-type"].startswith("application/manifest+json")
+    assert respuesta.json()["display"] == "standalone"

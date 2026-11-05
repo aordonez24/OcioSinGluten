@@ -8,7 +8,16 @@ from conftest import entrar
 
 AXE = Path(__file__).resolve().parent.parent / "frontend" / "node_modules" / "axe-core" / "axe.min.js"
 
-PUBLICAS = ["/", "/establecimientos", "/establecimientos/1", "/actividad", "/entrar", "/registro", "/u/lucia"]
+PUBLICAS = [
+    "/",
+    "/establecimientos",
+    "/establecimientos/1",
+    "/actividad",
+    "/entrar",
+    "/registro",
+    "/u/lucia",
+    "/u/lucia?tab=opiniones",
+]
 PRIVADAS = ["/comunidad", "/chat", "/ajustes", "/establecimientos/nuevo", "/consultas"]
 MOVIL = ["/", "/establecimientos", "/establecimientos/1", "/u/lucia", "/chat"]
 

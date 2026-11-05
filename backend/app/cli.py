@@ -15,8 +15,10 @@ from app.models import (
     Actividad,
     Categoria,
     Comentario,
+    Consulta,
     Establecimiento,
     Mensaje,
+    MotivoAviso,
     Rol,
     TipoActividad,
     Usuario,
@@ -141,6 +143,18 @@ ESTABLECIMIENTOS = [
     ),
 ]
 
+# precio (1 económico, 2 normal, 3 caro) y horario de cada sitio
+INFO_PRACTICA = {
+    "Celiaco Feliz": (2, "De martes a domingo, de 13:00 a 16:30 y de 20:30 a 23:30"),
+    "Horno Sin Trigo": (1, "De lunes a sábado, de 8:00 a 14:00 y de 17:30 a 20:30"),
+    "La Pizzería Libre": (2, "Todos los días, de 13:00 a 16:00 y de 20:00 a 0:00"),
+    "Taberna El Arroz": (2, "De miércoles a lunes, de 12:30 a 17:00"),
+    "Burger Zero": (2, "Todos los días, de 13:00 a 23:30"),
+    "Dulce Celíaca": (1, "De lunes a viernes, de 8:30 a 20:00. Sábados, de 9:00 a 14:00"),
+    "Mesón La Loma": (3, "De jueves a domingo, de 13:30 a 16:30 y de 21:00 a 23:30"),
+    "Heladería Polo Norte": (1, "De marzo a octubre, todos los días de 16:00 a 0:00"),
+}
+
 OPINIONES = [
     # puntuación, texto
     (5, "Carta sin gluten muy completa y el personal sabe perfectamente lo que es la contaminación cruzada."),
@@ -208,6 +222,8 @@ def cargar_demo() -> None:
                 creado_por_id=autor.id,
                 creado_en=hace(40 - n * 3),
                 categoria=categoria,
+                precio=INFO_PRACTICA[nombre][0],
+                horario=INFO_PRACTICA[nombre][1],
                 **dict.fromkeys(distintivos, True),
             )
             db.add(est)
@@ -271,6 +287,27 @@ def cargar_demo() -> None:
                     db.execute(insert(seguimientos).values(seguidor_id=seguidor.id, seguido_id=seguido.id))
 
         db.add_all(sorted(actividades, key=lambda a: a.creado_en))
+
+        # Un aviso sobre un sitio y una consulta del formulario, para ver la bandeja del admin.
+        taberna = db.scalar(select(Establecimiento).where(Establecimiento.nombre == "Taberna El Arroz"))
+        db.add_all(
+            [
+                Consulta(
+                    nombre="javi",
+                    email="javi@example.com",
+                    mensaje="Han cambiado de teléfono, ahora es el 954 111 222.",
+                    motivo=MotivoAviso.DATOS_INCORRECTOS,
+                    establecimiento_id=taberna.id,
+                    creado_en=ahora() - timedelta(hours=5),
+                ),
+                Consulta(
+                    nombre="Pepa",
+                    email="pepa@example.com",
+                    mensaje="¿Vais a añadir sitios en Córdoba? Me encantaría colaborar.",
+                    creado_en=ahora() - timedelta(days=1),
+                ),
+            ]
+        )
 
         for i, (username, texto) in enumerate(MENSAJES):
             db.add(

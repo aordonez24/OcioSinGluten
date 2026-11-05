@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { Activity, Footprints, Heart, MessageCircle, Search, Store } from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
+import { Activity, Footprints, Heart, MessageCircle, Search, Store, Users } from 'lucide-vue-next'
 import { api } from '@/api'
+import { useAuth } from '@/stores/auth'
 import { agruparPorDia, coincide } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
@@ -14,7 +15,9 @@ const TIPOS = {
   like: { texto: 'recomienda', filtro: 'Me gusta', icono: Heart },
 }
 
+const auth = useAuth()
 const actividades = ref(null)
+const soloSiguiendo = ref(false) // "De quienes sigo"
 const hayMas = ref(false)
 const cargando = ref(false)
 const busqueda = ref('')
@@ -32,11 +35,19 @@ const hora = (iso) => new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit
 async function cargarMas() {
   cargando.value = true
   const ultimo = actividades.value?.at(-1)
-  const nuevas = await api(`/actividades?limite=${POR_PAGINA}${ultimo ? `&antes_de=${ultimo.id}` : ''}`).catch(() => [])
+  const parametros = new URLSearchParams({ limite: POR_PAGINA })
+  if (ultimo) parametros.set('antes_de', ultimo.id)
+  if (soloSiguiendo.value) parametros.set('siguiendo', 'true')
+  const nuevas = await api(`/actividades?${parametros}`).catch(() => [])
   actividades.value = [...(actividades.value ?? []), ...nuevas]
   hayMas.value = nuevas.length === POR_PAGINA
   cargando.value = false
 }
+
+watch(soloSiguiendo, () => {
+  actividades.value = null
+  cargarMas()
+})
 
 onMounted(cargarMas)
 </script>
@@ -48,6 +59,11 @@ onMounted(cargarMas)
         <h1>Actividades</h1>
         <p>Lo último que ha hecho la comunidad: sitios nuevos, opiniones, visitas y recomendaciones.</p>
       </div>
+    </div>
+
+    <div v-if="auth.autenticado" class="interruptor" role="group" aria-label="De quién">
+      <button :aria-pressed="!soloSiguiendo" @click="soloSiguiendo = false">Toda la comunidad</button>
+      <button :aria-pressed="soloSiguiendo" @click="soloSiguiendo = true">De quienes sigo</button>
     </div>
 
     <div class="filtros">
@@ -68,6 +84,14 @@ onMounted(cargarMas)
       <div v-for="n in 5" :key="n" class="esqueleto" style="height: 48px; margin: 0.6rem 0"></div>
     </div>
 
+    <EstadoVacio
+      v-else-if="!grupos.length && soloSiguiendo && !busqueda && !tipo"
+      :icono="Users"
+      titulo="Aún no sigues a nadie con actividad"
+      texto="Sigue a otras personas celíacas para ver aquí sus recomendaciones."
+    >
+      <RouterLink to="/comunidad" class="btn btn-primario">Ver la comunidad</RouterLink>
+    </EstadoVacio>
     <EstadoVacio v-else-if="!grupos.length" :icono="Activity" titulo="Nada por aquí"
       texto="No hay actividad que coincida con los filtros." />
 
@@ -97,6 +121,35 @@ onMounted(cargarMas)
 </template>
 
 <style scoped>
+.interruptor {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  overflow: hidden;
+}
+
+.interruptor button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  min-height: 42px;
+  padding: 0.4rem 1rem;
+  border: 0;
+  background: var(--blanco);
+  color: var(--carbon);
+  cursor: pointer;
+}
+
+.interruptor button + button {
+  border-left: 1px solid var(--borde-fuerte);
+}
+
+.interruptor button[aria-pressed='true'] {
+  background: var(--carbon);
+  color: #fff;
+}
+
 .filtros {
   display: grid;
   gap: 0.75rem;

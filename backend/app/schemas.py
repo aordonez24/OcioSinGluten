@@ -12,7 +12,7 @@ from pydantic import (
     computed_field,
 )
 
-from app.models import Categoria, Rol, TipoActividad
+from app.models import Categoria, MotivoAviso, Rol, TipoActividad
 
 # --------------------------------------------------------------------------- validadores
 
@@ -55,6 +55,15 @@ def _cod_postal(valor: str) -> str:
     return valor.strip()
 
 
+def _web(valor: str) -> str:
+    valor = valor.strip()
+    if not re.match(r"^https?://", valor, re.IGNORECASE):
+        valor = f"https://{valor}"
+    if not re.fullmatch(r"https?://[^\s/$.?#][^\s]*\.[^\s]{2,}", valor, re.IGNORECASE):
+        raise ValueError("La web no parece una dirección válida")
+    return valor
+
+
 def _texto(max_len: int):
     return Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=max_len)]
 
@@ -67,6 +76,8 @@ CodPostal = Annotated[str, AfterValidator(_cod_postal)]
 # SQLite no guarda la zona horaria: las fechas se guardan en UTC y se marcan como tal al salir.
 FechaUTC = Annotated[datetime, AfterValidator(lambda d: d if d.tzinfo else d.replace(tzinfo=UTC))]
 Username = Annotated[str, Field(min_length=3, max_length=30, pattern=r"^[A-Za-z0-9_.-]+$")]
+Web = Annotated[str, StringConstraints(max_length=200), AfterValidator(_web)]
+Precio = Annotated[int, Field(ge=1, le=3, description="1 económico, 2 normal, 3 caro")]
 
 
 def url_upload(fichero: str | None) -> str | None:
@@ -177,6 +188,9 @@ class EstablecimientoIn(BaseModel):
     carta_sin_gluten: bool = False
     cocina_separada: bool = False
     acreditado: bool = False
+    precio: Precio | None = None
+    horario: Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None = None
+    web: Web | None = None
 
 
 class EstablecimientoUpdate(BaseModel):
@@ -192,6 +206,10 @@ class EstablecimientoUpdate(BaseModel):
     carta_sin_gluten: bool | None = None
     cocina_separada: bool | None = None
     acreditado: bool | None = None
+    # Para borrar uno de estos datos se envía una cadena vacía (o 0 en el precio).
+    precio: Annotated[int, Field(ge=0, le=3)] | None = None
+    horario: Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None = None
+    web: Web | Annotated[str, StringConstraints(max_length=0)] | None = None
 
 
 class EstablecimientoResumen(Esquema):
@@ -208,6 +226,7 @@ class EstablecimientoResumen(Esquema):
     carta_sin_gluten: bool
     cocina_separada: bool
     acreditado: bool
+    precio: int | None
     num_likes: int
     num_visitas: int
     num_opiniones: int
@@ -232,6 +251,8 @@ class ImagenOut(Esquema):
 
 
 class EstablecimientoDetalle(EstablecimientoResumen):
+    horario: str | None
+    web: str | None
     creado_por: UsuarioResumen | None
     creado_en: FechaUTC
     imagenes: list[ImagenOut]
@@ -239,6 +260,7 @@ class EstablecimientoDetalle(EstablecimientoResumen):
     me_gusta: bool = False
     favorito: bool = False
     visitado: bool = False
+    puede_editar: bool = False  # quien lo añadió o el equipo de administración
 
 
 class EstablecimientoMini(Esquema):
@@ -273,6 +295,17 @@ class ComentarioOut(Esquema):
     autor: UsuarioResumen
 
 
+class OpinionDePerfil(Esquema):
+    """Opinión vista desde el perfil de su autor: con el sitio en lugar de la persona."""
+
+    id: int
+    puntuacion: int
+    mensaje: str
+    creado_en: FechaUTC
+    editado_en: FechaUTC | None
+    establecimiento: EstablecimientoMini
+
+
 class ActividadOut(Esquema):
     id: int
     tipo: TipoActividad
@@ -301,9 +334,16 @@ class ConsultaIn(BaseModel):
     mensaje: _texto(1000)
 
 
+class AvisoIn(BaseModel):
+    motivo: MotivoAviso
+    mensaje: Annotated[str, StringConstraints(strip_whitespace=True, max_length=1000)] = ""
+
+
 class ConsultaOut(Esquema):
     id: int
     nombre: str
     email: str
     mensaje: str
     creado_en: FechaUTC
+    motivo: MotivoAviso | None = None
+    establecimiento: EstablecimientoMini | None = None

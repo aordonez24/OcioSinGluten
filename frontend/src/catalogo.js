@@ -38,3 +38,18 @@ export const DISTINTIVOS = [
 ]
 
 export const TEXTO_PUNTUACION = ['', 'Muy mal', 'Regular', 'Bien', 'Muy bien', 'Excelente']
+
+export const PRECIOS = {
+  1: { simbolo: '€', texto: 'Económico' },
+  2: { simbolo: '€€', texto: 'Precio medio' },
+  3: { simbolo: '€€€', texto: 'Caro' },
+}
+
+// Motivos para avisar al equipo de administración de un problema con un sitio:
+// `opcion` es lo que lee quien avisa y `resumen`, lo que ve el equipo en su bandeja.
+export const MOTIVOS_AVISO = {
+  cerrado: { opcion: 'Ha cerrado', resumen: 'Ha cerrado' },
+  sin_opciones: { opcion: 'Ya no tiene opciones sin gluten', resumen: 'Ya no tiene opciones sin gluten' },
+  datos_incorrectos: { opcion: 'Algún dato está mal (dirección, teléfono, horario…)', resumen: 'Datos incorrectos' },
+  otro: { opcion: 'Otro motivo', resumen: 'Otro problema' },
+}

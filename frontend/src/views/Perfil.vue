@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  Activity, Ban, Bookmark, Footprints, Mail, RotateCcw, Settings, Trash2, UserMinus, UserPlus, Users, UserX,
+  Activity, Ban, Bookmark, Footprints, Mail, MessageSquareText, RotateCcw, Settings, Trash2, UserMinus, UserPlus, Users, UserX,
 } from 'lucide-vue-next'
 import { api } from '@/api'
 import { ponerTitulo } from '@/router'
@@ -13,6 +13,7 @@ import { fecha, hace } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
+import Estrellas from '@/components/Estrellas.vue'
 import ListaUsuarios from '@/components/ListaUsuarios.vue'
 
 const props = defineProps({ username: { type: String, required: true } })
@@ -30,6 +31,7 @@ const datos = reactive({}) // datos de cada pestaña, cargados la primera vez qu
 const esMio = computed(() => auth.usuario?.username === props.username)
 const PESTANAS = [
   { id: 'actividad', texto: 'Actividad', ruta: (u) => `/actividades?usuario=${u}&limite=30` },
+  { id: 'opiniones', texto: 'Opiniones', ruta: (u) => `/usuarios/${u}/opiniones` },
   { id: 'favoritos', texto: 'Favoritos', ruta: (u) => `/usuarios/${u}/favoritos` },
   { id: 'visitados', texto: 'Visitados', ruta: (u) => `/usuarios/${u}/visitados` },
   { id: 'seguidores', texto: 'Seguidores', ruta: (u) => `/usuarios/${u}/seguidores` },
@@ -40,6 +42,7 @@ const pestana = computed({
   set: (tab) => router.replace({ query: tab === 'actividad' ? {} : { tab } }),
 })
 const numeros = computed(() => ({
+  opiniones: perfil.value?.num_opiniones,
   visitados: perfil.value?.num_visitados,
   seguidores: perfil.value?.num_seguidores,
   seguidos: perfil.value?.num_seguidos,
@@ -141,7 +144,7 @@ onMounted(cargar)
             <span v-if="perfil.archivado" class="chip peligro">Cuenta suspendida</span>
           </p>
           <div class="cifras">
-            <button @click="pestana = 'actividad'"><strong>{{ perfil.num_opiniones }}</strong> {{ perfil.num_opiniones === 1 ? 'opinión' : 'opiniones' }}</button>
+            <button @click="pestana = 'opiniones'"><strong>{{ perfil.num_opiniones }}</strong> {{ perfil.num_opiniones === 1 ? 'opinión' : 'opiniones' }}</button>
             <button @click="pestana = 'visitados'"><strong>{{ perfil.num_visitados }}</strong> {{ perfil.num_visitados === 1 ? 'visitado' : 'visitados' }}</button>
             <button @click="pestana = 'seguidores'"><strong>{{ perfil.num_seguidores }}</strong> {{ perfil.num_seguidores === 1 ? 'seguidor' : 'seguidores' }}</button>
             <button @click="pestana = 'seguidos'"><strong>{{ perfil.num_seguidos }}</strong> siguiendo</button>
@@ -207,6 +210,30 @@ onMounted(cargar)
         </ul>
         <EstadoVacio v-else :icono="Activity" titulo="Sin actividad todavía"
           :texto="esMio ? 'Visita, opina o añade sitios y aparecerán aquí.' : 'Esta persona aún no ha participado.'" />
+      </template>
+
+      <template v-else-if="pestana === 'opiniones'">
+        <ul v-if="datos.opiniones.length" class="lista-limpia lista-filas opiniones">
+          <li v-for="o in datos.opiniones" :key="o.id">
+            <p class="sitio">
+              <RouterLink :to="`/establecimientos/${o.establecimiento.id}`">{{ o.establecimiento.nombre }}</RouterLink>
+              <span class="suave">en {{ o.establecimiento.localidad }}</span>
+            </p>
+            <p class="puntuacion">
+              <Estrellas :valor="o.puntuacion" :tamano="15" />
+              <span class="suave pequeno">{{ hace(o.creado_en) }}<template v-if="o.editado_en"> (editada)</template></span>
+            </p>
+            <p class="texto">{{ o.mensaje }}</p>
+          </li>
+        </ul>
+        <EstadoVacio
+          v-else
+          :icono="MessageSquareText"
+          titulo="Sin opiniones todavía"
+          :texto="esMio ? 'Cuando opines sobre un sitio, tu opinión aparecerá aquí.' : 'Esta persona aún no ha opinado.'"
+        >
+          <RouterLink v-if="esMio" to="/establecimientos" class="btn btn-primario">Buscar un sitio para opinar</RouterLink>
+        </EstadoVacio>
       </template>
 
       <template v-else-if="pestana === 'favoritos' || pestana === 'visitados'">
@@ -345,6 +372,30 @@ onMounted(cargar)
 
 .actividad li span .suave {
   margin-left: 0.3rem;
+}
+
+.opiniones p {
+  margin: 0;
+}
+
+.sitio a {
+  font-weight: 650;
+  color: var(--carbon);
+}
+
+.sitio .suave {
+  margin-left: 0.3rem;
+}
+
+.puntuacion {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.2rem 0 0.35rem !important;
+}
+
+.texto {
+  max-width: 60em;
 }
 
 .icono {

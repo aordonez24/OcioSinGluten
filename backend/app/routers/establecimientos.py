@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models import (
     Comentario,
+    Consulta,
     Establecimiento,
     Imagen,
     TipoActividad,
@@ -14,6 +15,7 @@ from app.models import (
     visitas,
 )
 from app.schemas import (
+    AvisoIn,
     ComentarioIn,
     ComentarioOut,
     ComentarioUpdate,
@@ -36,8 +38,13 @@ from app.services.imagenes import borrar_imagenes, guardar_imagen
 router = APIRouter(prefix="/api/establecimientos", tags=["establecimientos"])
 
 
+def _puede_editar(est: Establecimiento, yo: Usuario | None) -> bool:
+    return yo is not None and (yo.es_admin or est.creado_por_id == yo.id)
+
+
 def _detalle(db: Session, est: Establecimiento, yo: Usuario | None) -> EstablecimientoDetalle:
     detalle = EstablecimientoDetalle.model_validate(est)
+    detalle.puede_editar = _puede_editar(est, yo)
     if yo is not None:
         filtro = {"usuario_id": yo.id, "establecimiento_id": est.id}
         detalle.me_gusta = existe_fila(db, likes, **filtro)
@@ -83,9 +90,17 @@ def obtener(est_id: int, db: DB, yo: UsuarioOpcional):
 
 
 @router.patch("/{est_id}", response_model=EstablecimientoDetalle)
-def editar(est_id: int, datos: EstablecimientoUpdate, db: DB, admin: Admin):
+def editar(est_id: int, datos: EstablecimientoUpdate, db: DB, yo: UsuarioActual):
     est = establecimiento_o_404(db, est_id)
+    if not _puede_editar(est, yo):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, "Solo quien lo añadió o el equipo de administración puede editarlo"
+        )
     cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
+    # Una cadena vacía o un precio 0 significan "quitar este dato".
+    for campo in ("precio", "horario", "web"):
+        if campo in cambios and not cambios[campo]:
+            cambios[campo] = None
     _comprobar_duplicado(
         db, cambios.get("nombre", est.nombre), cambios.get("cod_postal", est.cod_postal), est.id
     )
@@ -95,7 +110,7 @@ def editar(est_id: int, datos: EstablecimientoUpdate, db: DB, admin: Admin):
         geocodificar(est)
     db.commit()
     db.refresh(est)
-    return _detalle(db, est, admin)
+    return _detalle(db, est, yo)
 
 
 @router.delete("/{est_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -105,6 +120,23 @@ def eliminar(est_id: int, db: DB, admin: Admin):
     db.delete(est)  # comentarios, imágenes, likes, actividad... se borran en cascada
     db.commit()
     borrar_imagenes(*ficheros)
+
+
+@router.post("/{est_id}/avisos", status_code=status.HTTP_201_CREATED)
+def avisar(est_id: int, datos: AvisoIn, db: DB, yo: UsuarioActual) -> dict:
+    """Avisa al equipo de administración de un problema con el sitio (cerrado, datos mal…)."""
+    establecimiento_o_404(db, est_id)
+    db.add(
+        Consulta(
+            nombre=yo.username,
+            email=yo.email,
+            mensaje=datos.mensaje,
+            motivo=datos.motivo,
+            establecimiento_id=est_id,
+        )
+    )
+    db.commit()
+    return {"ok": True}
 
 
 # ----------------------------------------------------------------- imágenes

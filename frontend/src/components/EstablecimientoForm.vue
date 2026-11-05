@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { NOMBRES_PROVINCIAS, PROVINCIAS } from '@/provincias'
 import { validar } from '@/utils'
-import { CATEGORIAS, DISTINTIVOS } from '@/catalogo'
+import { CATEGORIAS, DISTINTIVOS, PRECIOS } from '@/catalogo'
 
 const props = defineProps({
   inicial: { type: Object, default: () => ({}) },
@@ -17,6 +17,9 @@ const CAMPOS = ['nombre', 'telefono', 'calle', 'cod_postal', 'localidad', 'provi
 const datos = reactive({
   ...Object.fromEntries(CAMPOS.map((c) => [c, String(props.inicial[c] ?? (c === 'pais' ? 'España' : ''))])),
   categoria: props.inicial.categoria ?? 'restaurante',
+  precio: props.inicial.precio ?? '',
+  horario: props.inicial.horario ?? '',
+  web: props.inicial.web ?? '',
   ...Object.fromEntries(DISTINTIVOS.map((d) => [d.clave, Boolean(props.inicial[d.clave])])),
 })
 const intentado = ref(false)
@@ -29,7 +32,9 @@ const errores = computed(() => ({
   localidad: datos.localidad.trim() ? '' : 'Obligatorio',
   provincia: datos.provincia.trim() ? '' : 'Obligatorio',
   pais: datos.pais.trim() ? '' : 'Obligatorio',
+  web: !datos.web.trim() || /^(https?:\/\/)?[^\s/$.?#][^\s]*\.[^\s]{2,}$/i.test(datos.web.trim()) ? '' : 'No parece una dirección web',
 }))
+const editando = Boolean(props.inicial.id)
 const esEspana = computed(() => datos.pais.trim().toLowerCase() === 'españa')
 const localidades = computed(() => PROVINCIAS[datos.provincia] ?? [])
 const err = (campo) => (intentado.value ? errores.value[campo] : '')
@@ -37,7 +42,14 @@ const err = (campo) => (intentado.value ? errores.value[campo] : '')
 function enviar() {
   intentado.value = true
   if (Object.values(errores.value).some(Boolean)) return
-  emit('guardar', { ...datos })
+  // Al crear, lo que no se rellena no se envía; al editar, vacío significa "quitar el dato".
+  const vacio = (valor, borrar) => valor || (editando ? borrar : null)
+  emit('guardar', {
+    ...datos,
+    precio: vacio(Number(datos.precio), 0),
+    horario: vacio(datos.horario.trim(), ''),
+    web: vacio(datos.web.trim(), ''),
+  })
 }
 </script>
 
@@ -65,6 +77,28 @@ function enviar() {
           <strong>{{ d.texto }}</strong>
           <span class="ayuda">{{ d.descripcion }}</span>
         </span>
+      </label>
+    </fieldset>
+
+    <fieldset class="practica">
+      <legend>Información práctica <span class="ayuda">Opcional</span></legend>
+      <div class="dos-columnas">
+        <label>
+          Precio
+          <select v-model="datos.precio">
+            <option value="">Sin indicar</option>
+            <option v-for="(p, n) in PRECIOS" :key="n" :value="Number(n)">{{ p.simbolo }} {{ p.texto }}</option>
+          </select>
+        </label>
+        <label>
+          Web
+          <input v-model="datos.web" inputmode="url" maxlength="200" placeholder="www.ejemplo.es" :aria-invalid="!!err('web')" />
+          <span class="error-campo">{{ err('web') }}</span>
+        </label>
+      </div>
+      <label>
+        Horario
+        <textarea v-model="datos.horario" rows="2" maxlength="300" placeholder="De martes a domingo, de 13:00 a 16:30 y de 20:30 a 23:30"></textarea>
       </label>
     </fieldset>
 
@@ -128,6 +162,14 @@ function enviar() {
   display: grid;
   gap: 0.6rem;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.practica legend {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
 }
 
 .distintivos legend {
