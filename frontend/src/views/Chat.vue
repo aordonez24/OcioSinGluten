@@ -75,9 +75,9 @@ onBeforeUnmount(() => {
       </span>
     </div>
 
-    <div class="tarjeta chat">
+    <div class="chat">
       <div ref="lista" class="mensajes" aria-live="polite">
-        <EstadoVacio v-if="!mensajes.length" :icono="MessagesSquare" titulo="Aún no hay mensajes" texto="¡Rompe el hielo y saluda a la comunidad!" />
+        <EstadoVacio v-if="!mensajes.length" :icono="MessagesSquare" titulo="Aún no hay mensajes" texto="Saluda a la comunidad o pregunta por un sitio." />
         <section v-for="g in grupos" :key="g.etiqueta">
           <p class="dia"><span>{{ g.etiqueta }}</span></p>
           <div
@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
         </section>
       </div>
       <form class="escribir" @submit.prevent="enviar">
-        <input v-model="texto" maxlength="500" placeholder="Escribe un mensaje…" aria-label="Mensaje" autocomplete="off" />
+        <input v-model="texto" maxlength="500" placeholder="Escribe un mensaje" aria-label="Mensaje" autocomplete="off" />
         <button class="btn btn-primario btn-icono" :disabled="estado !== 'conectado' || !texto.trim()" title="Enviar">
           <Send :size="18" /><span class="solo-lectores">Enviar</span>
         </button>
@@ -114,11 +114,13 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .chat {
-  padding: 0;
   display: flex;
   flex-direction: column;
-  height: min(calc(100dvh - 260px - var(--alto-barra-movil)), 640px);
+  height: min(calc(100dvh - 280px - var(--alto-barra-movil)), 660px);
   min-height: 380px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio);
+  overflow: hidden;
 }
 
 .punto {
@@ -135,17 +137,20 @@ onBeforeUnmount(() => {
 }
 
 .dia {
-  text-align: center;
-  margin: 1rem 0 0.5rem;
-  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--texto-suave);
 }
 
-.dia span {
-  background: var(--crema-2);
-  padding: 0.2rem 0.75rem;
-  border-radius: 999px;
+.dia::before,
+.dia::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--borde);
 }
 
 .mensaje {
@@ -171,34 +176,34 @@ onBeforeUnmount(() => {
 }
 
 .burbuja {
-  background: var(--crema-2);
+  background: var(--niebla-2);
   padding: 0.45rem 0.85rem 0.35rem;
-  border-radius: 16px 16px 16px 4px;
+  border-radius: 14px 14px 14px 4px;
   overflow-wrap: anywhere;
   display: grid;
 }
 
 .mio .burbuja {
-  background: var(--coral);
-  color: #fff;
-  border-radius: 16px 16px 4px 16px;
+  background: var(--turquesa);
+  color: var(--carbon);
+  border-radius: 14px 14px 4px 14px;
 }
 
 .autor {
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--coral-oscuro);
+  color: var(--turquesa-oscuro);
   text-decoration: none;
 }
 
 time {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--texto-suave);
   justify-self: end;
 }
 
 .mio time {
-  color: #fff;
+  color: #2b4f4b;
 }
 
 .escribir {
@@ -206,9 +211,6 @@ time {
   gap: 0.5rem;
   padding: 0.85rem;
   border-top: 1px solid var(--borde);
-}
-
-.escribir input {
-  border-radius: 999px;
+  background: var(--niebla);
 }
 </style>

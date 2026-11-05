@@ -129,111 +129,121 @@ onMounted(cargar)
     <div class="esqueleto" style="height: 220px"></div>
   </div>
 
-  <div v-else class="contenedor">
-    <section class="tarjeta cabecera-perfil">
-      <Avatar :usuario="perfil" :tamano="104" />
-      <div class="identidad">
-        <h1>{{ perfil.nombre }} {{ perfil.apellidos }}</h1>
-        <p class="suave">
-          @{{ perfil.username }} · En la comunidad desde {{ fecha(perfil.creado_en) }}
-        </p>
-        <p class="chips">
-          <span v-if="perfil.rol === 'admin'" class="chip ok">Administración</span>
-          <span v-if="perfil.archivado" class="chip peligro">Cuenta suspendida</span>
-        </p>
-        <div class="cifras">
-          <button @click="pestana = 'actividad'"><strong>{{ perfil.num_opiniones }}</strong> Opiniones</button>
-          <button @click="pestana = 'visitados'"><strong>{{ perfil.num_visitados }}</strong> Visitados</button>
-          <button @click="pestana = 'seguidores'"><strong>{{ perfil.num_seguidores }}</strong> Seguidores</button>
-          <button @click="pestana = 'seguidos'"><strong>{{ perfil.num_seguidos }}</strong> Siguiendo</button>
+  <div v-else>
+    <section class="cabecera-perfil">
+      <div class="interior">
+        <Avatar :usuario="perfil" :tamano="112" />
+        <div class="identidad">
+          <h1>{{ perfil.nombre }} {{ perfil.apellidos }}</h1>
+          <p class="suave">@{{ perfil.username }}, en la comunidad desde {{ fecha(perfil.creado_en) }}</p>
+          <p v-if="perfil.rol === 'admin' || perfil.archivado" class="estados">
+            <span v-if="perfil.rol === 'admin'" class="chip ok">Administración</span>
+            <span v-if="perfil.archivado" class="chip peligro">Cuenta suspendida</span>
+          </p>
+          <div class="cifras">
+            <button @click="pestana = 'actividad'"><strong>{{ perfil.num_opiniones }}</strong> {{ perfil.num_opiniones === 1 ? 'opinión' : 'opiniones' }}</button>
+            <button @click="pestana = 'visitados'"><strong>{{ perfil.num_visitados }}</strong> {{ perfil.num_visitados === 1 ? 'visitado' : 'visitados' }}</button>
+            <button @click="pestana = 'seguidores'"><strong>{{ perfil.num_seguidores }}</strong> {{ perfil.num_seguidores === 1 ? 'seguidor' : 'seguidores' }}</button>
+            <button @click="pestana = 'seguidos'"><strong>{{ perfil.num_seguidos }}</strong> siguiendo</button>
+          </div>
+        </div>
+        <div class="acciones">
+          <RouterLink v-if="esMio" to="/ajustes" class="btn"><Settings :size="17" /> Editar perfil</RouterLink>
+          <button v-else class="btn" :class="perfil.siguiendo ? '' : 'btn-primario'" @click="alternarSeguir">
+            <component :is="perfil.siguiendo ? UserMinus : UserPlus" :size="17" />
+            {{ perfil.siguiendo ? 'Siguiendo' : 'Seguir' }}
+          </button>
         </div>
       </div>
-      <div class="acciones">
-        <RouterLink v-if="esMio" to="/ajustes" class="btn"><Settings :size="17" /> Editar perfil</RouterLink>
-        <button v-else class="btn" :class="perfil.siguiendo ? '' : 'btn-primario'" @click="alternarSeguir">
-          <component :is="perfil.siguiendo ? UserMinus : UserPlus" :size="17" />
-          {{ perfil.siguiendo ? 'Siguiendo' : 'Seguir' }}
-        </button>
-      </div>
     </section>
 
-    <section v-if="auth.esAdmin && !esMio" class="tarjeta moderacion">
-      <div>
-        <h2>Moderación</h2>
-        <p v-if="perfil.privado" class="suave pequeno">
-          {{ perfil.privado.email }} · DNI {{ perfil.privado.dni }} · Tel. {{ perfil.privado.telefono }}
-        </p>
-      </div>
-      <div class="fila">
-        <a v-if="perfil.privado" :href="`mailto:${perfil.privado.email}`" class="btn btn-pequeno"><Mail :size="16" /> Email</a>
-        <button class="btn btn-pequeno" @click="alternarSuspension">
-          <component :is="perfil.archivado ? RotateCcw : Ban" :size="16" />
-          {{ perfil.archivado ? 'Restaurar' : 'Suspender' }}
+    <div class="contenedor cuerpo">
+      <section v-if="auth.esAdmin && !esMio" class="moderacion">
+        <div>
+          <h2>Moderación</h2>
+          <dl v-if="perfil.privado" class="privado pequeno">
+            <div><dt>Email</dt><dd>{{ perfil.privado.email }}</dd></div>
+            <div><dt>DNI</dt><dd>{{ perfil.privado.dni }}</dd></div>
+            <div><dt>Teléfono</dt><dd>{{ perfil.privado.telefono }}</dd></div>
+          </dl>
+        </div>
+        <div class="fila">
+          <a v-if="perfil.privado" :href="`mailto:${perfil.privado.email}`" class="btn btn-pequeno"><Mail :size="16" /> Email</a>
+          <button class="btn btn-pequeno" @click="alternarSuspension">
+            <component :is="perfil.archivado ? RotateCcw : Ban" :size="16" />
+            {{ perfil.archivado ? 'Restaurar' : 'Suspender' }}
+          </button>
+          <button class="btn btn-pequeno btn-peligro" @click="eliminarCuenta"><Trash2 :size="16" /> Eliminar</button>
+        </div>
+      </section>
+
+      <div class="pestanas" role="tablist">
+        <button
+          v-for="p in PESTANAS"
+          :key="p.id"
+          role="tab"
+          :aria-selected="pestana === p.id"
+          @click="pestana = p.id"
+        >
+          {{ p.texto }}<span v-if="numeros[p.id] !== undefined" class="numero">{{ numeros[p.id] }}</span>
         </button>
-        <button class="btn btn-pequeno btn-peligro" @click="eliminarCuenta"><Trash2 :size="16" /> Eliminar</button>
       </div>
-    </section>
 
-    <div class="pestanas" role="tablist">
-      <button
-        v-for="p in PESTANAS"
-        :key="p.id"
-        role="tab"
-        :aria-selected="pestana === p.id"
-        @click="pestana = p.id"
-      >
-        {{ p.texto }}<span v-if="numeros[p.id] !== undefined" class="numero">{{ numeros[p.id] }}</span>
-      </button>
-    </div>
-
-    <div v-if="!datos[pestana]" class="rejilla">
-      <div v-for="n in 3" :key="n" class="esqueleto" style="height: 120px"></div>
-    </div>
-
-    <template v-else-if="pestana === 'actividad'">
-      <ul v-if="datos.actividad.length" class="lista-limpia tarjeta actividad">
-        <li v-for="a in datos.actividad" :key="a.id">
-          <component :is="a.tipo === 'visita' ? Footprints : Activity" :size="18" class="icono" />
-          <span>
-            {{ TEXTOS[a.tipo] }}
-            <RouterLink :to="`/establecimientos/${a.establecimiento.id}`">{{ a.establecimiento.nombre }}</RouterLink>
-            <span class="suave"> ({{ a.establecimiento.localidad }})</span>
-          </span>
-          <span class="suave pequeno cuando">{{ hace(a.creado_en) }}</span>
-        </li>
-      </ul>
-      <EstadoVacio v-else :icono="Activity" titulo="Sin actividad todavía"
-        :texto="esMio ? 'Visita, opina o añade sitios y aparecerán aquí.' : 'Esta persona aún no ha participado.'" />
-    </template>
-
-    <template v-else-if="pestana === 'favoritos' || pestana === 'visitados'">
-      <div v-if="datos[pestana].length" class="rejilla">
-        <EstablecimientoCard v-for="e in datos[pestana]" :key="e.id" :establecimiento="e" />
+      <div v-if="!datos[pestana]" class="rejilla">
+        <div v-for="n in 3" :key="n" class="esqueleto" style="height: 120px"></div>
       </div>
-      <EstadoVacio
-        v-else
-        :icono="pestana === 'favoritos' ? Bookmark : Footprints"
-        :titulo="pestana === 'favoritos' ? 'Sin favoritos' : 'Sin visitas'"
-        :texto="esMio ? 'Explora sitios y guárdalos o márcalos como visitados.' : ''"
-      >
-        <RouterLink v-if="esMio" to="/establecimientos" class="btn btn-primario">Explorar sitios</RouterLink>
-      </EstadoVacio>
-    </template>
 
-    <template v-else>
-      <ListaUsuarios v-if="datos[pestana].length" :usuarios="datos[pestana]" />
-      <EstadoVacio v-else :icono="Users" :titulo="pestana === 'seguidores' ? 'Aún sin seguidores' : 'No sigue a nadie todavía'" />
-    </template>
+      <template v-else-if="pestana === 'actividad'">
+        <ul v-if="datos.actividad.length" class="lista-limpia lista-filas actividad">
+          <li v-for="a in datos.actividad" :key="a.id">
+            <component :is="a.tipo === 'visita' ? Footprints : Activity" :size="18" class="icono" aria-hidden="true" />
+            <span>
+              {{ TEXTOS[a.tipo] }}
+              <RouterLink :to="`/establecimientos/${a.establecimiento.id}`">{{ a.establecimiento.nombre }}</RouterLink>
+              <span class="suave">en {{ a.establecimiento.localidad }}</span>
+            </span>
+            <span class="suave pequeno cuando">{{ hace(a.creado_en) }}</span>
+          </li>
+        </ul>
+        <EstadoVacio v-else :icono="Activity" titulo="Sin actividad todavía"
+          :texto="esMio ? 'Visita, opina o añade sitios y aparecerán aquí.' : 'Esta persona aún no ha participado.'" />
+      </template>
+
+      <template v-else-if="pestana === 'favoritos' || pestana === 'visitados'">
+        <div v-if="datos[pestana].length" class="rejilla">
+          <EstablecimientoCard v-for="e in datos[pestana]" :key="e.id" :establecimiento="e" />
+        </div>
+        <EstadoVacio
+          v-else
+          :icono="pestana === 'favoritos' ? Bookmark : Footprints"
+          :titulo="pestana === 'favoritos' ? 'Sin favoritos' : 'Sin visitas'"
+          :texto="esMio ? 'Cuando guardes un sitio o lo marques como visitado, aparecerá aquí.' : ''"
+        >
+          <RouterLink v-if="esMio" to="/establecimientos" class="btn btn-primario">Ver establecimientos</RouterLink>
+        </EstadoVacio>
+      </template>
+
+      <template v-else>
+        <ListaUsuarios v-if="datos[pestana].length" :usuarios="datos[pestana]" />
+        <EstadoVacio v-else :icono="Users" :titulo="pestana === 'seguidores' ? 'Aún sin seguidores' : 'No sigue a nadie todavía'" />
+      </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .cabecera-perfil {
+  background: var(--niebla);
+}
+
+.cabecera-perfil .interior {
+  width: min(var(--ancho), 100% - 2 * var(--margen));
+  margin-inline: auto;
+  padding-block: 2.5rem;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem 2rem;
 }
 
 .identidad {
@@ -243,42 +253,48 @@ onMounted(cargar)
 
 .identidad h1 {
   margin: 0;
-  font-size: 1.7rem;
 }
 
 .identidad p {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
+}
+
+.estados {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem !important;
 }
 
 .cifras {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0 0;
+  gap: 0.25rem 1.5rem;
+  margin-top: 1rem;
 }
 
 .cifras button {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   font: inherit;
-  font-size: 0.78rem;
   color: var(--texto-suave);
-  border: 1px solid var(--borde);
-  background: var(--crema);
-  border-radius: var(--radio-sm);
-  padding: 0.45rem 0.9rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  min-height: 44px;
   cursor: pointer;
 }
 
 .cifras button:hover {
-  border-color: var(--naranja);
+  color: var(--carbon);
+  text-decoration: underline;
 }
 
 .cifras strong {
-  font-weight: 800;
-  font-size: 1.15rem;
-  color: var(--texto);
+  font-weight: 700;
+  color: var(--carbon);
+  margin-right: 0.15rem;
+}
+
+.cuerpo {
+  padding-top: 0;
 }
 
 .moderacion {
@@ -287,37 +303,52 @@ onMounted(cargar)
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  border-color: #f1c9a5;
-  background: #fff8ef;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio);
 }
 
 .moderacion h2 {
-  font-size: 1.05rem;
+  font-size: 1rem;
   margin: 0;
 }
 
-.moderacion p {
-  margin: 0.2rem 0 0;
+.privado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin: 0.35rem 0 0;
 }
 
-.actividad {
-  padding: 0.25rem 1.25rem;
+.privado dt {
+  display: inline;
+  color: var(--texto-suave);
+  margin-right: 0.35rem;
+}
+
+.privado dd {
+  display: inline;
+  margin: 0;
+}
+
+.pestanas {
+  margin-top: 1.5rem;
 }
 
 .actividad li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.8rem 0;
+  gap: 0.15rem 0.75rem;
 }
 
-.actividad li + li {
-  border-top: 1px solid var(--borde);
+.actividad li span .suave {
+  margin-left: 0.3rem;
 }
 
 .icono {
-  color: var(--naranja);
+  color: var(--turquesa-oscuro);
   flex-shrink: 0;
 }
 
@@ -327,25 +358,22 @@ onMounted(cargar)
 }
 
 @media (max-width: 600px) {
-  .cabecera-perfil {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .actividad li {
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: start;
   }
 
-  .chips {
-    justify-content: center;
+  .actividad .icono {
+    margin-top: 0.2rem;
   }
 
-  .cifras {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.35rem;
+  .actividad .cuando {
+    grid-column: 2;
+    margin-left: 0;
   }
 
-  .cifras button {
-    align-items: center;
-    padding: 0.45rem 0.25rem;
+  .cabecera-perfil .interior {
+    padding-block: 1.75rem;
   }
 
   .acciones {

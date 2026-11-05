@@ -8,7 +8,7 @@ defineProps({
 
 <template>
   <div class="vacio">
-    <span class="circulo"><component :is="icono" :size="28" /></span>
+    <component :is="icono" :size="32" :stroke-width="1.5" class="icono" aria-hidden="true" />
     <h3>{{ titulo }}</h3>
     <p v-if="texto" class="suave">{{ texto }}</p>
     <slot />
@@ -21,17 +21,11 @@ defineProps({
   justify-items: center;
   text-align: center;
   gap: 0.25rem;
-  padding: 2.5rem 1rem;
+  padding: 3rem 1rem;
 }
 
-.circulo {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--crema-2);
-  color: var(--coral-oscuro);
+.icono {
+  color: var(--turquesa-oscuro);
   margin-bottom: 0.5rem;
 }
 

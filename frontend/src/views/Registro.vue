@@ -68,7 +68,7 @@ async function registrarse() {
         avisos.error(`Tu cuenta se ha creado, pero no se pudo subir la foto: ${e.message}`)
       }
     }
-    avisos.ok(`¡Bienvenido/a a la comunidad, ${datos.nombre}!`)
+    avisos.ok(`Te damos la bienvenida a la comunidad, ${datos.nombre}`)
     router.push(route.query.volver || '/establecimientos')
   } catch (e) {
     error.value = e.message
@@ -80,13 +80,13 @@ async function registrarse() {
 
 <template>
   <div class="contenedor medio">
-    <div class="tarjeta">
-      <h1>Únete a Ocio Sin Gluten</h1>
-      <p class="suave intro">Crea tu cuenta para opinar, guardar tus sitios favoritos y hablar con la comunidad.</p>
+    <div>
+      <h1>Crear una cuenta</h1>
+      <p class="suave intro">Con tu cuenta puedes opinar, guardar tus sitios favoritos y hablar con la comunidad.</p>
 
       <form class="formulario" novalidate @submit.prevent="registrarse">
         <fieldset>
-          <legend><span class="paso">1</span> Tu cuenta</legend>
+          <legend>Tu cuenta</legend>
           <div class="avatar-selector">
             <label class="avatar-boton" :title="foto ? 'Cambiar foto' : 'Añadir foto'">
               <img v-if="previsualizacion" :src="previsualizacion" alt="" />
@@ -122,9 +122,9 @@ async function registrarse() {
         </fieldset>
 
         <fieldset>
-          <legend><span class="paso">2</span> Datos personales</legend>
+          <legend>Datos personales</legend>
           <p class="privacidad pequeno">
-            <ShieldCheck :size="18" /> Estos datos son privados: solo los ves tú y el equipo de administración.
+            <ShieldCheck :size="18" aria-hidden="true" /> Estos datos son privados: solo los ves tú y el equipo de administración.
           </p>
           <div class="dos-columnas">
             <label>
@@ -186,11 +186,16 @@ async function registrarse() {
 <style scoped>
 .intro {
   margin-top: 0;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2.25rem;
 }
 
 .formulario {
-  gap: 2rem;
+  gap: 2.25rem;
+}
+
+fieldset + fieldset {
+  padding-top: 2rem;
+  border-top: 1px solid var(--borde);
 }
 
 .avatar-selector {
@@ -206,20 +211,21 @@ async function registrarse() {
 .avatar-boton {
   display: grid;
   place-items: center;
-  width: 76px;
-  height: 76px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 2px dashed var(--crema-3);
-  background: var(--crema);
+  border: 2px dashed var(--borde-fuerte);
+  background: var(--niebla);
   color: var(--texto-suave);
   cursor: pointer;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-.avatar-boton:hover {
-  border-color: var(--coral);
-  color: var(--coral);
+.avatar-boton:hover,
+.avatar-boton:focus-within {
+  border-color: var(--turquesa-oscuro);
+  color: var(--turquesa-oscuro);
 }
 
 .avatar-boton img {
@@ -233,26 +239,36 @@ async function registrarse() {
   align-items: center;
   gap: 0.5rem;
   margin: -0.25rem 0 0;
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.9rem;
   border-radius: var(--radio-sm);
-  background: #e3f3e8;
-  color: var(--verde);
+  background: var(--niebla);
+  color: var(--carbon);
   font-weight: 500;
+}
+
+.privacidad svg {
+  color: var(--turquesa-oscuro);
+  flex-shrink: 0;
 }
 
 .condiciones {
   display: grid;
   gap: 0.6rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--borde);
 }
 
 summary {
   cursor: pointer;
   font-weight: 600;
-  color: var(--coral-oscuro);
+  color: var(--turquesa-oscuro);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .pie {
   text-align: center;
-  margin: 1.25rem 0 0;
+  margin: 1.75rem 0 0;
 }
 </style>

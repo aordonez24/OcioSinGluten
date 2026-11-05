@@ -21,7 +21,7 @@ async function entrar() {
   enviando.value = true
   try {
     auth.iniciarSesion(await api('/auth/login', { method: 'POST', body: datos }))
-    avisos.ok(`¡Hola de nuevo, ${auth.usuario.nombre}!`)
+    avisos.ok(`Hola de nuevo, ${auth.usuario.nombre}`)
     router.push(route.query.volver || '/establecimientos')
   } catch (e) {
     error.value = e.message
@@ -33,11 +33,11 @@ async function entrar() {
 
 <template>
   <div class="contenedor estrecho">
-    <div class="tarjeta">
+    <div class="acceso">
       <div class="cabecera">
-        <img :src="logo" alt="" width="64" height="64" />
-        <h1>Bienvenido/a de nuevo</h1>
-        <p class="suave">Entra para opinar, guardar sitios y hablar con la comunidad.</p>
+        <img :src="logo" alt="" width="72" height="72" />
+        <h1>Iniciar sesión</h1>
+        <p class="suave">Entra para opinar, guardar tus sitios y hablar con la comunidad.</p>
       </div>
       <form class="formulario" @submit.prevent="entrar">
         <label>
@@ -55,26 +55,29 @@ async function entrar() {
       </form>
       <p class="pie suave">
         ¿Aún no tienes cuenta?
-        <RouterLink :to="{ path: '/registro', query: route.query }">Créala en un minuto</RouterLink>
+        <RouterLink :to="{ path: '/registro', query: route.query }">Crea una cuenta nueva</RouterLink>
       </p>
     </div>
   </div>
 </template>
 
 <style scoped>
+.acceso {
+  padding-block: 1rem;
+}
+
 .cabecera {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .cabecera img {
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 1rem;
   border-radius: 50%;
 }
 
 .cabecera h1 {
-  font-size: 1.6rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .cabecera p {
@@ -83,6 +86,8 @@ async function entrar() {
 
 .pie {
   text-align: center;
-  margin: 1.25rem 0 0;
+  margin: 1.75rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--borde);
 }
 </style>

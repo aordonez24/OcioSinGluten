@@ -35,8 +35,8 @@ const iniciales = computed(() => (props.usuario.nombre || props.usuario.username
 .inicial {
   display: inline-grid;
   place-items: center;
-  background: var(--naranja);
-  color: var(--marron);
-  font-weight: 700;
+  background: var(--turquesa);
+  color: var(--carbon);
+  font-weight: 650;
 }
 </style>

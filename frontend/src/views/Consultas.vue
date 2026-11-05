@@ -39,11 +39,12 @@ onMounted(async () => {
     </div>
 
     <div v-if="consultas === null" class="esqueleto" style="height: 140px"></div>
-    <ul v-else-if="consultas.length" class="lista-limpia lista">
-      <li v-for="c in consultas" :key="c.id" class="tarjeta">
+    <ul v-else-if="consultas.length" class="lista-limpia lista-filas lista">
+      <li v-for="c in consultas" :key="c.id">
         <p class="meta">
           <strong>{{ c.nombre }}</strong>
-          <span class="suave pequeno">{{ c.email }} · {{ hace(c.creado_en) }}</span>
+          <a :href="`mailto:${c.email}`" class="pequeno">{{ c.email }}</a>
+          <span class="suave pequeno">{{ hace(c.creado_en) }}</span>
         </p>
         <blockquote>{{ c.mensaje }}</blockquote>
         <div class="fila">
@@ -52,29 +53,28 @@ onMounted(async () => {
         </div>
       </li>
     </ul>
-    <EstadoVacio v-else :icono="Inbox" titulo="Bandeja vacía" texto="No hay consultas pendientes. ¡Buen trabajo!" />
+    <EstadoVacio v-else :icono="Inbox" titulo="No hay consultas pendientes" texto="Las que lleguen desde el formulario de contacto aparecerán aquí." />
   </div>
 </template>
 
 <style scoped>
-.lista {
-  display: grid;
-  gap: 1rem;
+.lista > li {
+  padding-block: 1.25rem;
 }
 
 .meta {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.25rem 0.85rem;
   align-items: baseline;
 }
 
 blockquote {
   margin: 0.75rem 0 1rem;
   padding: 0.75rem 1rem;
-  background: var(--crema);
-  border-left: 3px solid var(--naranja);
+  background: var(--niebla);
+  border-left: 3px solid var(--turquesa-oscuro);
   border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
   white-space: pre-line;
 }

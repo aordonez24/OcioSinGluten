@@ -1,7 +1,7 @@
 <script setup>
 // Navegación inferior en móvil: las secciones principales siempre a un toque.
 import { computed } from 'vue'
-import { Compass, House, MessagesSquare, Activity, UserRound, LogIn, Plus } from 'lucide-vue-next'
+import { Store, House, MessagesSquare, Activity, UserRound, LogIn, Plus } from 'lucide-vue-next'
 import { useAuth } from '@/stores/auth'
 
 const auth = useAuth()
@@ -9,15 +9,15 @@ const enlaces = computed(() =>
   auth.autenticado
     ? [
         { to: '/', icono: House, texto: 'Inicio', exacto: true },
-        { to: '/establecimientos', icono: Compass, texto: 'Explorar', exacto: true },
-        { to: '/establecimientos/nuevo', icono: Plus, texto: 'Añadir', destacado: true },
+        { to: '/establecimientos', icono: Store, texto: 'Sitios', exacto: true },
+        { to: '/establecimientos/nuevo', icono: Plus, texto: 'Añadir' },
         { to: '/chat', icono: MessagesSquare, texto: 'Chat' },
         { to: `/u/${auth.usuario.username}`, icono: UserRound, texto: 'Perfil' },
       ]
     : [
         { to: '/', icono: House, texto: 'Inicio', exacto: true },
-        { to: '/establecimientos', icono: Compass, texto: 'Explorar' },
-        { to: '/actividad', icono: Activity, texto: 'Actividad' },
+        { to: '/establecimientos', icono: Store, texto: 'Sitios' },
+        { to: '/actividad', icono: Activity, texto: 'Actividades' },
         { to: '/entrar', icono: LogIn, texto: 'Entrar' },
       ],
 )
@@ -29,7 +29,6 @@ const enlaces = computed(() =>
       v-for="e in enlaces"
       :key="e.to"
       :to="e.to"
-      :class="{ destacado: e.destacado }"
       :exact-active-class="e.exacto ? 'activo' : ''"
       :active-class="e.exacto ? '' : 'activo'"
     >
@@ -49,10 +48,9 @@ const enlaces = computed(() =>
     display: flex;
     position: fixed;
     inset: auto 0 0;
-    height: var(--alto-barra-movil);
+    height: calc(var(--alto-barra-movil) + env(safe-area-inset-bottom));
     background: var(--blanco);
     border-top: 1px solid var(--borde);
-    box-shadow: 0 -4px 16px rgb(43 29 18 / 6%);
     z-index: 100;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -63,26 +61,28 @@ const enlaces = computed(() =>
     justify-items: center;
     align-content: center;
     gap: 2px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--texto-suave);
     text-decoration: none;
   }
 
-  a.activo {
-    color: var(--coral-oscuro);
-  }
-
-  .destacado .icono {
+  .icono {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
-    margin-top: -14px;
-    border-radius: 50%;
-    background: var(--coral);
-    color: #fff;
-    box-shadow: 0 4px 12px rgb(226 96 74 / 40%);
+    width: 52px;
+    height: 30px;
+    border-radius: 999px;
+    transition: background-color 0.15s;
+  }
+
+  a.activo {
+    color: var(--carbon);
+  }
+
+  /* La sección actual se marca con la píldora turquesa, como en la cabecera de escritorio. */
+  a.activo .icono {
+    background: var(--turquesa);
   }
 }
 </style>

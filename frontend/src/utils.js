@@ -90,3 +90,6 @@ export function distanciaKm(a, b) {
 
 export const formatoDistancia = (km) =>
   km < 1 ? `${Math.round(km * 1000)} m` : `${km < 10 ? km.toFixed(1).replace('.', ',') : Math.round(km)} km`
+
+/** Valoración media con un decimal y coma: 4,5. */
+export const nota = (valor) => (valor == null ? '' : valor.toFixed(1).replace('.', ','))

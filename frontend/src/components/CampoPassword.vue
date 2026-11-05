@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { Eye, EyeOff } from 'lucide-vue-next'
+import { Check, Eye, EyeOff, Minus } from 'lucide-vue-next'
 
 const modelo = defineModel({ type: String, default: '' })
 defineProps({
@@ -38,7 +38,8 @@ const fuerza = computed(() => cumplidos.value.filter(Boolean).length + (modelo.v
   <span v-if="medidor" class="medidor" aria-live="polite">
     <span class="barras" :data-fuerza="fuerza"><i></i><i></i><i></i><i></i></span>
     <span v-for="(r, i) in REQUISITOS" :key="r.texto" class="requisito" :class="{ ok: cumplidos[i] }">
-      {{ cumplidos[i] ? '✓' : '·' }} {{ r.texto }}
+      <component :is="cumplidos[i] ? Check : Minus" :size="14" aria-hidden="true" /> {{ r.texto }}
+      <span class="solo-lectores">{{ cumplidos[i] ? '(cumplido)' : '(pendiente)' }}</span>
     </span>
   </span>
 </template>
@@ -55,16 +56,18 @@ const fuerza = computed(() => cumplidos.value.filter(Boolean).length + (modelo.v
 
 .ojo {
   position: absolute;
-  right: 0.35rem;
+  right: 0.2rem;
   top: 50%;
   translate: 0 -50%;
   border: 0;
   background: none;
   color: var(--texto-suave);
-  padding: 0.4rem;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radio-sm);
   cursor: pointer;
   display: grid;
+  place-items: center;
 }
 
 .ojo:hover {
@@ -90,13 +93,13 @@ const fuerza = computed(() => cumplidos.value.filter(Boolean).length + (modelo.v
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: var(--crema-3);
+  background: var(--niebla-2);
   transition: background 0.2s;
 }
 
 .barras[data-fuerza='1'] i:nth-child(-n + 1),
 .barras[data-fuerza='2'] i:nth-child(-n + 2) {
-  background: var(--naranja);
+  background: var(--estrella);
 }
 
 .barras[data-fuerza='3'] i:nth-child(-n + 3),
@@ -105,6 +108,9 @@ const fuerza = computed(() => cumplidos.value.filter(Boolean).length + (modelo.v
 }
 
 .requisito {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
   color: var(--texto-suave);
 }
 

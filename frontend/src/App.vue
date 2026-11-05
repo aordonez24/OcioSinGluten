@@ -56,8 +56,9 @@ watch(
   left: 1rem;
   top: -100px;
   z-index: 200;
-  background: var(--blanco);
-  padding: 0.5rem 1rem;
+  background: var(--carbon);
+  color: #fff;
+  padding: 0.6rem 1rem;
   border-radius: var(--radio-sm);
 }
 
@@ -69,7 +70,6 @@ watch(
   position: fixed;
   bottom: calc(1rem + var(--alto-barra-movil));
   right: 1rem;
-  left: auto;
   display: grid;
   gap: 0.5rem;
   z-index: 1000;
@@ -80,28 +80,30 @@ watch(
   font-weight: 500;
   text-align: left;
   border: 0;
+  border-left: 4px solid var(--turquesa);
   cursor: pointer;
   padding: 0.85rem 1.1rem;
   border-radius: var(--radio-sm);
   color: #fff;
-  background: var(--verde);
-  box-shadow: var(--sombra-alta);
+  background: var(--carbon);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
   max-width: 380px;
 }
 
 .aviso.error {
   background: var(--rojo);
+  border-left-color: #ffb4ab;
 }
 
 .aviso-enter-from,
 .aviso-leave-to {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(8px);
 }
 
 .aviso-enter-active,
 .aviso-leave-active {
-  transition: all 0.2s;
+  transition: opacity 0.2s, transform 0.2s;
 }
 
 @media (max-width: 760px) {

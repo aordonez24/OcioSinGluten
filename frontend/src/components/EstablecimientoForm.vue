@@ -57,7 +57,7 @@ function enviar() {
     </label>
 
     <fieldset class="distintivos">
-      <legend>¿Qué ofrece para personas celíacas? <span class="ayuda">Marca lo que sepas con seguridad</span></legend>
+      <legend>¿Qué ofrece para personas celíacas? <span class="ayuda">Marca solo lo que sepas con seguridad.</span></legend>
       <label v-for="d in DISTINTIVOS" :key="d.clave" class="distintivo" :class="{ marcado: datos[d.clave] }">
         <input v-model="datos[d.clave]" type="checkbox" />
         <component :is="d.icono" :size="20" />
@@ -131,7 +131,7 @@ function enviar() {
 }
 
 .distintivos legend {
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   display: flex;
   flex-wrap: wrap;
@@ -144,7 +144,7 @@ function enviar() {
   align-items: flex-start;
   gap: 0.6rem;
   padding: 0.7rem 0.8rem;
-  border: 1px solid var(--borde);
+  border: 1px solid var(--borde-fuerte);
   border-radius: var(--radio-sm);
   background: #fff;
   cursor: pointer;
@@ -152,9 +152,10 @@ function enviar() {
 }
 
 .distintivo input {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  margin-top: 1px;
   accent-color: var(--verde);
 }
 
@@ -170,7 +171,7 @@ function enviar() {
 
 .distintivo.marcado {
   border-color: var(--verde);
-  background: #f1faf3;
+  background: var(--verde-claro);
 }
 
 .distintivo.marcado svg {

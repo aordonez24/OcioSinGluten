@@ -45,16 +45,16 @@ onMounted(cargarMas)
   <div class="contenedor medio">
     <div class="cabecera-pagina">
       <div>
-        <h1>Actividad de la comunidad</h1>
-        <p>Lo último que ha pasado en Ocio Sin Gluten.</p>
+        <h1>Actividades</h1>
+        <p>Lo último que ha hecho la comunidad: sitios nuevos, opiniones, visitas y recomendaciones.</p>
       </div>
     </div>
 
     <div class="filtros">
       <label class="buscador">
         <span class="solo-lectores">Filtrar</span>
-        <Search :size="18" />
-        <input v-model="busqueda" type="search" placeholder="Filtrar por persona o sitio…" />
+        <Search :size="18" aria-hidden="true" />
+        <input v-model="busqueda" type="search" placeholder="Filtrar por persona o sitio" />
       </label>
       <div class="chips" role="group" aria-label="Tipo de actividad">
         <button :aria-pressed="tipo === ''" @click="tipo = ''">Todo</button>
@@ -64,7 +64,7 @@ onMounted(cargarMas)
       </div>
     </div>
 
-    <div v-if="actividades === null" class="tarjeta">
+    <div v-if="actividades === null">
       <div v-for="n in 5" :key="n" class="esqueleto" style="height: 48px; margin: 0.6rem 0"></div>
     </div>
 
@@ -73,7 +73,7 @@ onMounted(cargarMas)
 
     <section v-for="g in grupos" :key="g.etiqueta" class="grupo">
       <h2>{{ g.etiqueta }}</h2>
-      <ul class="lista-limpia tarjeta lista">
+      <ul class="lista-limpia lista-filas lista">
         <li v-for="a in g.elementos" :key="a.id">
           <RouterLink :to="`/u/${a.usuario.username}`" class="avatar-tipo">
             <Avatar :usuario="a.usuario" :tamano="42" />
@@ -83,7 +83,7 @@ onMounted(cargarMas)
             <RouterLink :to="`/u/${a.usuario.username}`" class="usuario">{{ a.usuario.username }}</RouterLink>
             {{ TIPOS[a.tipo].texto }}
             <RouterLink :to="`/establecimientos/${a.establecimiento.id}`">{{ a.establecimiento.nombre }}</RouterLink>
-            <span class="suave"> · {{ a.establecimiento.localidad }}</span>
+            <span class="suave">en {{ a.establecimiento.localidad }}</span>
           </p>
           <time class="suave pequeno" :datetime="a.creado_en">{{ hora(a.creado_en) }}</time>
         </li>
@@ -91,7 +91,7 @@ onMounted(cargarMas)
     </section>
 
     <div v-if="hayMas" class="mas">
-      <button class="btn" :disabled="cargando" @click="cargarMas">{{ cargando ? 'Cargando…' : 'Ver más antigua' }}</button>
+      <button class="btn" :disabled="cargando" @click="cargarMas">{{ cargando ? 'Cargando…' : 'Ver actividades anteriores' }}</button>
     </div>
   </div>
 </template>
@@ -100,23 +100,13 @@ onMounted(cargarMas)
 .filtros {
   display: grid;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.buscador {
-  max-width: none;
+  margin-bottom: 1rem;
 }
 
 .grupo h2 {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--texto-suave);
-  margin: 1.5rem 0 0.6rem;
-}
-
-.lista {
-  padding: 0.25rem 1.25rem;
+  font-size: 1rem;
+  margin: 2rem 0 0;
+  padding-bottom: 0.6rem;
 }
 
 .lista li {
@@ -124,15 +114,14 @@ onMounted(cargarMas)
   grid-template-columns: auto 1fr auto;
   gap: 0.85rem;
   align-items: center;
-  padding: 0.8rem 0;
-}
-
-.lista li + li {
-  border-top: 1px solid var(--borde);
 }
 
 .lista p {
   margin: 0;
+}
+
+.lista p .suave {
+  margin-left: 0.3rem;
 }
 
 .avatar-tipo {
@@ -150,15 +139,15 @@ onMounted(cargarMas)
   border-radius: 50%;
   border: 2px solid var(--blanco);
   color: #fff;
-  background: var(--naranja);
+  background: var(--turquesa-oscuro);
 }
 
 .tipo.like {
-  background: var(--coral);
+  background: #b33a5a;
 }
 
 .tipo.comentario {
-  background: #6b4f9e;
+  background: var(--carbon);
 }
 
 .tipo.publicacion {
@@ -166,13 +155,13 @@ onMounted(cargarMas)
 }
 
 .usuario {
-  font-weight: 700;
-  color: inherit;
+  font-weight: 650;
+  color: var(--carbon);
   text-decoration: none;
 }
 
 .mas {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 </style>

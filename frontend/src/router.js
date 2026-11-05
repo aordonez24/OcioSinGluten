@@ -6,9 +6,9 @@ import { useAuth } from '@/stores/auth'
 // meta.invitado → solo sin sesión (login/registro)
 const routes = [
   { path: '/', component: () => import('@/views/Inicio.vue'), meta: { titulo: null } },
-  { path: '/entrar', name: 'login', component: () => import('@/views/Login.vue'), meta: { titulo: 'Entrar', invitado: true } },
+  { path: '/entrar', name: 'login', component: () => import('@/views/Login.vue'), meta: { titulo: 'Iniciar sesión', invitado: true } },
   { path: '/registro', component: () => import('@/views/Registro.vue'), meta: { titulo: 'Crear cuenta', invitado: true } },
-  { path: '/establecimientos', component: () => import('@/views/Establecimientos.vue'), meta: { titulo: 'Explorar' } },
+  { path: '/establecimientos', component: () => import('@/views/Establecimientos.vue'), meta: { titulo: 'Establecimientos' } },
   {
     path: '/establecimientos/nuevo',
     component: () => import('@/views/NuevoEstablecimiento.vue'),
@@ -20,7 +20,7 @@ const routes = [
     props: (r) => ({ id: Number(r.params.id) }),
     meta: { titulo: 'Establecimiento' },
   },
-  { path: '/actividad', component: () => import('@/views/Actividad.vue'), meta: { titulo: 'Actividad' } },
+  { path: '/actividad', component: () => import('@/views/Actividad.vue'), meta: { titulo: 'Actividades' } },
   { path: '/comunidad', component: () => import('@/views/Comunidad.vue'), meta: { titulo: 'Comunidad', sesion: true } },
   { path: '/chat', component: () => import('@/views/Chat.vue'), meta: { titulo: 'Chat', sesion: true } },
   { path: '/ajustes', component: () => import('@/views/Ajustes.vue'), meta: { titulo: 'Ajustes', sesion: true } },
@@ -51,7 +51,7 @@ router.beforeEach((to) => {
 
 /** Las vistas pueden afinar el título (p. ej. con el nombre del local). */
 export function ponerTitulo(titulo) {
-  document.title = titulo ? `${titulo} · Ocio Sin Gluten` : 'Ocio Sin Gluten · Comunidad sin gluten'
+  document.title = titulo ? `${titulo} - Ocio Sin Gluten` : 'Ocio Sin Gluten - Disfrute de su tiempo de ocio sin gluten'
 }
 
 router.afterEach((to) => ponerTitulo(to.meta.titulo))

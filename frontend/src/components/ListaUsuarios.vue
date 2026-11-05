@@ -41,19 +41,16 @@ const emit = defineEmits(['alternar-seguir'])
 <style scoped>
 .rejilla-usuarios {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  column-gap: 2.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .usuario {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  background: var(--blanco);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-  box-shadow: var(--sombra);
+  padding-block: 0.9rem;
+  border-bottom: 1px solid var(--borde);
 }
 
 .enlace {
@@ -79,6 +76,7 @@ const emit = defineEmits(['alternar-seguir'])
 }
 
 .enlace:hover strong {
-  color: var(--coral-oscuro);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 </style>

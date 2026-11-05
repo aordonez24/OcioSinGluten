@@ -1,63 +1,69 @@
 <script setup>
 import { computed } from 'vue'
-import { Heart, MapPin, WheatOff } from 'lucide-vue-next'
+import { Heart, WheatOff } from 'lucide-vue-next'
 import { CATEGORIAS } from '@/catalogo'
-import { formatoDistancia } from '@/utils'
+import { formatoDistancia, nota } from '@/utils'
 import Estrellas from '@/components/Estrellas.vue'
 import Portada from '@/components/Portada.vue'
 
 const props = defineProps({ establecimiento: { type: Object, required: true } })
-const categoria = computed(() => CATEGORIAS[props.establecimiento.categoria] ?? CATEGORIAS.otro)
+const e = computed(() => props.establecimiento)
+const categoria = computed(() => (CATEGORIAS[e.value.categoria] ?? CATEGORIAS.otro).texto)
+const lugar = computed(() =>
+  e.value.localidad === e.value.provincia ? e.value.localidad : `${e.value.localidad}, ${e.value.provincia}`,
+)
 </script>
 
 <template>
-  <RouterLink :to="`/establecimientos/${establecimiento.id}`" class="tarjeta-est">
+  <RouterLink :to="`/establecimientos/${e.id}`" class="tarjeta-est">
     <div class="imagen">
-      <Portada :url="establecimiento.portada_url" :nombre="establecimiento.nombre" />
-      <span v-if="establecimiento.todo_sin_gluten" class="sello"><WheatOff :size="14" /> 100 % sin gluten</span>
+      <Portada :url="e.portada_url" :categoria="e.categoria" />
+      <span v-if="e.todo_sin_gluten" class="sello"><WheatOff :size="14" aria-hidden="true" /> 100 % sin gluten</span>
     </div>
     <div class="cuerpo">
-      <p class="categoria"><component :is="categoria.icono" :size="14" /> {{ categoria.texto }}</p>
-      <h3>{{ establecimiento.nombre }}</h3>
-      <p class="lugar suave">
-        <MapPin :size="15" /> {{ establecimiento.localidad }}
-        <span v-if="establecimiento.localidad !== establecimiento.provincia">· {{ establecimiento.provincia }}</span>
-        <strong v-if="establecimiento.distancia != null" class="distancia">a {{ formatoDistancia(establecimiento.distancia) }}</strong>
-      </p>
-      <div class="pie">
+      <p class="categoria">{{ categoria }} en {{ lugar }}</p>
+      <h3>{{ e.nombre }}</h3>
+      <p v-if="e.todo_sin_gluten" class="sello-linea"><WheatOff :size="14" aria-hidden="true" /> 100 % sin gluten</p>
+      <p class="pie">
         <span class="nota">
-          <Estrellas :valor="establecimiento.valoracion" />
-          <span v-if="establecimiento.num_opiniones" class="suave pequeno">
-            <strong>{{ establecimiento.valoracion }}</strong> ({{ establecimiento.num_opiniones }})
+          <Estrellas :valor="e.valoracion" :tamano="15" />
+          <span v-if="e.num_opiniones" class="suave">
+            {{ nota(e.valoracion) }} ({{ e.num_opiniones }})
           </span>
         </span>
-        <span class="suave pequeno me-gusta" title="Me gusta"><Heart :size="14" /> {{ establecimiento.num_likes }}</span>
-      </div>
+        <strong v-if="e.distancia != null" class="distancia">a {{ formatoDistancia(e.distancia) }}</strong>
+        <span v-else class="me-gusta suave" :title="`${e.num_likes} me gusta`">
+          <Heart :size="14" aria-hidden="true" /> {{ e.num_likes }}
+        </span>
+      </p>
     </div>
   </RouterLink>
 </template>
 
 <style scoped>
 .tarjeta-est {
-  display: flex;
-  flex-direction: column;
-  background: var(--blanco);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-  overflow: hidden;
+  display: grid;
+  align-content: start;
   color: inherit;
   text-decoration: none;
-  box-shadow: var(--sombra);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.tarjeta-est:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sombra-alta);
 }
 
 .imagen {
   position: relative;
+  margin-bottom: 0.65rem;
+}
+
+.imagen :deep(.portada) {
+  transition: filter 0.15s;
+}
+
+.tarjeta-est:hover .imagen :deep(.portada) {
+  filter: brightness(0.95);
+}
+
+.tarjeta-est:hover h3 {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .sello {
@@ -67,64 +73,42 @@ const categoria = computed(() => CATEGORIAS[props.establecimiento.categoria] ?? 
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radio-sm);
   background: #fff;
   color: var(--verde);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  box-shadow: var(--sombra);
-}
-
-@media (max-width: 520px) {
-  .tarjeta-est :deep(.portada) {
-    aspect-ratio: 5 / 2;
-  }
 }
 
 .cuerpo {
-  padding: 0.85rem 1.1rem 1rem;
   display: grid;
-  gap: 0.25rem;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.sello-linea {
+  display: none;
 }
 
 .categoria {
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--coral-oscuro);
+  font-size: 0.875rem;
+  color: var(--texto-suave);
 }
 
 h3 {
   margin: 0;
-  font-size: 1.08rem;
-}
-
-.lugar {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.88rem;
-}
-
-.distancia {
-  margin-left: auto;
-  color: var(--coral-oscuro);
-  font-size: 0.82rem;
-  white-space: nowrap;
+  font-size: 1.125rem;
 }
 
 .pie {
+  margin: 0.2rem 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 0.35rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .nota {
@@ -133,13 +117,55 @@ h3 {
   gap: 0.4rem;
 }
 
-.nota strong {
-  color: var(--texto);
+.distancia {
+  color: var(--turquesa-oscuro);
+  white-space: nowrap;
 }
 
 .me-gusta {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+/* En móvil, lista compacta: miniatura a la izquierda y datos a la derecha. */
+@media (max-width: 520px) {
+  .tarjeta-est {
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+  }
+
+  .imagen {
+    margin: 0;
+  }
+
+  .tarjeta-est :deep(.portada) {
+    aspect-ratio: 1;
+    border-radius: var(--radio-sm);
+  }
+
+  .tarjeta-est :deep(.sin-foto svg) {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sello {
+    display: none;
+  }
+
+  .sello-linea {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0.1rem 0 0;
+    color: var(--verde);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.0625rem;
+  }
 }
 </style>

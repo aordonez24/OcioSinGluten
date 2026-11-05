@@ -35,7 +35,7 @@ const activos = computed(() => DISTINTIVOS.filter((d) => props.establecimiento[d
 }
 
 .chip.destacado {
-  background: #e3f3e8;
+  background: var(--verde-claro);
   color: var(--verde);
 }
 
@@ -62,13 +62,13 @@ const activos = computed(() => DISTINTIVOS.filter((d) => props.establecimiento[d
   flex-shrink: 0;
   width: 38px;
   height: 38px;
-  border-radius: 10px;
-  background: var(--crema-2);
-  color: var(--marron-2);
+  border-radius: var(--radio-sm);
+  background: var(--niebla-2);
+  color: var(--turquesa-oscuro);
 }
 
 .icono.destacado {
-  background: #e3f3e8;
+  background: var(--verde-claro);
   color: var(--verde);
 }
 </style>

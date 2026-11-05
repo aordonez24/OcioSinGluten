@@ -22,7 +22,7 @@ const rellenos = computed(() => [0, 1, 2, 3, 4].map((i) => Math.max(0, Math.min(
 .estrellas {
   display: inline-flex;
   gap: 1px;
-  color: var(--naranja);
+  color: var(--estrella);
 }
 
 .estrella {
@@ -31,7 +31,7 @@ const rellenos = computed(() => [0, 1, 2, 3, 4].map((i) => Math.max(0, Math.min(
 }
 
 .vacia {
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 .llena {

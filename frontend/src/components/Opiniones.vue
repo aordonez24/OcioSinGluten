@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { MessageSquareText, Pencil, Trash2 } from 'lucide-vue-next'
+import { MessageSquareText, Pencil, Star, Trash2 } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
-import { hace } from '@/utils'
+import { hace, nota } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 import Estrellas from '@/components/Estrellas.vue'
@@ -93,29 +93,28 @@ onMounted(cargar)
 </script>
 
 <template>
-  <section class="tarjeta opiniones" aria-labelledby="titulo-opiniones">
-    <h2 id="titulo-opiniones">Opiniones de la comunidad</h2>
+  <section class="opiniones" aria-labelledby="titulo-opiniones">
+    <h2 id="titulo-opiniones">Opiniones</h2>
 
     <div v-if="opiniones?.length" class="resumen">
       <div class="media">
-        <strong>{{ valoracion?.toFixed(1) }}</strong>
+        <strong>{{ nota(valoracion) }}</strong>
         <Estrellas :valor="valoracion" :tamano="18" />
         <span class="suave pequeno">{{ opiniones.length }} {{ opiniones.length === 1 ? 'opinión' : 'opiniones' }}</span>
       </div>
       <ul class="lista-limpia barras" aria-label="Reparto de puntuaciones">
-        <li v-for="d in distribucion" :key="d.n">
-          <span class="pequeno">{{ d.n }}★</span>
-          <span class="barra"><span :style="{ width: `${d.porcentaje}%` }"></span></span>
-          <span class="suave pequeno">{{ d.cantidad }}</span>
+        <li v-for="d in distribucion" :key="d.n" :aria-label="`${d.n} estrellas: ${d.cantidad}`">
+          <span class="estrellas-n" aria-hidden="true">{{ d.n }} <Star :size="12" fill="currentColor" /></span>
+          <span class="barra" aria-hidden="true"><span :style="{ width: `${d.porcentaje}%` }"></span></span>
+          <span class="suave pequeno" aria-hidden="true">{{ d.cantidad }}</span>
         </li>
       </ul>
     </div>
 
     <form v-if="mostrarFormulario" class="formulario nueva" @submit.prevent="enviar">
-      <div class="fila cabecera-form">
-        <Avatar :usuario="auth.usuario" :tamano="36" />
-        <strong>{{ editando ? 'Editar tu opinión' : '¿Has estado? Cuéntanos qué tal' }}</strong>
-      </div>
+      <p class="cabecera-form">
+        <strong>{{ editando ? 'Editar tu opinión' : '¿Has estado? Cuenta qué tal' }}</strong>
+      </p>
       <SelectorEstrellas v-model="borrador.puntuacion" />
       <textarea
         v-model="borrador.mensaje"
@@ -126,7 +125,7 @@ onMounted(cargar)
         placeholder="¿Tenían carta sin gluten? ¿Sabían lo que es la contaminación cruzada? ¿Qué pediste?"
       ></textarea>
       <div class="fila acciones-form">
-        <span class="suave pequeno">{{ borrador.mensaje.length }}/500</span>
+        <span class="suave pequeno">{{ borrador.mensaje.length }} de 500 caracteres</span>
         <button v-if="editando" type="button" class="btn btn-pequeno" @click="cancelar">Cancelar</button>
         <button class="btn btn-primario btn-pequeno" :disabled="enviando || !borrador.mensaje.trim()">
           {{ editando ? 'Guardar' : 'Publicar opinión' }}
@@ -141,21 +140,22 @@ onMounted(cargar)
     <div v-if="opiniones === null" class="esqueleto" style="height: 90px"></div>
     <ul v-else-if="opiniones.length" class="lista-limpia">
       <li v-for="o in mia && !editando ? [mia, ...resto] : resto" :key="o.id" class="opinion" :class="{ propia: o === mia }">
-        <RouterLink :to="`/u/${o.autor.username}`"><Avatar :usuario="o.autor" :tamano="40" /></RouterLink>
+        <RouterLink :to="`/u/${o.autor.username}`" tabindex="-1" aria-hidden="true"><Avatar :usuario="o.autor" :tamano="40" /></RouterLink>
         <div>
           <p class="meta">
-            <RouterLink :to="`/u/${o.autor.username}`">{{ o === mia ? 'Tu opinión' : o.autor.username }}</RouterLink>
-            <span class="suave"> · {{ hace(o.creado_en) }}<template v-if="o.editado_en"> · editada</template></span>
+            <RouterLink :to="`/u/${o.autor.username}`" class="autor">{{ o === mia ? 'Tu opinión' : o.autor.username }}</RouterLink>
+            <span class="suave">{{ hace(o.creado_en) }}</span>
+            <span v-if="o.editado_en" class="suave">(editada)</span>
           </p>
           <Estrellas :valor="o.puntuacion" :tamano="14" />
           <p class="texto">{{ o.mensaje }}</p>
         </div>
         <div class="acciones">
           <button v-if="o === mia" class="btn btn-icono btn-fantasma" title="Editar opinión" @click="empezarEdicion">
-            <Pencil :size="16" />
+            <Pencil :size="17" />
           </button>
           <button v-if="o === mia || auth.esAdmin" class="btn btn-icono btn-fantasma" title="Borrar opinión" @click="borrar(o)">
-            <Trash2 :size="16" />
+            <Trash2 :size="17" />
           </button>
         </div>
       </li>
@@ -164,7 +164,7 @@ onMounted(cargar)
       v-else
       :icono="MessageSquareText"
       titulo="Sin opiniones todavía"
-      texto="Cuéntale a la comunidad qué tal se come aquí sin gluten."
+      texto="Cuenta a la comunidad qué tal se come aquí sin gluten."
     />
   </section>
 </template>
@@ -175,61 +175,74 @@ onMounted(cargar)
   flex-wrap: wrap;
   gap: 1.5rem 2.5rem;
   align-items: center;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  background: var(--crema);
-  border-radius: var(--radio-sm);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--niebla);
+  border-radius: var(--radio);
 }
 
 .media {
   display: grid;
   justify-items: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .media strong {
-  font-size: 2.4rem;
+  font-size: 2.5rem;
   line-height: 1;
+  font-weight: 700;
+  color: var(--carbon);
 }
 
 .barras {
   flex: 1;
   min-width: 200px;
   display: grid;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .barras li {
   display: grid;
-  grid-template-columns: 2.2em 1fr 1.5em;
+  grid-template-columns: 2.5em 1fr 1.5em;
   align-items: center;
   gap: 0.5rem;
+}
+
+.estrellas-n {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.estrellas-n svg {
+  color: var(--estrella);
 }
 
 .barra {
   height: 8px;
   border-radius: 4px;
-  background: var(--crema-3);
+  background: var(--niebla-2);
   overflow: hidden;
 }
 
 .barra span {
   display: block;
   height: 100%;
-  background: var(--naranja);
-  border-radius: 4px;
+  background: var(--estrella);
 }
 
 .nueva {
-  gap: 0.6rem;
-  padding: 1rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-sm);
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio);
   margin-bottom: 1rem;
 }
 
 .cabecera-form {
-  gap: 0.6rem;
+  margin: 0;
 }
 
 .acciones-form {
@@ -241,38 +254,50 @@ onMounted(cargar)
 }
 
 .aviso-sesion {
-  padding: 0.85rem 1rem;
-  background: var(--crema-2);
+  padding: 0.9rem 1.1rem;
+  background: var(--niebla);
   border-radius: var(--radio-sm);
 }
 
 .opinion {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 0.75rem;
-  padding: 1rem 0;
+  gap: 0.85rem;
+  padding: 1.1rem 0;
   border-top: 1px solid var(--borde);
 }
 
 .opinion.propia {
-  background: var(--crema);
-  margin-inline: -0.75rem;
-  padding-inline: 0.75rem;
-  border-radius: var(--radio-sm);
+  background: var(--niebla);
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  border-radius: var(--radio);
+  border-top-color: transparent;
 }
 
 .opinion p {
   margin: 0;
 }
 
-.texto {
-  margin-top: 0.25rem !important;
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.6rem;
+  align-items: baseline;
 }
 
-.meta a {
-  font-weight: 700;
-  color: inherit;
+.autor {
+  font-weight: 650;
+  color: var(--carbon);
   text-decoration: none;
+}
+
+.autor:hover {
+  text-decoration: underline;
+}
+
+.texto {
+  margin-top: 0.3rem !important;
 }
 
 .acciones {

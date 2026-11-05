@@ -94,7 +94,7 @@ const filtrados = computed(() =>
     .sort(ORDENES[orden.value] ?? ORDENES.valoracion),
 )
 const puntos = computed(() =>
-  filtrados.value.map((e) => ({ ...e, titulo: e.nombre, subtitulo: `${e.localidad} · ${e.provincia}` })),
+  filtrados.value.map((e) => ({ ...e, titulo: e.nombre, subtitulo: `${e.localidad}, ${e.provincia}` })),
 )
 const filtrosAbiertos = ref(false)
 const numFiltros = computed(
@@ -121,20 +121,24 @@ onMounted(async () => {
   <div class="contenedor">
     <div class="cabecera-pagina">
       <div>
-        <h1>Explorar sitios sin gluten</h1>
+        <h1>Establecimientos sin gluten</h1>
         <p>
-          <template v-if="establecimientos">{{ filtrados.length }} de {{ establecimientos.length }} establecimientos</template>
+          <template v-if="establecimientos && filtrados.length === establecimientos.length">
+            {{ establecimientos.length }} establecimientos recomendados por la comunidad
+          </template>
+          <template v-else-if="establecimientos">{{ filtrados.length }} de {{ establecimientos.length }} establecimientos</template>
           <template v-else>Cargando establecimientos…</template>
         </p>
       </div>
+      <RouterLink v-if="auth.autenticado" to="/establecimientos/nuevo" class="btn btn-primario anadir">Añadir un sitio</RouterLink>
     </div>
 
-    <div class="filtros tarjeta">
+    <div class="filtros">
       <div class="principal">
         <label class="buscador">
           <span class="solo-lectores">Buscar</span>
-          <Search :size="18" />
-          <input v-model="textoBusqueda" type="search" placeholder="Nombre, localidad o calle…" />
+          <Search :size="18" aria-hidden="true" />
+          <input v-model="textoBusqueda" type="search" placeholder="Nombre, localidad o calle" />
         </label>
         <button
           class="btn cerca"
@@ -186,7 +190,7 @@ onMounted(async () => {
           >
             <component :is="d.icono" :size="15" /> {{ d.texto }}
           </button>
-          <button v-if="hayFiltros" class="quitar" @click="limpiarFiltros">Quitar filtros</button>
+          <button v-if="hayFiltros" class="enlace quitar" @click="limpiarFiltros">Quitar filtros</button>
         </div>
       </div>
     </div>
@@ -201,7 +205,7 @@ onMounted(async () => {
       v-else-if="!establecimientos.length"
       :icono="Store"
       titulo="Todavía no hay establecimientos"
-      texto="Sé la primera persona en recomendar un sitio sin gluten."
+      texto="Recomienda el primer sitio sin gluten."
     >
       <RouterLink v-if="auth.autenticado" to="/establecimientos/nuevo" class="btn btn-primario">Añadir el primero</RouterLink>
     </EstadoVacio>
@@ -209,13 +213,13 @@ onMounted(async () => {
     <EstadoVacio
       v-else-if="!filtrados.length"
       :icono="SearchX"
-      titulo="No hay resultados"
-      texto="Prueba con otra búsqueda o quita los filtros."
+      titulo="Ningún establecimiento coincide"
+      texto="Prueba con otra búsqueda o quita algún filtro. Si conoces un sitio que no está, puedes añadirlo."
     >
       <div class="fila">
         <button class="btn" @click="limpiarFiltros">Quitar filtros</button>
         <RouterLink v-if="auth.autenticado" to="/establecimientos/nuevo" class="btn btn-primario">
-          ¿No está? Añádelo
+          Añadir un sitio nuevo
         </RouterLink>
       </div>
     </EstadoVacio>
@@ -242,8 +246,10 @@ onMounted(async () => {
 .filtros {
   display: grid;
   gap: 0.75rem;
-  padding: 0.85rem;
-  margin-bottom: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  background: var(--niebla);
+  border-radius: var(--radio);
 }
 
 .principal,
@@ -254,41 +260,40 @@ onMounted(async () => {
   align-items: center;
 }
 
-.principal .buscador {
-  flex: 1;
-  max-width: none;
-}
-
 .extra select {
   width: auto;
 }
 
 .interruptor {
   display: flex;
-  border: 1px solid var(--borde);
-  border-radius: 999px;
-  padding: 3px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  overflow: hidden;
   background: #fff;
 }
 
 .interruptor button {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
+  min-height: 42px;
   font: inherit;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.9375rem;
   border: 0;
   background: none;
   padding: 0.4rem 0.9rem;
-  border-radius: 999px;
   cursor: pointer;
-  color: var(--texto-suave);
+  color: var(--carbon);
+}
+
+.interruptor button + button {
+  border-left: 1px solid var(--borde-fuerte);
 }
 
 .interruptor button[aria-pressed='true'] {
-  background: var(--marron);
-  color: var(--crema);
+  background: var(--carbon);
+  color: #fff;
 }
 
 .mostrar-filtros {
@@ -302,39 +307,28 @@ onMounted(async () => {
   height: 20px;
   padding: 0 0.3rem;
   border-radius: 999px;
-  background: var(--coral);
+  background: var(--turquesa-oscuro);
   color: #fff;
   font-size: 0.75rem;
 }
 
-.distintivos button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 .distintivos .quitar {
-  border-color: transparent;
+  min-height: 40px;
+  border: 0;
   background: none;
-  color: var(--coral-oscuro);
-  text-decoration: underline;
+  padding-inline: 0.5rem;
 }
 
 .pie {
   text-align: center;
-  margin-top: 2rem;
-}
-
-.enlace {
-  font: inherit;
-  border: 0;
-  background: none;
-  color: var(--coral-oscuro);
-  text-decoration: underline;
-  cursor: pointer;
+  margin-top: 2.5rem;
 }
 
 @media (max-width: 640px) {
+  .anadir {
+    display: none;
+  }
+
   .principal .buscador {
     flex-basis: 100%;
   }
@@ -353,7 +347,7 @@ onMounted(async () => {
   }
 
   .interruptor button {
-    padding-inline: 0.65rem;
+    padding-inline: 0.7rem;
   }
 
   .interruptor .etiqueta {

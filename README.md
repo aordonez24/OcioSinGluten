@@ -7,7 +7,7 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 
 ## Funcionalidades
 
-- **Explorar** establecimientos en lista o en mapa, con búsqueda que ignora tildes y filtros por provincia,
+- **Establecimientos** en lista o en mapa, ordenables por cercanía, con búsqueda que ignora tildes y filtros por provincia,
   tipo de sitio y distintivos. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
   en la URL, así que se pueden compartir.
 - **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
@@ -144,6 +144,7 @@ frontend/
     components/        Cabecera, barra móvil, tarjetas, mapa, formularios…
     views/             Páginas
 e2e/                   Pruebas de extremo a extremo y de accesibilidad
+docs/DISENO.md         Dirección de diseño: paleta, tipografía y reglas de la interfaz
 Dockerfile             Imagen de producción (frontend + backend)
 ```
 

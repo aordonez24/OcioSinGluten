@@ -8,7 +8,7 @@ import EstadoVacio from '@/components/EstadoVacio.vue'
     <EstadoVacio :icono="MapPinOff" titulo="Página no encontrada" texto="Puede que el enlace esté roto o que la página se haya movido.">
       <div class="fila">
         <RouterLink to="/" class="btn">Ir al inicio</RouterLink>
-        <RouterLink to="/establecimientos" class="btn btn-primario">Explorar sitios</RouterLink>
+        <RouterLink to="/establecimientos" class="btn btn-primario">Ver establecimientos</RouterLink>
       </div>
     </EstadoVacio>
   </div>

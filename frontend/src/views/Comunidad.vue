@@ -40,13 +40,13 @@ onMounted(async () => {
         <h1>Comunidad</h1>
         <p>Sigue a otras personas celíacas para no perderte sus recomendaciones.</p>
       </div>
-      <RouterLink to="/chat" class="btn btn-oscuro"><MessagesSquare :size="18" /> Chat de la comunidad</RouterLink>
+      <RouterLink to="/chat" class="btn btn-primario"><MessagesSquare :size="18" /> Ir al chat</RouterLink>
     </div>
 
-    <label class="buscador" style="margin-bottom: 1.25rem; display: block">
+    <label class="buscador" style="margin-bottom: 1.5rem; max-width: 480px">
       <span class="solo-lectores">Buscar personas</span>
-      <Search :size="18" />
-      <input v-model="busqueda" type="search" placeholder="Buscar por nombre o usuario…" />
+      <Search :size="18" aria-hidden="true" />
+      <input v-model="busqueda" type="search" placeholder="Buscar por nombre o usuario" />
     </label>
 
     <div v-if="usuarios === null" class="rejilla">

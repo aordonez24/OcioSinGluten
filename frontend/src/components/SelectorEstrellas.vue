@@ -31,17 +31,17 @@ const mostrado = computed(() => encima.value || valor.value)
 
 label {
   cursor: pointer;
-  color: var(--crema-3);
+  color: var(--borde-fuerte);
   display: grid;
   border-radius: 6px;
 }
 
 label:has(input:focus-visible) {
-  outline: 3px solid rgb(226 96 74 / 45%);
+  outline: 3px solid var(--turquesa-oscuro);
 }
 
 .activa {
-  color: var(--naranja);
+  color: var(--estrella);
 }
 
 svg {

@@ -10,14 +10,13 @@ import { ponerTitulo } from '@/router'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
-import { hace } from '@/utils'
+import { hace, nota } from '@/utils'
 import { CATEGORIAS } from '@/catalogo'
 import Distintivos from '@/components/Distintivos.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 import Estrellas from '@/components/Estrellas.vue'
 import EstablecimientoForm from '@/components/EstablecimientoForm.vue'
 import Opiniones from '@/components/Opiniones.vue'
-import Portada from '@/components/Portada.vue'
 
 const Mapa = defineAsyncComponent(() => import('@/components/Mapa.vue'))
 const props = defineProps({ id: { type: Number, required: true } })
@@ -182,7 +181,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 <template>
   <div v-if="noExiste" class="contenedor">
     <EstadoVacio :icono="Store" titulo="Este establecimiento no existe" texto="Puede que lo hayan eliminado.">
-      <RouterLink to="/establecimientos" class="btn btn-primario">Explorar otros sitios</RouterLink>
+      <RouterLink to="/establecimientos" class="btn btn-primario">Ver otros establecimientos</RouterLink>
     </EstadoVacio>
   </div>
 
@@ -191,89 +190,91 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   </div>
 
   <div v-else class="contenedor">
-    <RouterLink to="/establecimientos" class="volver"><ArrowLeft :size="16" /> Explorar</RouterLink>
+    <RouterLink to="/establecimientos" class="volver"><ArrowLeft :size="16" /> Todos los establecimientos</RouterLink>
 
     <div class="disposicion">
-      <section class="tarjeta ficha">
-        <Portada class="banner" :class="{ 'sin-foto': !est.portada_url }" :url="est.portada_url" :nombre="est.nombre" />
+      <section class="ficha">
+        <button v-if="est.imagenes.length" class="foto-principal" @click="ampliada = 0">
+          <img :src="est.imagenes[0].url" :alt="`Foto de ${est.nombre}`" />
+        </button>
 
-        <div class="contenido">
-          <template v-if="!editando">
-            <p class="categoria"><component :is="categoria.icono" :size="15" /> {{ categoria.texto }}</p>
-            <div class="titulo">
-              <h1>{{ est.nombre }}</h1>
-              <div v-if="auth.esAdmin" class="fila">
-                <button class="btn btn-icono" title="Editar" @click="editando = true"><Pencil :size="17" /></button>
-                <button class="btn btn-icono btn-peligro" title="Eliminar" @click="eliminar"><Trash2 :size="17" /></button>
-              </div>
+        <template v-if="!editando">
+          <p class="categoria">{{ categoria.texto }} en {{ est.localidad }}</p>
+          <div class="titulo">
+            <h1>{{ est.nombre }}</h1>
+            <div v-if="auth.esAdmin" class="fila">
+              <button class="btn btn-icono" title="Editar" @click="editando = true"><Pencil :size="18" /></button>
+              <button class="btn btn-icono btn-peligro" title="Eliminar" @click="eliminar"><Trash2 :size="18" /></button>
             </div>
-            <p class="resumen">
-              <Estrellas :valor="est.valoracion" />
-              <a href="#titulo-opiniones" class="suave">
-                <strong v-if="est.valoracion">{{ est.valoracion.toFixed(1) }}</strong>
-                {{ est.num_opiniones }} {{ est.num_opiniones === 1 ? 'opinión' : 'opiniones' }}
-              </a>
-              <span class="suave">· {{ est.num_visitas }} {{ est.num_visitas === 1 ? 'visita' : 'visitas' }}</span>
-            </p>
+          </div>
+          <p class="resumen">
+            <Estrellas :valor="est.valoracion" :tamano="18" />
+            <strong v-if="est.valoracion">{{ nota(est.valoracion) }}</strong>
+            <a href="#titulo-opiniones">{{ est.num_opiniones }} {{ est.num_opiniones === 1 ? 'opinión' : 'opiniones' }}</a>
+            <span class="suave">{{ est.num_visitas }} {{ est.num_visitas === 1 ? 'persona ha estado' : 'personas han estado' }}</span>
+          </p>
 
-            <div class="acciones">
-              <button class="btn" :class="{ 'btn-activo': est.me_gusta }" :aria-pressed="est.me_gusta" @click="alternar('like')">
-                <Heart :size="18" :fill="est.me_gusta ? 'currentColor' : 'none'" /> Me gusta · {{ est.num_likes }}
-              </button>
-              <button class="btn" :class="{ 'btn-activo': est.visitado }" :aria-pressed="est.visitado" @click="alternar('visita')">
-                <Footprints :size="18" /> {{ est.visitado ? 'He estado' : '¿Has estado?' }}
-              </button>
-              <button class="btn" :class="{ 'btn-activo': est.favorito }" :aria-pressed="est.favorito" @click="alternar('favorito')">
-                <Bookmark :size="18" :fill="est.favorito ? 'currentColor' : 'none'" /> {{ est.favorito ? 'Guardado' : 'Guardar' }}
-              </button>
-              <button class="btn btn-icono" title="Compartir" @click="compartir"><Share2 :size="18" /></button>
-            </div>
+          <div class="acciones">
+            <button class="btn" :class="{ 'btn-activo': est.me_gusta }" :aria-pressed="est.me_gusta" @click="alternar('like')">
+              <Heart :size="18" :fill="est.me_gusta ? 'currentColor' : 'none'" /> Me gusta
+              <span class="cuenta">{{ est.num_likes }}</span>
+            </button>
+            <button class="btn" :class="{ 'btn-activo': est.visitado }" :aria-pressed="est.visitado" @click="alternar('visita')">
+              <Footprints :size="18" /> {{ est.visitado ? 'He estado' : '¿Has estado?' }}
+            </button>
+            <button class="btn" :class="{ 'btn-activo': est.favorito }" :aria-pressed="est.favorito" @click="alternar('favorito')">
+              <Bookmark :size="18" :fill="est.favorito ? 'currentColor' : 'none'" /> {{ est.favorito ? 'Guardado' : 'Guardar' }}
+            </button>
+            <button class="btn btn-icono" title="Compartir" @click="compartir"><Share2 :size="18" /></button>
+          </div>
 
+          <section class="ofrece" aria-labelledby="titulo-ofrece">
+            <h2 id="titulo-ofrece">Qué ofrece sin gluten</h2>
             <Distintivos :establecimiento="est" detallado class="distintivos" />
-            <p v-if="!est.todo_sin_gluten && !est.carta_sin_gluten && !est.cocina_separada && !est.acreditado" class="sin-datos suave pequeno">
-              Aún no sabemos qué opciones sin gluten ofrece. Si has estado, cuéntalo en tu opinión.
+            <p v-if="!est.todo_sin_gluten && !est.carta_sin_gluten && !est.cocina_separada && !est.acreditado" class="suave">
+              Aún no sabemos qué opciones sin gluten tiene. Si has estado, cuéntalo en tu opinión.
             </p>
+          </section>
 
-            <ul class="lista-limpia datos">
-              <li><MapPin :size="18" /> {{ direccion }} · {{ est.provincia }}, {{ est.pais }}</li>
-              <li><Phone :size="18" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
-              <li v-if="est.creado_por" class="suave pequeno">
-                <span>
-                  Añadido por
-                  <RouterLink :to="`/u/${est.creado_por.username}`">{{ est.creado_por.username }}</RouterLink>
-                  {{ hace(est.creado_en) }}
-                </span>
-              </li>
-            </ul>
-          </template>
+          <ul class="lista-limpia datos">
+            <li><MapPin :size="18" aria-hidden="true" /> {{ direccion }}, {{ est.provincia }} ({{ est.pais }})</li>
+            <li><Phone :size="18" aria-hidden="true" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
+            <li v-if="est.creado_por" class="suave pequeno">
+              <span>
+                Lo añadió
+                <RouterLink :to="`/u/${est.creado_por.username}`">{{ est.creado_por.username }}</RouterLink>
+                {{ hace(est.creado_en) }}
+              </span>
+            </li>
+          </ul>
+        </template>
 
-          <template v-else>
-            <h2>Editar establecimiento</h2>
-            <EstablecimientoForm
-              :inicial="est"
-              :enviando="guardando"
-              :error="errorEdicion"
-              cancelable
-              @guardar="guardarEdicion"
-              @cancelar="editando = false"
-            />
-          </template>
-        </div>
+        <template v-else>
+          <h1>Editar establecimiento</h1>
+          <EstablecimientoForm
+            :inicial="est"
+            :enviando="guardando"
+            :error="errorEdicion"
+            cancelable
+            @guardar="guardarEdicion"
+            @cancelar="editando = false"
+          />
+        </template>
       </section>
 
       <aside class="lateral">
         <Mapa
           v-if="tieneCoords"
           :puntos="[{ id: est.id, latitud: est.latitud, longitud: est.longitud, titulo: est.nombre }]"
-          altura="260px"
+          altura="280px"
         />
-        <a :href="urlComoLlegar" target="_blank" rel="noopener" class="btn btn-oscuro btn-bloque">
+        <a :href="urlComoLlegar" target="_blank" rel="noopener" class="btn btn-primario btn-bloque">
           <Navigation :size="18" /> Cómo llegar
         </a>
 
-        <section class="tarjeta">
-          <div class="cabecera-pagina">
-            <h2>Fotos <span class="suave pequeno">{{ est.imagenes.length }}</span></h2>
+        <section class="fotos" aria-labelledby="titulo-fotos">
+          <div class="cabecera-fotos">
+            <h2 id="titulo-fotos">Fotos <span class="suave">({{ est.imagenes.length }})</span></h2>
             <label v-if="auth.autenticado" class="btn btn-pequeno" :aria-disabled="subiendo">
               <ImagePlus :size="16" /> {{ subiendo ? 'Subiendo…' : 'Añadir' }}
               <input type="file" accept="image/*" class="solo-lectores" :disabled="subiendo" @change="subirImagen" />
@@ -285,8 +286,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
             </button>
           </div>
           <p v-else class="suave pequeno sin-fotos">
-            Aún no hay fotos.
-            <template v-if="auth.autenticado">¿Has estado? ¡Comparte la primera!</template>
+            Todavía no hay fotos.
+            <template v-if="auth.autenticado">Si has estado, sube la primera: la carta o los platos sin gluten ayudan mucho.</template>
           </p>
         </section>
       </aside>
@@ -298,7 +299,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
       <img :src="est.imagenes[ampliada].url" alt="" />
       <div class="visor-controles">
         <button v-if="est.imagenes.length > 1" class="btn btn-icono" aria-label="Anterior" @click="moverAmpliada(-1)"><ChevronLeft /></button>
-        <span class="contador">{{ ampliada + 1 }} / {{ est.imagenes.length }}</span>
+        <span class="contador">{{ ampliada + 1 }} de {{ est.imagenes.length }}</span>
         <button v-if="est.imagenes.length > 1" class="btn btn-icono" aria-label="Siguiente" @click="moverAmpliada(1)"><ChevronRight /></button>
         <button v-if="puedeBorrar(est.imagenes[ampliada].autor_id)" class="btn btn-peligro" @click="borrarImagen(est.imagenes[ampliada])">
           <Trash2 :size="16" /> Borrar
@@ -312,59 +313,33 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 <style scoped>
 .disposicion {
   display: grid;
-  gap: 1.5rem;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 2.5rem 3.5rem;
+  grid-template-columns: minmax(0, 1fr) 360px;
   align-items: start;
 }
 
-.ficha {
+.foto-principal {
+  display: block;
+  width: 100%;
   padding: 0;
+  border: 0;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radio);
   overflow: hidden;
+  cursor: zoom-in;
+  background: var(--niebla);
 }
 
-.banner {
-  aspect-ratio: 21 / 8;
-}
-
-/* Sin fotos: franja ilustrada baja en lugar de un gran bloque de color. */
-.banner.sin-foto {
-  aspect-ratio: auto;
-  height: 120px;
-}
-
-.banner.sin-foto :deep(.inicial) {
-  font-size: 3.5rem;
-}
-
-.contenido {
-  padding: 1.5rem;
+.foto-principal img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
 .categoria {
-  margin: 0 0 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--coral-oscuro);
-}
-
-.resumen a {
-  text-decoration: none;
-}
-
-.distintivos {
-  margin-top: 1.5rem;
-}
-
-.sin-datos {
-  margin: 1.25rem 0 0;
-  padding: 0.6rem 0.85rem;
-  border-radius: var(--radio-sm);
-  background: var(--crema);
+  margin: 0 0 0.35rem;
+  color: var(--texto-suave);
+  font-weight: 500;
 }
 
 .titulo {
@@ -376,14 +351,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
 .titulo h1 {
   margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  letter-spacing: -0.025em;
 }
 
 .resumen {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0.4rem 0 1.25rem;
+  gap: 0.35rem 1rem;
+  margin: 0.6rem 0 1.5rem;
+}
+
+.resumen a {
+  color: var(--carbon);
 }
 
 .acciones {
@@ -392,18 +373,45 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   gap: 0.5rem;
 }
 
+.cuenta {
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+
+.btn-activo .cuenta {
+  color: inherit;
+}
+
+.ofrece {
+  margin-top: 2.5rem;
+}
+
+.ofrece h2 {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.ofrece > p {
+  margin: 0;
+}
+
 .datos {
   display: grid;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--borde);
 }
 
 .datos li {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
+}
+
+.datos svg {
+  color: var(--turquesa-oscuro);
+  flex-shrink: 0;
 }
 
 .lateral {
@@ -411,8 +419,25 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   gap: 1rem;
 }
 
-.lateral .cabecera-pagina {
+.fotos {
+  margin-top: 1.25rem;
+}
+
+.cabecera-fotos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.85rem;
+}
+
+.cabecera-fotos h2 {
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+.cabecera-fotos .suave {
+  font-weight: 500;
 }
 
 .galeria {
@@ -426,24 +451,27 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   border: 0;
   cursor: zoom-in;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: var(--radio-sm);
   overflow: hidden;
-  background: var(--crema-2);
+  background: var(--niebla);
 }
 
 .miniatura img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.2s;
+  transition: filter 0.15s;
 }
 
 .miniatura:hover img {
-  transform: scale(1.06);
+  filter: brightness(0.9);
 }
 
 .sin-fotos {
   margin: 0;
+  padding: 1rem;
+  background: var(--niebla);
+  border-radius: var(--radio-sm);
 }
 
 .opiniones {
@@ -453,7 +481,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 .visor {
   position: fixed;
   inset: 0;
-  background: rgb(20 12 6 / 90%);
+  background: rgb(25 25 25 / 92%);
   display: grid;
   place-items: center;
   align-content: center;
@@ -465,7 +493,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 .visor img {
   max-height: 78vh;
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radio-sm);
 }
 
 .visor-controles {
@@ -475,19 +503,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 }
 
 .contador {
-  color: var(--crema);
+  color: #fff;
   font-weight: 600;
-  min-width: 4em;
+  min-width: 4.5em;
   text-align: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .disposicion {
     grid-template-columns: 1fr;
-  }
-
-  .banner:not(.sin-foto) {
-    aspect-ratio: 16 / 8;
   }
 }
 </style>

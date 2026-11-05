@@ -1,14 +1,21 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, LocateFixed, MessageCircleHeart, Users, ArrowRight } from 'lucide-vue-next'
+import { LocateFixed, Search } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { hace } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
 import ContactoForm from '@/components/ContactoForm.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
-import logo from '@/assets/logo.webp'
+
+// El mapa de la portada solo existe en pantallas anchas: en móvil no se descarga Leaflet.
+const Mapa = defineAsyncComponent(() => import('@/components/Mapa.vue'))
+const consulta = window.matchMedia('(min-width: 900px)')
+const ancho = ref(consulta.matches)
+const alCambiar = (e) => (ancho.value = e.matches)
+consulta.addEventListener('change', alCambiar)
+onBeforeUnmount(() => consulta.removeEventListener('change', alCambiar))
 
 const auth = useAuth()
 const router = useRouter()
@@ -22,17 +29,16 @@ const destacados = computed(() =>
     .sort((a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_opiniones - a.num_opiniones)
     .slice(0, 4),
 )
+const puntos = computed(() =>
+  (establecimientos.value ?? []).map((e) => ({ ...e, titulo: e.nombre, subtitulo: `${e.localidad}, ${e.provincia}` })),
+)
 
-const PASOS = [
-  { icono: Search, titulo: 'Descubre', texto: 'Busca restaurantes, bares y cafeterías con opciones sin gluten cerca de ti.' },
-  { icono: MessageCircleHeart, titulo: 'Comparte', texto: 'Marca los sitios que visitas, deja tu opinión y sube fotos de los platos.' },
-  { icono: Users, titulo: 'Conecta', texto: 'Sigue a otras personas celíacas y charla con la comunidad en el chat.' },
-]
 const TEXTOS = { publicacion: 'ha añadido', comentario: 'ha opinado sobre', visita: 'ha visitado', like: 'recomienda' }
 const SINTOMAS = [
   'Diarrea crónica', 'Distensión abdominal', 'Pérdida de peso inexplicable', 'Fatiga',
   'Erupciones cutáneas', 'Dolor abdominal', 'Anemia', 'Dolor en las articulaciones',
 ]
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`
 
 function buscar() {
   router.push({ path: '/establecimientos', query: busqueda.value.trim() ? { q: busqueda.value.trim() } : {} })
@@ -42,7 +48,7 @@ onMounted(async () => {
   const [e, s, a] = await Promise.allSettled([
     api('/establecimientos'),
     api('/estadisticas'),
-    api('/actividades?limite=5'),
+    api('/actividades?limite=6'),
   ])
   establecimientos.value = e.value ?? []
   estadisticas.value = s.value ?? null
@@ -54,303 +60,325 @@ onMounted(async () => {
   <section class="hero">
     <div class="hero-interior">
       <div class="hero-texto">
-        <span class="etiqueta">Comunidad celíaca</span>
-        <h1>Sal a comer <span>sin miedo al gluten</span></h1>
-        <p>
-          Restaurantes, bares y sitios de ocio recomendados por personas celíacas que ya han estado allí.
+        <h1>Disfrute de su tiempo de ocio sin gluten</h1>
+        <p class="entradilla">
+          Restaurantes, bares, cafeterías y heladerías con opciones sin gluten, recomendados por personas
+          celíacas que ya han estado allí.
         </p>
         <form class="buscador-hero" role="search" @submit.prevent="buscar">
-          <Search :size="20" />
-          <input v-model="busqueda" type="search" placeholder="Busca un sitio, una ciudad o una provincia…" aria-label="Buscar" />
-          <button class="btn btn-primario">Buscar</button>
+          <label class="campo">
+            <span class="solo-lectores">Buscar establecimientos</span>
+            <Search :size="20" aria-hidden="true" />
+            <input v-model="busqueda" type="search" placeholder="Ciudad o nombre" />
+          </label>
+          <button class="btn buscar">Buscar</button>
         </form>
-        <p class="unete">
-          <RouterLink :to="{ path: '/establecimientos', query: { orden: 'cerca' } }" class="cerca">
-            <LocateFixed :size="16" /> Ver sitios cerca de mí
+        <p class="enlaces-hero">
+          <RouterLink :to="{ path: '/establecimientos', query: { orden: 'cerca' } }">
+            <LocateFixed :size="17" aria-hidden="true" /> Ver los sitios más cercanos a mí
           </RouterLink>
         </p>
-        <p v-if="!auth.autenticado" class="unete">
-          ¿Aún no formas parte? <RouterLink to="/registro">Crea tu cuenta gratis</RouterLink>
+        <p v-if="estadisticas" class="cifras">
+          Ya hay {{ plural(estadisticas.establecimientos, 'sitio sin gluten', 'sitios sin gluten') }}
+          en {{ plural(estadisticas.provincias, 'provincia', 'provincias') }},
+          con {{ plural(estadisticas.opiniones, 'opinión', 'opiniones') }} de la comunidad.
         </p>
       </div>
-      <img :src="logo" alt="" width="220" height="220" class="hero-logo" />
+      <div v-if="ancho" class="hero-mapa">
+        <Mapa
+          v-if="establecimientos"
+          :puntos="puntos"
+          altura="100%"
+          @seleccionar="(id) => router.push(`/establecimientos/${id}`)"
+        />
+      </div>
     </div>
   </section>
 
-  <section v-if="estadisticas" class="cifras" aria-label="La comunidad en cifras">
-    <div><strong>{{ estadisticas.establecimientos }}</strong> sitios sin gluten</div>
-    <div><strong>{{ estadisticas.provincias }}</strong> provincias</div>
-    <div><strong>{{ estadisticas.opiniones }}</strong> opiniones</div>
-    <div><strong>{{ estadisticas.miembros }}</strong> miembros</div>
+  <section v-if="!auth.autenticado" class="invitacion">
+    <p>
+      <RouterLink to="/entrar">Inicia sesión</RouterLink> o
+      <RouterLink to="/registro">crea una cuenta nueva</RouterLink>
+      para pertenecer a la comunidad de Ocio Sin Gluten: opinar, guardar tus sitios y hablar en el chat.
+    </p>
   </section>
 
-  <div class="contenedor secciones">
-    <section>
+  <section class="banda" aria-labelledby="titulo-destacados">
+    <div class="interior">
       <div class="cabecera-pagina">
-        <div>
-          <h2>Los mejor valorados</h2>
-          <p>Lo que más gusta a la comunidad ahora mismo.</p>
-        </div>
-        <RouterLink to="/establecimientos" class="btn btn-pequeno">Ver todos <ArrowRight :size="16" /></RouterLink>
+        <h2 id="titulo-destacados">Los mejor valorados</h2>
+        <RouterLink to="/establecimientos">Ver todos los establecimientos</RouterLink>
       </div>
-      <div class="rejilla">
+      <div class="rejilla destacados">
         <template v-if="establecimientos === null">
-          <div v-for="n in 4" :key="n" class="esqueleto" style="height: 250px"></div>
+          <div v-for="n in 4" :key="n" class="esqueleto" style="aspect-ratio: 4 / 4"></div>
         </template>
         <EstablecimientoCard v-for="e in destacados" v-else :key="e.id" :establecimiento="e" />
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="como">
-      <h2>Cómo funciona</h2>
-      <ol class="lista-limpia pasos">
-        <li v-for="(p, i) in PASOS" :key="p.titulo" class="tarjeta">
-          <span class="icono"><component :is="p.icono" :size="24" /></span>
-          <h3><span class="suave">{{ i + 1 }}.</span> {{ p.titulo }}</h3>
-          <p class="suave">{{ p.texto }}</p>
-        </li>
-      </ol>
-    </section>
+  <section class="banda niebla">
+    <div class="interior dos">
+      <div class="celiaquia">
+        <h2>¿Qué es la celiaquía?</h2>
+        <p>
+          Es una enfermedad en la que el cuerpo no tolera el gluten, una proteína del trigo, la cebada y el
+          centeno. Al consumirlo, el sistema inmunitario daña el revestimiento del intestino delgado. Por eso
+          importa tanto saber dónde se cocina sin riesgo de contaminación cruzada.
+        </p>
+        <h3>Síntomas más frecuentes</h3>
+        <ul class="sintomas">
+          <li v-for="s in SINTOMAS" :key="s">{{ s }}</li>
+        </ul>
+      </div>
 
-    <div class="dos">
-      <section class="tarjeta">
+      <div class="comunidad">
         <div class="cabecera-pagina">
           <h2>Ahora en la comunidad</h2>
-          <RouterLink to="/actividad" class="pequeno">Ver más</RouterLink>
+          <RouterLink to="/actividad">Ver todas las actividades</RouterLink>
         </div>
         <ul class="lista-limpia actividad">
           <li v-for="a in actividad" :key="a.id">
-            <Avatar :usuario="a.usuario" :tamano="36" />
-            <span>
+            <Avatar :usuario="a.usuario" :tamano="40" />
+            <p>
               <RouterLink :to="`/u/${a.usuario.username}`" class="quien">{{ a.usuario.username }}</RouterLink>
               {{ TEXTOS[a.tipo] }}
               <RouterLink :to="`/establecimientos/${a.establecimiento.id}`">{{ a.establecimiento.nombre }}</RouterLink>
-              <span class="suave pequeno"> · {{ hace(a.creado_en) }}</span>
-            </span>
+              <span class="cuando">{{ hace(a.creado_en) }}</span>
+            </p>
           </li>
           <li v-if="!actividad.length" class="suave">Todavía no hay actividad.</li>
         </ul>
-      </section>
-
-      <section class="tarjeta celiaquia">
-        <h2>¿Qué es la celiaquía?</h2>
-        <p>
-          Es una enfermedad en la que el cuerpo no tolera el <strong>gluten</strong>, una proteína del trigo,
-          la cebada y el centeno. Al consumirlo, el sistema inmunitario daña el intestino delgado. Por eso es
-          tan importante saber dónde se cocina sin riesgo de contaminación cruzada.
-        </p>
-        <h3>Síntomas frecuentes</h3>
-        <ul class="lista-limpia sintomas">
-          <li v-for="s in SINTOMAS" :key="s" class="chip">{{ s }}</li>
-        </ul>
-      </section>
+      </div>
     </div>
+  </section>
 
-    <ContactoForm />
+  <div class="banda">
+    <div class="interior">
+      <ContactoForm />
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Banda carbón: la sección principal del proyecto original. */
 .hero {
-  background:
-    radial-gradient(circle at 85% 40%, rgb(226 96 74 / 25%), transparent 45%),
-    linear-gradient(135deg, var(--marron) 0%, var(--marron-2) 100%);
-  color: var(--crema);
+  background: var(--carbon);
+  color: #f4fffd;
 }
 
 .hero-interior {
-  width: min(1120px, 100% - 2rem);
+  width: min(var(--ancho), 100% - 2 * var(--margen));
   margin-inline: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: stretch;
   padding-block: 4rem;
 }
 
 .hero-texto {
-  max-width: 640px;
-}
-
-.etiqueta {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--naranja);
-  margin-bottom: 0.75rem;
+  align-self: center;
 }
 
 .hero h1 {
-  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
-  line-height: 1.08;
+  color: #fff;
+  font-size: clamp(2rem, 4.4vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
 }
 
-.hero h1 span {
-  color: var(--naranja);
-}
-
-.hero p {
-  font-size: 1.15rem;
-  color: var(--crema-2);
+.entradilla {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  margin: 0 0 2rem;
+  max-width: 36em;
+  color: #e3ecea;
 }
 
 .buscador-hero {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
-  background: #fff;
-  border-radius: 999px;
-  padding: 0.35rem 0.35rem 0.35rem 1.1rem;
-  margin-top: 1.75rem;
+  max-width: 560px;
+}
+
+.campo {
+  position: relative;
+  flex: 1;
+  display: block;
+}
+
+.campo svg {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  translate: 0 -50%;
   color: var(--texto-suave);
-  box-shadow: var(--sombra-alta);
+  pointer-events: none;
 }
 
-.buscador-hero input {
+.campo input {
+  min-height: 52px;
+  padding-left: 2.85rem;
   border: 0;
-  padding: 0.6rem 0.25rem;
-  box-shadow: none;
+  font-size: 1.0625rem;
 }
 
-.unete {
-  font-size: 0.95rem !important;
+.campo input:focus {
+  box-shadow: 0 0 0 3px var(--ambar);
 }
 
-.cerca {
+/* El ámbar del original, reservado para la acción principal. */
+.buscar {
+  min-height: 52px;
+  padding-inline: 1.5rem;
+  background: var(--ambar);
+  border-color: var(--ambar);
+  color: var(--carbon);
+  font-size: 1rem;
+}
+
+.buscar:hover {
+  background: #ffd98f;
+  border-color: #ffd98f;
+}
+
+.buscar:focus-visible {
+  outline-color: #fff;
+}
+
+.enlaces-hero {
+  margin: 1rem 0 0;
+}
+
+.enlaces-hero a {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-}
-
-.unete a {
-  color: var(--naranja);
+  gap: 0.4rem;
+  min-height: 44px;
+  color: var(--ambar);
   font-weight: 600;
 }
 
-.hero-logo {
-  border-radius: 50%;
-  box-shadow: 0 0 0 10px rgb(255 255 255 / 6%), var(--sombra-alta);
+.enlaces-hero a:hover {
+  color: #fff;
+}
+
+.hero a:focus-visible {
+  outline-color: var(--ambar);
 }
 
 .cifras {
-  width: min(1120px, 100% - 2rem);
-  margin: -1.75rem auto 0;
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  background: var(--blanco);
-  border: 1px solid var(--borde);
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(255 255 255 / 14%);
+  font-size: 0.9375rem;
+  color: #c9d6d4;
+  max-width: 36em;
+}
+
+.hero-mapa {
+  min-height: 420px;
   border-radius: var(--radio);
-  box-shadow: var(--sombra);
+  overflow: hidden;
+  background: #444;
 }
 
-.cifras div {
-  padding: 1rem;
-  text-align: center;
-  color: var(--texto-suave);
-  font-size: 0.9rem;
+.invitacion {
+  background: var(--turquesa-claro);
 }
 
-.cifras div + div {
-  border-left: 1px solid var(--borde);
+.invitacion p {
+  width: min(var(--ancho), 100% - 2 * var(--margen));
+  margin: 0 auto;
+  padding-block: 1rem;
+  font-weight: 500;
 }
 
-.cifras strong {
-  display: block;
-  font-size: 1.6rem;
-  color: var(--coral-oscuro);
-}
-
-.secciones {
-  display: grid;
-  gap: 3rem;
-}
-
-.pasos {
-  display: grid;
-  gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-}
-
-.pasos h3 {
-  margin: 0.75rem 0 0.25rem;
-}
-
-.pasos p {
-  margin: 0;
-}
-
-.icono {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: var(--coral-suave);
-  color: var(--coral-oscuro);
+.invitacion a {
+  color: var(--carbon);
+  font-weight: 700;
 }
 
 .dos {
   display: grid;
-  gap: 1.5rem;
+  gap: 3rem 4rem;
   grid-template-columns: 1fr 1fr;
   align-items: start;
 }
 
-.actividad li {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0;
+.celiaquia p {
+  max-width: 38em;
 }
 
-.actividad li + li {
-  border-top: 1px solid var(--borde);
-}
-
-.quien {
-  font-weight: 700;
-  color: inherit;
-  text-decoration: none;
+.celiaquia h3 {
+  margin-top: 1.75rem;
 }
 
 .sintomas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  columns: 2;
+  column-gap: 2rem;
+  padding-left: 1.1rem;
+  margin: 0;
 }
 
-@media (max-width: 860px) {
-  .hero-logo {
-    display: none;
-  }
+.sintomas li {
+  padding-block: 0.15rem;
+  break-inside: avoid;
+}
 
+.sintomas li::marker {
+  color: var(--turquesa-oscuro);
+}
+
+.actividad li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--borde-fuerte);
+}
+
+.actividad li:last-child {
+  border-bottom: 0;
+}
+
+.actividad p {
+  margin: 0;
+}
+
+.quien {
+  font-weight: 650;
+  color: var(--carbon);
+  text-decoration: none;
+}
+
+.cuando {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--texto-suave);
+}
+
+@media (max-width: 900px) {
   .hero-interior {
-    padding-block: 2.5rem 3.5rem;
+    grid-template-columns: 1fr;
+    padding-block: 2.5rem 3rem;
   }
 
   .dos {
     grid-template-columns: 1fr;
   }
-
-  .cifras {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cifras div:nth-child(3) {
-    border-left: 0;
-  }
-
-  .cifras div:nth-child(n + 3) {
-    border-top: 1px solid var(--borde);
-  }
 }
 
 @media (max-width: 520px) {
-  .buscador-hero .btn {
-    padding-inline: 0.85rem;
+  .buscar {
+    padding-inline: 1rem;
+  }
+
+  .sintomas {
+    columns: 1;
   }
 }
 </style>

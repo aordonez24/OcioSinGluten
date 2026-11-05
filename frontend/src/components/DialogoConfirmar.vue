@@ -50,14 +50,13 @@ watch(
   border-radius: var(--radio);
   padding: 1.5rem;
   width: min(420px, 100% - 2rem);
-  box-shadow: var(--sombra-alta);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 22%);
   background: var(--blanco);
   color: var(--texto);
 }
 
 .dialogo::backdrop {
-  background: rgb(43 29 18 / 45%);
-  backdrop-filter: blur(2px);
+  background: rgb(53 53 53 / 55%);
 }
 
 h2 {

@@ -128,8 +128,11 @@ async function eliminarCuenta() {
       <button class="btn" @click="salir"><LogOut :size="17" /> Cerrar sesión</button>
     </div>
 
-    <section class="tarjeta">
-      <h2>Foto de perfil</h2>
+    <section class="seccion">
+      <div class="explicacion">
+        <h2>Foto de perfil</h2>
+        <p>Ayuda a que la comunidad te reconozca en las opiniones y en el chat.</p>
+      </div>
       <div class="foto">
         <Avatar :usuario="auth.usuario" :tamano="88" />
         <div class="fila">
@@ -142,8 +145,11 @@ async function eliminarCuenta() {
       </div>
     </section>
 
-    <section class="tarjeta">
-      <h2>Datos personales</h2>
+    <section class="seccion">
+      <div class="explicacion">
+        <h2>Datos personales</h2>
+        <p>El email y el DNI no se pueden cambiar. Solo tú y el equipo de administración veis estos datos.</p>
+      </div>
       <form class="formulario" @submit.prevent="guardarPerfil">
         <div class="dos-columnas">
           <label>Nombre de usuario <input v-model="perfil.username" required /></label>
@@ -154,14 +160,16 @@ async function eliminarCuenta() {
           <label>Fecha de nacimiento <input v-model="perfil.fecha_nacimiento" type="date" required /></label>
           <label>DNI <input :value="auth.usuario.dni" disabled /></label>
         </div>
-        <p class="ayuda">El email y el DNI no se pueden cambiar. Solo tú y el equipo de administración veis estos datos.</p>
         <p v-if="errorPerfil" class="alerta" role="alert">{{ errorPerfil }}</p>
         <div><button class="btn btn-primario" :disabled="guardando === 'perfil'">Guardar cambios</button></div>
       </form>
     </section>
 
-    <section class="tarjeta">
-      <h2>Contraseña</h2>
+    <section class="seccion">
+      <div class="explicacion">
+        <h2>Contraseña</h2>
+        <p>Necesitas la actual para poner una nueva.</p>
+      </div>
       <form class="formulario" @submit.prevent="cambiarPassword">
         <label>Contraseña actual <CampoPassword v-model="pass.actual" required /></label>
         <div class="dos-columnas">
@@ -179,22 +187,40 @@ async function eliminarCuenta() {
       </form>
     </section>
 
-    <section class="tarjeta peligro">
-      <h2>Eliminar cuenta</h2>
-      <p class="suave">Se borrarán tu perfil, tus opiniones y tu actividad. Esta acción no se puede deshacer.</p>
-      <button class="btn btn-peligro" @click="eliminarCuenta"><Trash2 :size="17" /> Eliminar mi cuenta</button>
+    <section class="seccion">
+      <div class="explicacion">
+        <h2>Eliminar cuenta</h2>
+        <p>Se borrarán tu perfil, tus opiniones y tu actividad. No se puede deshacer.</p>
+      </div>
+      <div>
+        <button class="btn btn-peligro" @click="eliminarCuenta"><Trash2 :size="17" /> Eliminar mi cuenta</button>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped>
 .ajustes {
-  display: grid;
-  gap: 1.25rem;
+  width: min(1000px, 100% - 2 * var(--margen));
 }
 
-.ajustes .cabecera-pagina {
-  margin-bottom: 0.25rem;
+.seccion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 1rem 3rem;
+  padding-block: 2rem;
+  border-top: 1px solid var(--borde);
+}
+
+.explicacion h2 {
+  font-size: 1.125rem;
+  margin-bottom: 0.35rem;
+}
+
+.explicacion p {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.9375rem;
 }
 
 .foto {
@@ -204,12 +230,9 @@ async function eliminarCuenta() {
   gap: 1.25rem;
 }
 
-.peligro {
-  border-color: #f1c4bc;
-}
-
-input:disabled {
-  background: var(--crema);
-  color: var(--texto-suave);
+@media (max-width: 760px) {
+  .seccion {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

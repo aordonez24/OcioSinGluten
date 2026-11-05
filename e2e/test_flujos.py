@@ -79,7 +79,7 @@ def test_anadir_sitio_opinar_y_editar(pagina, imagen):
 
     # Acciones con respuesta inmediata
     pagina.click("button:has-text('Me gusta')")
-    expect(pagina.locator("button:has-text('Me gusta · 1')")).to_be_visible()
+    expect(pagina.locator("button:has-text('Me gusta') .cuenta")).to_have_text("1")
     pagina.click("button:has-text('Guardar')")
     expect(pagina.locator("button:has-text('Guardado')")).to_be_visible()
 
@@ -94,14 +94,14 @@ def test_anadir_sitio_opinar_y_editar(pagina, imagen):
     pagina.click(".selector label:nth-of-type(4)")
     pagina.click("button:has-text('Publicar opinión')")
     expect(pagina.locator(".opinion.propia")).to_contain_text("Tostadas sin gluten")
-    expect(pagina.locator(".media strong")).to_have_text("4.0")
+    expect(pagina.locator(".media strong")).to_have_text("4,0")
     expect(pagina.locator(".nueva")).to_have_count(0)  # solo una opinión por persona
 
     # Editarla
     pagina.click("button[title='Editar opinión']")
     pagina.click(".selector label:nth-of-type(2)")
     pagina.click(".nueva button:has-text('Guardar')")
-    expect(pagina.locator(".media strong")).to_have_text("2.0")
+    expect(pagina.locator(".media strong")).to_have_text("2,0")
     expect(pagina.locator(".opinion.propia")).to_contain_text("editada")
 
     # Borrarla pasa por el diálogo de confirmación

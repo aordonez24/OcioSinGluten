@@ -28,17 +28,17 @@ async function crear(datos) {
 
 <template>
   <div class="contenedor">
-    <RouterLink to="/establecimientos" class="volver"><ArrowLeft :size="16" /> Explorar</RouterLink>
+    <RouterLink to="/establecimientos" class="volver"><ArrowLeft :size="16" /> Todos los establecimientos</RouterLink>
     <div class="disposicion">
-      <div class="tarjeta">
-        <h1>Añadir un sitio sin gluten</h1>
-        <p class="suave">Comparte un restaurante, bar o cafetería que aún no esté en Ocio Sin Gluten.</p>
+      <div>
+        <h1>Añadir un establecimiento</h1>
+        <p class="suave intro">Comparte un restaurante, bar o cafetería con opciones sin gluten que aún no esté en Ocio Sin Gluten.</p>
         <EstablecimientoForm texto-boton="Publicar establecimiento" :enviando="enviando" :error="error" @guardar="crear" />
       </div>
-      <aside class="tarjeta consejos">
-        <h2><Lightbulb :size="20" /> Consejos</h2>
+      <aside class="consejos">
+        <h2><Lightbulb :size="20" aria-hidden="true" /> Antes de publicarlo</h2>
         <ul>
-          <li>Comprueba en <RouterLink to="/establecimientos">Explorar</RouterLink> que el sitio no esté ya añadido.</li>
+          <li>Comprueba en <RouterLink to="/establecimientos">Establecimientos</RouterLink> que el sitio no esté ya añadido.</li>
           <li>Escribe la dirección completa: la usamos para situarlo en el mapa.</li>
           <li>Después podrás subir fotos de la carta o de los platos sin gluten.</li>
           <li>Cuenta en tu opinión si tienen cocina separada o protocolo contra la contaminación cruzada.</li>
@@ -52,12 +52,23 @@ async function crear(datos) {
 .disposicion {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 2.5rem 3.5rem;
+  grid-template-columns: minmax(0, 1fr) 320px;
   align-items: start;
 }
 
+.intro {
+  margin: 0 0 2rem;
+}
+
 .consejos {
-  background: #fff8ef;
+  background: var(--niebla);
+  border-radius: var(--radio);
+  padding: 1.5rem;
+}
+
+.consejos svg {
+  color: var(--turquesa-oscuro);
 }
 
 .consejos h2 {

@@ -6,47 +6,45 @@ import logo from '@/assets/logo.webp'
   <footer>
     <div class="interior">
       <div class="marca">
-        <img :src="logo" alt="" width="36" height="36" />
-        <div>
+        <img :src="logo" alt="" width="44" height="44" />
+        <p>
           <strong>Ocio Sin Gluten</strong>
-          <p>La comunidad para comer fuera sin preocupaciones.</p>
-        </div>
+          <span>Restaurantes y sitios de ocio sin gluten recomendados por personas celíacas.</span>
+        </p>
       </div>
       <nav aria-label="Pie de página">
-        <RouterLink to="/establecimientos">Explorar</RouterLink>
-        <RouterLink to="/actividad">Actividad</RouterLink>
+        <RouterLink to="/establecimientos">Establecimientos</RouterLink>
+        <RouterLink to="/actividad">Actividades</RouterLink>
         <RouterLink :to="{ path: '/', hash: '#contacto' }">Contacto</RouterLink>
       </nav>
-      <p class="credito">
-        Trabajo Fin de Grado · Álvaro Ordóñez Romero · Universidad de Jaén
-      </p>
+      <p class="credito">Trabajo Fin de Grado de Álvaro Ordóñez Romero en la Universidad de Jaén.</p>
     </div>
   </footer>
 </template>
 
 <style scoped>
+/* El pie turquesa del proyecto original. */
 footer {
-  background: var(--marron);
-  color: var(--crema-2);
-  font-size: 0.9rem;
-  margin-top: 2rem;
+  background: var(--turquesa);
+  color: var(--carbon);
+  font-size: 0.9375rem;
 }
 
 .interior {
-  width: min(1120px, 100% - 2rem);
+  width: min(var(--ancho), 100% - 2 * var(--margen));
   margin-inline: auto;
-  padding: 1.75rem 0;
+  padding: 2rem 0 1.5rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem 2rem;
+  gap: 1.25rem 2rem;
 }
 
 .marca {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .marca img {
@@ -55,30 +53,35 @@ footer {
 
 .marca p {
   margin: 0;
-  opacity: 0.75;
+  display: grid;
+  line-height: 1.4;
 }
 
 nav {
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
 }
 
 a {
-  color: var(--crema);
-  text-decoration: none;
+  color: var(--carbon);
   font-weight: 600;
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 a:hover {
-  color: var(--naranja);
+  text-decoration: underline;
+  color: var(--carbon);
 }
 
 .credito {
   width: 100%;
   margin: 0;
-  padding-top: 1rem;
-  border-top: 1px solid rgb(255 255 255 / 10%);
-  opacity: 0.6;
-  font-size: 0.82rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(53 53 53 / 18%);
+  font-size: 0.875rem;
 }
 </style>

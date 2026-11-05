@@ -24,7 +24,7 @@ function popup(punto) {
   const sub = document.createElement('span')
   sub.textContent = punto.subtitulo ?? ''
   const boton = document.createElement('button')
-  boton.textContent = 'Ver ficha →'
+  boton.textContent = 'Ver ficha'
   boton.onclick = () => emit('seleccionar', punto.id)
   div.append(titulo, sub, boton)
   return div
@@ -38,7 +38,7 @@ function dibujar() {
       radius: 10,
       color: '#fff',
       weight: 3,
-      fillColor: '#e2604a',
+      fillColor: '#17675f',
       fillOpacity: 1,
     }).addTo(capa)
     if (props.puntos.length > 1) marcador.bindPopup(popup(p))
@@ -70,7 +70,6 @@ onBeforeUnmount(() => mapa?.remove())
 <style scoped>
 .mapa {
   border-radius: var(--radio);
-  border: 1px solid var(--borde);
   z-index: 0;
 }
 
@@ -87,10 +86,11 @@ onBeforeUnmount(() => mapa?.remove())
 .mapa :deep(.popup-local button) {
   margin-top: 0.4rem;
   border: 0;
-  background: var(--coral);
+  background: var(--carbon);
   color: #fff;
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
+  border-radius: var(--radio-sm);
+  padding: 0.4rem 0.8rem;
+  font: inherit;
   font-weight: 600;
   cursor: pointer;
 }
