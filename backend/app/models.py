@@ -9,6 +9,7 @@ import enum
 from datetime import UTC, date, datetime
 
 from sqlalchemy import (
+    JSON,
     Column,
     DateTime,
     Enum,
@@ -149,6 +150,9 @@ class Imagen(Base):
     )
     autor_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))
     fichero: Mapped[str] = mapped_column(String(100))
+    # Autoría y licencia, para fotos que no son de quien las sube (p. ej. de Wikimedia Commons)
+    credito: Mapped[str | None] = mapped_column(String(200))
+    credito_url: Mapped[str | None] = mapped_column(String(300))
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
@@ -198,7 +202,11 @@ class Establecimiento(Base):
     acreditado: Mapped[bool] = mapped_column(default=False)
     # Información práctica (opcional)
     precio: Mapped[int | None] = mapped_column(SmallInteger)  # 1 = económico … 3 = caro
-    horario: Mapped[str | None] = mapped_column(String(300))
+    # Horario semanal: 7 listas (lunes a domingo) de franjas {"abre": "13:00", "cierra": "16:30"}.
+    # Una lista vacía es un día cerrado; None, que no se sabe. Si "cierra" es menor que "abre",
+    # la franja termina pasada la medianoche.
+    horario: Mapped[list | None] = mapped_column(JSON)
+    nota_horario: Mapped[str | None] = mapped_column(String(300))  # "Cerrado en agosto"
     web: Mapped[str | None] = mapped_column(String(200))
     latitud: Mapped[float | None] = mapped_column(Float)
     longitud: Mapped[float | None] = mapped_column(Float)

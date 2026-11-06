@@ -8,14 +8,17 @@ _tmp = Path(tempfile.mkdtemp(prefix="osg-tests-"))
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp / 'test.db'}"
 os.environ["UPLOADS_DIR"] = str(_tmp / "uploads")
 os.environ["GEOCODIFICAR"] = "false"
+os.environ["CORREOS_DIR"] = str(_tmp / "correos")
 os.environ["FRONTEND_DIST"] = str(_tmp / "no-existe")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from PIL import Image  # noqa: E402
 
-from app.db import Base, engine  # noqa: E402
+from app.db import Base, engine, migrar  # noqa: E402
 from app.main import app  # noqa: E402
+
+migrar()  # el esquema se crea una vez con las migraciones, igual que en producción
 
 DNIS = ["12345678Z", "87654321X", "11111111H", "22222222J"]
 
@@ -25,8 +28,9 @@ def client():
     from app.services import limite
 
     limite.reiniciar()
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    with engine.begin() as conexion:  # cada prueba empieza con las tablas vacías
+        for tabla in reversed(Base.metadata.sorted_tables):
+            conexion.execute(tabla.delete())
     with TestClient(app) as c:
         yield c
 

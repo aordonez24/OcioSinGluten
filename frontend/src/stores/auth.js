@@ -20,6 +20,8 @@ export const useAuth = defineStore('auth', () => {
   function cerrarSesion() {
     token.value = null
     usuario.value = null
+    // Las copias sin conexión pueden llevar datos de esta cuenta (favoritos, perfil): se borran.
+    window.caches?.delete('osg-datos')
   }
 
   return { token, usuario, autenticado, esAdmin, iniciarSesion, cerrarSesion }

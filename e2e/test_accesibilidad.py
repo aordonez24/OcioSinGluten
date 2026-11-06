@@ -15,6 +15,8 @@ PUBLICAS = [
     "/actividad",
     "/entrar",
     "/registro",
+    "/recuperar",
+    "/restablecer?token=caducado",
     "/u/lucia",
     "/u/lucia?tab=opiniones",
 ]

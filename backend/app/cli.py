@@ -2,21 +2,28 @@
 
 python -m app.cli admin correo@ejemplo.com   # convierte una cuenta en administradora
 python -m app.cli demo                       # carga datos de ejemplo en una BD vacía
+python -m app.cli migrar                     # actualiza el esquema (también se hace al arrancar)
 """
 
 import argparse
+import json
 import random
+import shutil
+import uuid
 from datetime import date, timedelta
+from pathlib import Path
 
 from sqlalchemy import insert, select
 
-from app.db import Base, SessionLocal, engine
+from app.config import get_settings
+from app.db import SessionLocal, migrar
 from app.models import (
     Actividad,
     Categoria,
     Comentario,
     Consulta,
     Establecimiento,
+    Imagen,
     Mensaje,
     MotivoAviso,
     Notificacion,
@@ -146,16 +153,29 @@ ESTABLECIMIENTOS = [
     ),
 ]
 
-# precio (1 económico, 2 normal, 3 caro) y horario de cada sitio
+
+def _semana(*tramos: tuple[range | list[int], list[tuple[str, str]]]) -> list[list[dict]]:
+    """Horario semanal a partir de (días, franjas); 0 es el lunes y 6 el domingo."""
+    dias = [[] for _ in range(7)]
+    for numeros, franjas in tramos:
+        for n in numeros:
+            dias[n] = [{"abre": abre, "cierra": cierra} for abre, cierra in franjas]
+    return dias
+
+
+TODOS = range(7)
+COMIDA_Y_CENA = [("13:00", "16:30"), ("20:30", "23:30")]
+
+# precio (1 económico, 2 normal, 3 caro), horario y nota del horario de cada sitio
 INFO_PRACTICA = {
-    "Celiaco Feliz": (2, "De martes a domingo, de 13:00 a 16:30 y de 20:30 a 23:30"),
-    "Horno Sin Trigo": (1, "De lunes a sábado, de 8:00 a 14:00 y de 17:30 a 20:30"),
-    "La Pizzería Libre": (2, "Todos los días, de 13:00 a 16:00 y de 20:00 a 0:00"),
-    "Taberna El Arroz": (2, "De miércoles a lunes, de 12:30 a 17:00"),
-    "Burger Zero": (2, "Todos los días, de 13:00 a 23:30"),
-    "Dulce Celíaca": (1, "De lunes a viernes, de 8:30 a 20:00. Sábados, de 9:00 a 14:00"),
-    "Mesón La Loma": (3, "De jueves a domingo, de 13:30 a 16:30 y de 21:00 a 23:30"),
-    "Heladería Polo Norte": (1, "De marzo a octubre, todos los días de 16:00 a 0:00"),
+    "Celiaco Feliz": (2, _semana((range(1, 7), COMIDA_Y_CENA)), None),
+    "Horno Sin Trigo": (1, _semana((range(6), [("08:00", "14:00"), ("17:30", "20:30")])), None),
+    "La Pizzería Libre": (2, _semana((TODOS, [("13:00", "16:00"), ("20:00", "00:00")])), None),
+    "Taberna El Arroz": (2, _semana(([0, 2, 3, 4, 5, 6], [("12:30", "17:00")])), None),
+    "Burger Zero": (2, _semana((TODOS, [("13:00", "23:30")])), None),
+    "Dulce Celíaca": (1, _semana((range(5), [("08:30", "20:00")]), ([5], [("09:00", "14:00")])), None),
+    "Mesón La Loma": (3, _semana((range(3, 7), [("13:30", "16:30"), ("21:00", "23:30")])), None),
+    "Heladería Polo Norte": (1, _semana((TODOS, [("16:00", "00:00")])), "Abre de marzo a octubre."),
 }
 
 OPINIONES = [
@@ -176,6 +196,30 @@ MENSAJES = [
     ("sara", "Confirmo lo del Horno Sin Trigo, sus magdalenas son lo mejor 😋"),
     ("javi", "Este finde voy a Málaga, apunto La Pizzería Libre."),
 ]
+
+
+# Fotos con licencia libre de Wikimedia Commons (autoría y licencia en creditos.json)
+FOTOS_DEMO = Path(__file__).resolve().parent / "demo_fotos"
+
+
+def _fotos_demo(establecimiento_id: int, nombre: str, autores: list[Usuario]) -> list[Imagen]:
+    creditos = json.loads((FOTOS_DEMO / "creditos.json").read_text(encoding="utf-8"))
+    carpeta = get_settings().uploads_dir
+    carpeta.mkdir(parents=True, exist_ok=True)
+    fotos = []
+    for foto, autor in zip(creditos.get(nombre, []), autores, strict=False):
+        fichero = f"{uuid.uuid4().hex}.webp"
+        shutil.copyfile(FOTOS_DEMO / foto["fichero"], carpeta / fichero)
+        fotos.append(
+            Imagen(
+                establecimiento_id=establecimiento_id,
+                autor_id=autor.id,
+                fichero=fichero,
+                credito=foto["credito"],
+                credito_url=foto["credito_url"],
+            )
+        )
+    return fotos
 
 
 def _dni(numero: int) -> str:
@@ -227,10 +271,15 @@ def cargar_demo() -> None:
                 categoria=categoria,
                 precio=INFO_PRACTICA[nombre][0],
                 horario=INFO_PRACTICA[nombre][1],
+                nota_horario=INFO_PRACTICA[nombre][2],
                 **dict.fromkeys(distintivos, True),
             )
             db.add(est)
             db.flush()
+            # Las suben distintos miembros (sin usar `aleatorio`, para no alterar el resto de la demo)
+            db.add_all(
+                _fotos_demo(est.id, nombre, miembros[n % len(miembros) :] + miembros[: n % len(miembros)])
+            )
             actividades.append(
                 Actividad(
                     usuario_id=autor.id,
@@ -358,12 +407,13 @@ def main() -> None:
     sub = parser.add_subparsers(dest="comando", required=True)
     sub.add_parser("admin", help="Convierte una cuenta en administradora").add_argument("email")
     sub.add_parser("demo", help="Carga datos de ejemplo")
+    sub.add_parser("migrar", help="Actualiza el esquema de la base de datos")
     args = parser.parse_args()
 
-    Base.metadata.create_all(engine)
+    migrar()
     if args.comando == "admin":
         hacer_admin(args.email)
-    else:
+    elif args.comando == "demo":
         cargar_demo()
 
 

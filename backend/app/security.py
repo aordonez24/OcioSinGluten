@@ -1,3 +1,4 @@
+import hashlib
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
@@ -35,10 +36,45 @@ def crear_token(usuario: Usuario) -> str:
 def usuario_desde_token(token: str, db: Session) -> Usuario | None:
     try:
         datos = jwt.decode(token, get_settings().secret_key, algorithms=[ALGORITMO])
+        if "uso" in datos:  # un enlace para recuperar la contraseña no sirve como sesión
+            return None
         usuario = db.get(Usuario, int(datos["sub"]))
     except (jwt.PyJWTError, KeyError, ValueError):
         return None
     if usuario is None or usuario.archivado:
+        return None
+    return usuario
+
+
+# ----------------------------------------------------------------- recuperar la contraseña
+
+RECUPERAR_EXPIRA = timedelta(hours=1)
+
+
+def _huella(usuario: Usuario) -> str:
+    """Resumen de la contraseña actual: al cambiarla, los enlaces anteriores dejan de valer."""
+    return hashlib.sha256(usuario.password_hash.encode()).hexdigest()[:20]
+
+
+def crear_token_recuperacion(usuario: Usuario) -> str:
+    datos = {
+        "sub": str(usuario.id),
+        "uso": "recuperar",
+        "huella": _huella(usuario),
+        "exp": datetime.now(UTC) + RECUPERAR_EXPIRA,
+    }
+    return jwt.encode(datos, get_settings().secret_key, algorithm=ALGORITMO)
+
+
+def usuario_desde_token_recuperacion(token: str, db: Session) -> Usuario | None:
+    try:
+        datos = jwt.decode(token, get_settings().secret_key, algorithms=[ALGORITMO])
+        if datos.get("uso") != "recuperar":
+            return None
+        usuario = db.get(Usuario, int(datos["sub"]))
+    except (jwt.PyJWTError, KeyError, ValueError):
+        return None
+    if usuario is None or usuario.archivado or datos.get("huella") != _huella(usuario):
         return None
     return usuario
 

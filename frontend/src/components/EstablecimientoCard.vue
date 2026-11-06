@@ -3,12 +3,15 @@ import { computed } from 'vue'
 import { Heart, WheatOff } from 'lucide-vue-next'
 import { CATEGORIAS, PRECIOS } from '@/catalogo'
 import { formatoDistancia, nota } from '@/utils'
+import { estadoHorario, useAhora } from '@/horario'
 import Estrellas from '@/components/Estrellas.vue'
 import Portada from '@/components/Portada.vue'
 
 const props = defineProps({ establecimiento: { type: Object, required: true } })
 const e = computed(() => props.establecimiento)
 const categoria = computed(() => (CATEGORIAS[e.value.categoria] ?? CATEGORIAS.otro).texto)
+const ahora = useAhora()
+const estado = computed(() => estadoHorario(e.value, ahora.value))
 const lugar = computed(() =>
   e.value.localidad === e.value.provincia ? e.value.localidad : `${e.value.localidad}, ${e.value.provincia}`,
 )
@@ -28,6 +31,7 @@ const lugar = computed(() =>
         </span>
       </p>
       <h3>{{ e.nombre }}</h3>
+      <p v-if="estado" class="estado" :class="{ abierto: estado.abierto }">{{ estado.texto }}</p>
       <p v-if="e.todo_sin_gluten" class="sello-linea"><WheatOff :size="14" aria-hidden="true" /> 100 % sin gluten</p>
       <p class="pie">
         <span class="nota">
@@ -94,6 +98,17 @@ const lugar = computed(() =>
 
 .sello-linea {
   display: none;
+}
+
+.estado {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--texto-suave);
+}
+
+.estado.abierto {
+  color: var(--turquesa-oscuro);
+  font-weight: 600;
 }
 
 .categoria {

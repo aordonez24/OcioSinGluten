@@ -1,5 +1,6 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { WifiOff } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
@@ -19,6 +20,16 @@ const router = useRouter()
 // Comprueba que la sesión guardada sigue siendo válida y refresca los datos (p. ej. el rol).
 onMounted(() => {
   if (auth.autenticado) api('/auth/yo').then((u) => (auth.usuario = u)).catch(() => {})
+})
+
+// Sin conexión la app sigue funcionando con lo guardado (service worker); se avisa de ello.
+const enLinea = ref(navigator.onLine)
+const actualizarConexion = () => (enLinea.value = navigator.onLine)
+window.addEventListener('online', actualizarConexion)
+window.addEventListener('offline', actualizarConexion)
+onBeforeUnmount(() => {
+  window.removeEventListener('online', actualizarConexion)
+  window.removeEventListener('offline', actualizarConexion)
 })
 
 // Las notificaciones se consultan solo mientras hay sesión.
@@ -43,6 +54,10 @@ watch(
 <template>
   <a href="#contenido" class="saltar">Saltar al contenido</a>
   <AppHeader />
+  <p v-if="!enLinea" class="sin-conexion" role="status">
+    <WifiOff :size="16" aria-hidden="true" />
+    Sin conexión. Ves lo que se guardó la última vez que abriste cada página.
+  </p>
   <main id="contenido">
     <RouterView :key="$route.path" />
   </main>
@@ -73,6 +88,20 @@ watch(
 
 .saltar:focus {
   top: 0.5rem;
+}
+
+.sin-conexion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.55rem var(--margen);
+  background: var(--carbon);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 .avisos {

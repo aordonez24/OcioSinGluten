@@ -8,12 +8,14 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 ## Funcionalidades
 
 - **Establecimientos** en lista o en mapa, ordenables por cercanía, con búsqueda que ignora tildes y filtros por provincia,
-  tipo de sitio, precio y distintivos. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
+  tipo de sitio, precio, distintivos y **abierto ahora**. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
   en la URL, así que se pueden compartir.
 - **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
   acreditado por una asociación de celíacos.
 - **Ficha de cada sitio**: mapa, "cómo llegar", horario, web y rango de precio, me gusta, "he estado",
   guardar en favoritos, compartir, galería de fotos, opiniones y otros sitios sin gluten cercanos.
+- **Horario por días** con franjas (también de madrugada): la ficha y cada tarjeta dicen si el sitio está
+  abierto ahora, hasta cuándo o cuándo abre, con la hora local del sitio (Canarias incluida).
 - **Avisar de un error**: cualquier miembro puede avisar de que un sitio ha cerrado, ya no tiene opciones
   sin gluten o tiene datos mal; el aviso llega a la bandeja del equipo de administración.
 - Quien añade un sitio puede **editarlo** después (borrarlo solo puede el equipo de administración).
@@ -23,7 +25,9 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 - **Perfiles** con actividad, opiniones, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
 - **Actividades** de la comunidad agrupadas por días, filtrables por tipo y por "de quienes sigo".
-- **Instalable en el móvil** como una app (manifiesto PWA con iconos y accesos directos).
+- **Instalable en el móvil** como una app (manifiesto PWA con iconos y accesos directos) que **funciona sin
+  conexión**: se abre sin cobertura y muestra lo que se consultó la última vez.
+- **Recuperar la contraseña** con un enlace por email que caduca en una hora y sirve una sola vez.
 - **Administración**: editar o eliminar establecimientos, suspender o eliminar cuentas y gestionar las
   consultas del formulario de contacto.
 - **Privacidad**: el DNI, el email, el teléfono y la fecha de nacimiento solo los ven la propia persona
@@ -34,7 +38,7 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 | Capa | Tecnología |
 |---|---|
 | Backend | Python 3.11+, [FastAPI](https://fastapi.tiangolo.com), SQLAlchemy 2, Pydantic 2 |
-| Base de datos | SQLite (por defecto, sin instalar nada) o PostgreSQL |
+| Base de datos | SQLite (por defecto, sin instalar nada) o PostgreSQL, con migraciones de Alembic |
 | Seguridad | JWT (Bearer), bcrypt, límite de intentos de login, cabeceras de seguridad |
 | Tiempo real | WebSockets nativos |
 | Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF |
@@ -64,6 +68,19 @@ npm run dev                     # http://localhost:5173
 ```
 
 Vite redirige `/api` y `/uploads` al backend, así que no hay que configurar URLs ni CORS.
+
+La base de datos se crea y se actualiza sola al arrancar (migraciones de Alembic), así que no hay que
+borrarla cuando cambia el modelo. Para crear una migración nueva tras tocar `app/models.py`:
+
+```bash
+alembic revision --autogenerate -m "describe el cambio"   # desde backend/; revisa el fichero generado
+```
+
+### Correo
+
+Sin servidor SMTP (lo normal en desarrollo), los correos se guardan como ficheros `.eml` en
+`backend/correos/` y se abren con cualquier programa de correo. En producción define `SMTP_HOST`,
+`SMTP_USUARIO`, `SMTP_PASSWORD` y `URL_PUBLICA` (consulta `backend/.env.example`).
 
 ### Cuentas de la demo
 
@@ -137,17 +154,21 @@ backend/
     models.py          Tablas (SQLAlchemy)
     schemas.py         Entrada/salida de la API y validaciones (Pydantic)
     security.py        Contraseñas, tokens JWT y permisos
-    cli.py             Comandos: crear admin, cargar demo
+    cli.py             Comandos: crear admin, cargar demo, migrar
+    migraciones/       Migraciones de Alembic
+    demo_fotos/        Fotos de la demo (Wikimedia Commons; autoría y licencia en creditos.json)
     routers/           auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat
-    services/          Imágenes, geolocalización, límite de intentos y consultas reutilizables
+    services/          Imágenes, correo, geolocalización, límite de intentos y consultas reutilizables
   tests/
 frontend/
   src/
     api.js             Cliente HTTP único (token y errores)
     router.js          Rutas, títulos de página y protección por sesión o rol
+    horario.js         ¿Está abierto? Horario semanal en la zona horaria del sitio
     stores/            Estado global: sesión, avisos y diálogo de confirmación
     components/        Cabecera, barra móvil, tarjetas, mapa, formularios…
     views/             Páginas
+  sw.js                Service worker (uso sin conexión); Vite le añade la lista de ficheros al compilar
 e2e/                   Pruebas de extremo a extremo y de accesibilidad
 docs/DISENO.md         Dirección de diseño: paleta, tipografía y reglas de la interfaz
 Dockerfile             Imagen de producción (frontend + backend)
@@ -160,6 +181,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | Método | Ruta | Acceso |
 |---|---|---|
 | POST | `/api/auth/registro`, `/api/auth/login` | Público |
+| POST | `/api/auth/recuperar` (envía el enlace), `/api/auth/restablecer` | Público |
 | GET | `/api/auth/yo` | Sesión |
 | GET | `/api/estadisticas` | Público |
 | GET | `/api/establecimientos`, `/api/establecimientos/{id}`, `/{id}/comentarios` | Público |
@@ -182,3 +204,10 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | POST | `/api/consultas` | Público |
 | GET/DELETE | `/api/consultas` | Admin |
 | WS | `/api/chat?token=` | Sesión |
+
+## Créditos de las fotos de la demo
+
+Las fotos de los establecimientos de ejemplo son de [Wikimedia Commons](https://commons.wikimedia.org),
+con licencias CC0, CC BY y CC BY-SA. La autoría y la licencia de cada una aparecen bajo la foto en la ficha
+y en `backend/app/demo_fotos/creditos.json`. Los sitios de la demo son inventados: las fotos ilustran el
+tipo de cocina, no son de esos locales.

@@ -9,6 +9,7 @@ __pycache__/
 backend/*.db
 backend/*.db-*
 backend/uploads/
+backend/correos/
 backend/.env
 
 # Frontend

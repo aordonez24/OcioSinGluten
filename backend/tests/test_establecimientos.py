@@ -1,3 +1,5 @@
+import pytest
+
 from conftest import crear_establecimiento, hacer_admin, imagen_png, registrar
 
 
@@ -234,18 +236,55 @@ def test_estadisticas_y_detalle_con_autor(client):
     assert detalle["creado_por"]["username"] == "ana"
 
 
+def _semana(*franjas) -> list[list[dict]]:
+    """El mismo horario de lunes a viernes; sábado y domingo cerrado."""
+    dia = [{"abre": a, "cierra": c} for a, c in franjas]
+    return [dia] * 5 + [[], []]
+
+
 def test_informacion_practica(client):
     h = registrar(client, "ana")
-    est = crear_establecimiento(client, h, precio=2, horario="De lunes a viernes", web="celiacofeliz.es")
-    assert (est["precio"], est["horario"], est["web"]) == (2, "De lunes a viernes", "https://celiacofeliz.es")
+    horario = _semana(("13:00", "16:30"), ("20:30", "00:30"))
+    est = crear_establecimiento(
+        client, h, precio=2, horario=horario, nota_horario="Cerrado en agosto", web="celiacofeliz.es"
+    )
+    assert (est["precio"], est["web"]) == (2, "https://celiacofeliz.es")
+    assert est["horario"] == horario and est["nota_horario"] == "Cerrado en agosto"
+    # El listado también lleva el horario, para filtrar por "abierto ahora"
+    assert client.get("/api/establecimientos").json()[0]["horario"] == horario
     url = f"/api/establecimientos/{est['id']}"
 
     assert client.patch(url, json={"web": "no es una web"}, headers=h).status_code == 422
     assert client.patch(url, json={"precio": 4}, headers=h).status_code == 422
-    # Cadena vacía y precio 0 borran el dato
-    r = client.patch(url, json={"web": "", "horario": "", "precio": 0}, headers=h).json()
-    assert (r["precio"], r["horario"], r["web"]) == (None, None, None)
+    # Cadena vacía, precio 0 y horario [] borran el dato
+    r = client.patch(url, json={"web": "", "horario": [], "nota_horario": "", "precio": 0}, headers=h).json()
+    assert (r["precio"], r["horario"], r["nota_horario"], r["web"]) == (None, None, None, None)
     assert client.get("/api/establecimientos").json()[0]["precio"] is None
+
+
+@pytest.mark.parametrize(
+    "horario",
+    [
+        [[]] * 6,  # faltan días
+        _semana(("25:00", "26:00")),  # hora imposible
+        _semana(("9:00", "14:00")),  # sin el cero
+        _semana(("10:00", "10:00")),  # abre y cierra a la vez
+        _semana(("10:00", "14:00"), ("13:00", "18:00")),  # se solapan
+        _semana(("20:00", "02:00"), ("21:00", "23:00")),  # la de madrugada tiene que ser la última
+        _semana(("08:00", "09:00"), ("10:00", "11:00"), ("12:00", "13:00"), ("14:00", "15:00")),
+    ],
+)
+def test_horario_no_valido(client, horario):
+    h = registrar(client, "ana")
+    datos = {"nombre": "X", "telefono": "953000000", "calle": "C", "cod_postal": "23002"}
+    datos |= {"localidad": "Jaén", "provincia": "Jaén", "horario": horario}
+    assert client.post("/api/establecimientos", json=datos, headers=h).status_code == 422
+
+
+def test_las_franjas_se_ordenan(client):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(client, h, horario=_semana(("20:00", "23:00"), ("09:00", "14:00")))
+    assert [f["abre"] for f in est["horario"][0]] == ["09:00", "20:00"]
 
 
 def test_avisos_de_un_sitio_llegan_a_administracion(client):

@@ -3,6 +3,8 @@ import { computed, reactive, ref } from 'vue'
 import { NOMBRES_PROVINCIAS, PROVINCIAS } from '@/provincias'
 import { validar } from '@/utils'
 import { CATEGORIAS, DISTINTIVOS, PRECIOS } from '@/catalogo'
+import { validarHorario } from '@/horario'
+import EditorHorario from '@/components/EditorHorario.vue'
 
 const props = defineProps({
   inicial: { type: Object, default: () => ({}) },
@@ -18,7 +20,9 @@ const datos = reactive({
   ...Object.fromEntries(CAMPOS.map((c) => [c, String(props.inicial[c] ?? (c === 'pais' ? 'España' : ''))])),
   categoria: props.inicial.categoria ?? 'restaurante',
   precio: props.inicial.precio ?? '',
-  horario: props.inicial.horario ?? '',
+  // Copia: si se cancela la edición, la ficha no debe cambiar.
+  horario: props.inicial.horario ? JSON.parse(JSON.stringify(props.inicial.horario)) : null,
+  nota_horario: props.inicial.nota_horario ?? '',
   web: props.inicial.web ?? '',
   ...Object.fromEntries(DISTINTIVOS.map((d) => [d.clave, Boolean(props.inicial[d.clave])])),
 })
@@ -32,6 +36,7 @@ const errores = computed(() => ({
   localidad: datos.localidad.trim() ? '' : 'Obligatorio',
   provincia: datos.provincia.trim() ? '' : 'Obligatorio',
   pais: datos.pais.trim() ? '' : 'Obligatorio',
+  horario: validarHorario(datos.horario),
   web: !datos.web.trim() || /^(https?:\/\/)?[^\s/$.?#][^\s]*\.[^\s]{2,}$/i.test(datos.web.trim()) ? '' : 'No parece una dirección web',
 }))
 const editando = Boolean(props.inicial.id)
@@ -47,7 +52,8 @@ function enviar() {
   emit('guardar', {
     ...datos,
     precio: vacio(Number(datos.precio), 0),
-    horario: vacio(datos.horario.trim(), ''),
+    horario: datos.horario ?? (editando ? [] : null),
+    nota_horario: vacio(datos.nota_horario.trim(), ''),
     web: vacio(datos.web.trim(), ''),
   })
 }
@@ -96,9 +102,10 @@ function enviar() {
           <span class="error-campo">{{ err('web') }}</span>
         </label>
       </div>
+      <EditorHorario v-model="datos.horario" :error="err('horario')" />
       <label>
-        Horario
-        <textarea v-model="datos.horario" rows="2" maxlength="300" placeholder="De martes a domingo, de 13:00 a 16:30 y de 20:30 a 23:30"></textarea>
+        Nota sobre el horario
+        <input v-model="datos.nota_horario" maxlength="300" placeholder="Por ejemplo: cerrado en agosto" />
       </label>
     </fieldset>
 

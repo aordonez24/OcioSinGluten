@@ -1,0 +1,108 @@
+{
+  "Celiaco Feliz": [
+    {
+      "fichero": "celiaco-feliz-1.webp",
+      "credito": "Foto: Juan Emilio Prades Bel (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Croquetas;_tapa_(Espa%C3%B1a).jpg"
+    },
+    {
+      "fichero": "celiaco-feliz-2.webp",
+      "credito": "Foto: Juan Fernández (CC BY-SA 2.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Croquetas_-_JuanJa%C3%A9n.jpg"
+    }
+  ],
+  "Horno Sin Trigo": [
+    {
+      "fichero": "horno-sin-trigo-1.webp",
+      "credito": "Foto: Eurobas (CC BY-SA 3.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Pains_biologiques_sans_gluten_quinoa_sarrasin_teff.JPG"
+    },
+    {
+      "fichero": "horno-sin-trigo-2.webp",
+      "credito": "Foto: Bigvai Muhoti (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Non_gluten_bread.jpg"
+    }
+  ],
+  "La Pizzería Libre": [
+    {
+      "fichero": "la-pizzeria-libre-1.webp",
+      "credito": "Foto: Lombroso (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Pizza_Margherita_().JPG"
+    },
+    {
+      "fichero": "la-pizzeria-libre-2.webp",
+      "credito": "Foto: Mario56 (CC BY-SA 3.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Margherita_Originale.JPG"
+    }
+  ],
+  "Taberna El Arroz": [
+    {
+      "fichero": "taberna-el-arroz-1.webp",
+      "credito": "Foto: Jan Harenburg (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:01_Paella_Valenciana_original.jpg"
+    },
+    {
+      "fichero": "taberna-el-arroz-2.webp",
+      "credito": "Foto: Juan Emilio Prades Bel (CC BY 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Paella_terminada_haciendo_el_socarrat,_uno_de_los_procesos_de_elaboraci%C3%B3n_y_cocci%C3%B3n_de_la_paella_valenciana.jpg"
+    }
+  ],
+  "Burger Zero": [
+    {
+      "fichero": "burger-zero-1.webp",
+      "credito": "Foto: JIP (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Hamburger_with_French_fries_at_Mike%27s_Diner_in_January_2024.jpg"
+    },
+    {
+      "fichero": "burger-zero-2.webp",
+      "credito": "Foto: JIP (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Hamburger_with_fries_and_dip_sauce_at_restaurant_Locale.jpg"
+    }
+  ],
+  "Dulce Celíaca": [
+    {
+      "fichero": "dulce-celiaca-1.webp",
+      "credito": "Foto: Juan Emilio Prades Bel (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Raci%C3%B3n_de_postre_de_Tarta_de_Queso.jpg"
+    },
+    {
+      "fichero": "dulce-celiaca-2.webp",
+      "credito": "Foto: さえぼー (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Basque-style_cheesecake_in_Pepito,_Tokyo.jpg"
+    },
+    {
+      "fichero": "dulce-celiaca-3.webp",
+      "credito": "Foto: Juan Emilio Prades Bel (CC BY 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Plato_de_postre,_tarta_de_queso_(Espa%C3%B1a).jpg"
+    }
+  ],
+  "Mesón La Loma": [
+    {
+      "fichero": "meson-la-loma-1.webp",
+      "credito": "Foto: P.Lechien (CC0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Salmorejo_cordouan.JPG"
+    },
+    {
+      "fichero": "meson-la-loma-2.webp",
+      "credito": "Foto: Tirithel (CC BY-SA 3.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Salmorejo_201207.jpg"
+    }
+  ],
+  "Heladería Polo Norte": [
+    {
+      "fichero": "heladeria-polo-norte-1.webp",
+      "credito": "Foto: Hannah Clover (CC BY 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Gelato_in_Hamilton.jpg"
+    },
+    {
+      "fichero": "heladeria-polo-norte-2.webp",
+      "credito": "Foto: Ruth Hartnup from Vancouver, Canada (CC BY 2.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Mango_gelato_(9368461646).jpg"
+    },
+    {
+      "fichero": "heladeria-polo-norte-3.webp",
+      "credito": "Foto: Basilicofresco (CC BY-SA 4.0), Wikimedia Commons",
+      "credito_url": "https://commons.wikimedia.org/wiki/File:Gelato_artigianale_italiano,_Bertinelli.jpg"
+    }
+  ]
+}

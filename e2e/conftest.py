@@ -22,6 +22,8 @@ from playwright.sync_api import sync_playwright
 RAIZ = Path(__file__).resolve().parent.parent
 BACKEND = RAIZ / "backend"
 DIST = RAIZ / "frontend" / "dist"
+# Sin SMTP, la app guarda aquí los correos que envía (ficheros .eml) y las pruebas los leen.
+CORREOS = Path(tempfile.mkdtemp(prefix="osg-e2e-correos-"))
 
 
 def _puerto_libre() -> int:
@@ -42,6 +44,7 @@ def url_base():
         "UPLOADS_DIR": str(carpeta / "uploads"),
         "FRONTEND_DIST": str(DIST),
         "GEOCODIFICAR": "false",
+        "CORREOS_DIR": str(CORREOS),
         "SECRET_KEY": "clave-solo-para-pruebas-e2e",
         "PYTHONIOENCODING": "utf-8",
     }

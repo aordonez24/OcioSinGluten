@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import Settings, get_settings
-from app.db import Base, engine
+from app.db import migrar
 from app.routers import (
     actividades,
     auth,
@@ -32,7 +32,11 @@ async def lifespan(_: FastAPI):
             "Usando la SECRET_KEY por defecto: cualquiera podría falsificar sesiones. "
             "Defínela en backend/.env antes de publicar la aplicación."
         )
-    Base.metadata.create_all(engine)
+    if get_settings().smtp_host and not get_settings().url_publica:
+        logging.getLogger("uvicorn").warning(
+            "Define URL_PUBLICA: sin ella, los enlaces de los correos usan la dirección de cada petición."
+        )
+    migrar()  # aplica las migraciones pendientes (Alembic)
     get_settings().uploads_dir.mkdir(parents=True, exist_ok=True)
     yield
 

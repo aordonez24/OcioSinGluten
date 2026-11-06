@@ -44,6 +44,10 @@ nunca en mayúsculas. Interfaz en 600. Texto a 16 px con interlineado 1,6.
 - Se separa con espacio, con líneas finas entre filas y con cambios de superficie (blanco y niebla).
   Nada de tarjetas con borde y sombra repetidas.
 - Sin foto, la portada de un sitio es un fondo plano con el icono de su tipo: nunca una imagen inventada.
+- Las fotos que no son de quien las sube (las de la demo, de Wikimedia Commons) llevan debajo su autoría
+  y su licencia, en texto pequeño.
+- El estado del horario va en texto, sin pastillas: «Abierto hasta las 23:30» en turquesa oscuro y
+  «Cerrado, abre mañana a las 13:00» en gris. El verde queda reservado al «100 % sin gluten».
 - En móvil la lista de sitios es compacta (miniatura a la izquierda) y la navegación va abajo.
 
 ## Texto

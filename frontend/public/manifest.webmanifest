@@ -15,6 +15,7 @@
   ],
   "shortcuts": [
     { "name": "Cerca de mí", "url": "/establecimientos?orden=cerca" },
+    { "name": "Abierto ahora cerca de mí", "url": "/establecimientos?orden=cerca&abierto=1" },
     { "name": "Añadir un sitio", "url": "/establecimientos/nuevo" }
   ]
 }

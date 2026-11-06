@@ -48,6 +48,9 @@ async function entrar() {
           Contraseña
           <CampoPassword v-model="datos.password" required />
         </label>
+        <RouterLink :to="{ path: '/recuperar', query: datos.email ? { email: datos.email } : {} }" class="olvido">
+          ¿Has olvidado la contraseña?
+        </RouterLink>
         <p v-if="error" class="alerta" role="alert">{{ error }}</p>
         <button class="btn btn-primario btn-bloque" :disabled="enviando">
           {{ enviando ? 'Entrando…' : 'Entrar' }}
@@ -82,6 +85,12 @@ async function entrar() {
 
 .cabecera p {
   margin: 0;
+}
+
+.olvido {
+  justify-self: start;
+  margin-top: -0.4rem;
+  font-size: 0.9375rem;
 }
 
 .pie {

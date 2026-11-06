@@ -7,6 +7,8 @@ import { useAuth } from '@/stores/auth'
 const routes = [
   { path: '/', component: () => import('@/views/Inicio.vue'), meta: { titulo: null } },
   { path: '/entrar', name: 'login', component: () => import('@/views/Login.vue'), meta: { titulo: 'Iniciar sesión', invitado: true } },
+  { path: '/recuperar', component: () => import('@/views/Recuperar.vue'), meta: { titulo: 'Recuperar la contraseña', invitado: true } },
+  { path: '/restablecer', component: () => import('@/views/Restablecer.vue'), meta: { titulo: 'Contraseña nueva' } },
   { path: '/registro', component: () => import('@/views/Registro.vue'), meta: { titulo: 'Crear cuenta', invitado: true } },
   { path: '/establecimientos', component: () => import('@/views/Establecimientos.vue'), meta: { titulo: 'Establecimientos' } },
   {

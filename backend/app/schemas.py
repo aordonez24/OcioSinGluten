@@ -64,6 +64,34 @@ def _web(valor: str) -> str:
     return valor
 
 
+HORA = re.compile(r"([01]\d|2[0-3]):[0-5]\d")
+
+
+class Franja(BaseModel):
+    """Tramo en el que el sitio abre. Si cierra antes de la hora de apertura, cierra de madrugada."""
+
+    abre: str
+    cierra: str
+
+
+def _horario(dias: list[list[Franja]]) -> list[list[Franja]]:
+    if len(dias) != 7:
+        raise ValueError("El horario debe tener los 7 días de la semana")
+    for franjas in dias:
+        if len(franjas) > 3:
+            raise ValueError("Como mucho tres franjas por día")
+        for f in franjas:
+            if not HORA.fullmatch(f.abre) or not HORA.fullmatch(f.cierra):
+                raise ValueError("Las horas deben tener el formato HH:MM")
+            if f.abre == f.cierra:
+                raise ValueError("La hora de cierre debe ser distinta de la de apertura")
+        franjas.sort(key=lambda f: f.abre)
+        for anterior, siguiente in zip(franjas, franjas[1:], strict=False):
+            if anterior.cierra < anterior.abre or anterior.cierra > siguiente.abre:
+                raise ValueError("Las franjas de un mismo día no pueden solaparse")
+    return dias
+
+
 def _texto(max_len: int):
     return Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=max_len)]
 
@@ -78,6 +106,12 @@ FechaUTC = Annotated[datetime, AfterValidator(lambda d: d if d.tzinfo else d.rep
 Username = Annotated[str, Field(min_length=3, max_length=30, pattern=r"^[A-Za-z0-9_.-]+$")]
 Web = Annotated[str, StringConstraints(max_length=200), AfterValidator(_web)]
 Precio = Annotated[int, Field(ge=1, le=3, description="1 económico, 2 normal, 3 caro")]
+Horario = Annotated[
+    list[list[Franja]],
+    AfterValidator(_horario),
+    Field(description="7 listas (de lunes a domingo) de franjas; una lista vacía es un día cerrado"),
+]
+NotaHorario = Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)]
 
 
 def url_upload(fichero: str | None) -> str | None:
@@ -105,6 +139,15 @@ class RegistroIn(BaseModel):
 class LoginIn(BaseModel):
     email: str
     password: str
+
+
+class RecuperarIn(BaseModel):
+    email: str
+
+
+class RestablecerIn(BaseModel):
+    token: str
+    password: Password
 
 
 class UsuarioUpdate(BaseModel):
@@ -189,7 +232,8 @@ class EstablecimientoIn(BaseModel):
     cocina_separada: bool = False
     acreditado: bool = False
     precio: Precio | None = None
-    horario: Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None = None
+    horario: Horario | None = None
+    nota_horario: NotaHorario | None = None
     web: Web | None = None
 
 
@@ -206,9 +250,10 @@ class EstablecimientoUpdate(BaseModel):
     carta_sin_gluten: bool | None = None
     cocina_separada: bool | None = None
     acreditado: bool | None = None
-    # Para borrar uno de estos datos se envía una cadena vacía (o 0 en el precio).
+    # Para borrar uno de estos datos se envía una cadena vacía (0 en el precio, [] en el horario).
     precio: Annotated[int, Field(ge=0, le=3)] | None = None
-    horario: Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None = None
+    horario: Horario | Annotated[list, Field(max_length=0)] | None = None
+    nota_horario: NotaHorario | None = None
     web: Web | Annotated[str, StringConstraints(max_length=0)] | None = None
 
 
@@ -227,6 +272,7 @@ class EstablecimientoResumen(Esquema):
     cocina_separada: bool
     acreditado: bool
     precio: int | None
+    horario: list[list[Franja]] | None
     num_likes: int
     num_visitas: int
     num_opiniones: int
@@ -243,6 +289,8 @@ class EstablecimientoResumen(Esquema):
 class ImagenOut(Esquema):
     id: int
     autor_id: int | None
+    credito: str | None = None
+    credito_url: str | None = None
     fichero: str = Field(exclude=True)
 
     @computed_field
@@ -251,7 +299,7 @@ class ImagenOut(Esquema):
 
 
 class EstablecimientoDetalle(EstablecimientoResumen):
-    horario: str | None
+    nota_horario: str | None
     web: str | None
     creado_por: UsuarioResumen | None
     creado_en: FechaUTC

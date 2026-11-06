@@ -29,6 +29,20 @@ class Settings(BaseSettings):
     # Geocodificación de direcciones con OpenStreetMap (Nominatim).
     geocodificar: bool = True
 
+    # Dirección pública de la web, para los enlaces de los correos (p. ej. https://ociosingluten.es).
+    # Si no se define se usa la de la petición, que un atacante podría manipular: defínela en producción.
+    url_publica: str | None = None
+
+    # Correo saliente (recuperar la contraseña). Sin SMTP_HOST, los correos se guardan como
+    # ficheros .eml en `correos_dir` para poder abrirlos durante el desarrollo.
+    smtp_host: str | None = None
+    smtp_puerto: int = 587
+    smtp_usuario: str | None = None
+    smtp_password: str | None = None
+    smtp_tls: bool = True
+    correo_remitente: str = "Ocio Sin Gluten <no-responder@ociosingluten.es>"
+    correos_dir: Path = BASE_DIR / "correos"
+
     # Carpeta con el build del frontend. Si existe, FastAPI lo sirve directamente.
     frontend_dist: Path = BASE_DIR.parent / "frontend" / "dist"
 

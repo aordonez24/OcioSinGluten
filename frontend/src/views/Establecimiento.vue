@@ -12,6 +12,7 @@ import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
 import { hace, nota } from '@/utils'
 import { CATEGORIAS, PRECIOS } from '@/catalogo'
+import { DIAS, estadoHorario, momentoLocal, textoDia, useAhora } from '@/horario'
 import AvisoProblema from '@/components/AvisoProblema.vue'
 import SitiosCercanos from '@/components/SitiosCercanos.vue'
 import Distintivos from '@/components/Distintivos.vue'
@@ -48,6 +49,9 @@ const urlComoLlegar = computed(() => {
 })
 const categoria = computed(() => CATEGORIAS[est.value?.categoria] ?? CATEGORIAS.otro)
 const puedeBorrar = (autorId) => auth.esAdmin || auth.usuario?.id === autorId
+const ahora = useAhora()
+const estado = computed(() => estadoHorario(est.value, ahora.value))
+const hoy = computed(() => est.value && momentoLocal(ahora.value, est.value.provincia).dia)
 const webVisible = computed(() => est.value?.web?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''))
 
 async function cargar() {
@@ -197,9 +201,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
     <div class="disposicion">
       <section class="ficha">
-        <button v-if="est.imagenes.length" class="foto-principal" @click="ampliada = 0">
-          <img :src="est.imagenes[0].url" :alt="`Foto de ${est.nombre}`" />
-        </button>
+        <figure v-if="est.imagenes.length" class="foto-principal">
+          <button @click="ampliada = 0">
+            <img :src="est.imagenes[0].url" :alt="`Foto de ${est.nombre}`" />
+          </button>
+          <figcaption v-if="est.imagenes[0].credito">
+            <a :href="est.imagenes[0].credito_url" target="_blank" rel="noopener nofollow">{{ est.imagenes[0].credito }}</a>
+          </figcaption>
+        </figure>
 
         <template v-if="!editando">
           <p class="categoria">{{ categoria.texto }} en {{ est.localidad }}</p>
@@ -242,7 +251,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
           <ul class="lista-limpia datos">
             <li><MapPin :size="18" aria-hidden="true" /> {{ direccion }}, {{ est.provincia }} ({{ est.pais }})</li>
             <li><Phone :size="18" aria-hidden="true" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
-            <li v-if="est.horario" class="horario"><Clock :size="18" aria-hidden="true" /> <span>{{ est.horario }}</span></li>
+            <li v-if="est.horario || est.nota_horario" class="horario">
+              <Clock :size="18" aria-hidden="true" />
+              <div>
+                <p v-if="estado" class="estado" :class="{ abierto: estado.abierto }">{{ estado.texto }}</p>
+                <details v-if="est.horario">
+                  <summary>Horario de la semana</summary>
+                  <table class="semana">
+                    <tr v-for="(franjas, d) in est.horario" :key="d" :class="{ hoy: d === hoy }">
+                      <th scope="row">{{ DIAS[d] }}<span v-if="d === hoy" class="solo-lectores"> (hoy)</span></th>
+                      <td>{{ textoDia(franjas) }}</td>
+                    </tr>
+                  </table>
+                </details>
+                <p v-if="est.nota_horario" class="nota-horario">{{ est.nota_horario }}</p>
+              </div>
+            </li>
             <li v-if="est.web">
               <Globe :size="18" aria-hidden="true" />
               <a :href="est.web" target="_blank" rel="noopener nofollow">{{ webVisible }}</a>
@@ -310,7 +334,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
     </div>
 
     <div v-if="ampliada !== null" class="visor" role="dialog" aria-modal="true" aria-label="Foto ampliada" @click.self="ampliada = null">
-      <img :src="est.imagenes[ampliada].url" alt="" />
+      <figure class="visor-foto">
+        <img :src="est.imagenes[ampliada].url" alt="" />
+        <figcaption v-if="est.imagenes[ampliada].credito">
+          <a :href="est.imagenes[ampliada].credito_url" target="_blank" rel="noopener nofollow">{{ est.imagenes[ampliada].credito }}</a>
+        </figcaption>
+      </figure>
       <div class="visor-controles">
         <button v-if="est.imagenes.length > 1" class="btn btn-icono" aria-label="Anterior" @click="moverAmpliada(-1)"><ChevronLeft /></button>
         <span class="contador">{{ ampliada + 1 }} de {{ est.imagenes.length }}</span>
@@ -333,15 +362,28 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 }
 
 .foto-principal {
+  margin: 0 0 1.5rem;
+}
+
+.foto-principal button {
   display: block;
   width: 100%;
   padding: 0;
   border: 0;
-  margin-bottom: 1.5rem;
   border-radius: var(--radio);
   overflow: hidden;
   cursor: zoom-in;
   background: var(--niebla);
+}
+
+.foto-principal figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.foto-principal figcaption a {
+  color: inherit;
 }
 
 .foto-principal img {
@@ -425,11 +467,55 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
 
 .datos .horario {
   align-items: flex-start;
-  white-space: pre-line;
 }
 
 .datos .horario svg {
   margin-top: 0.2rem;
+}
+
+.horario p {
+  margin: 0;
+}
+
+.estado {
+  font-weight: 600;
+}
+
+.estado.abierto {
+  color: var(--turquesa-oscuro);
+}
+
+.horario summary {
+  display: inline-block;
+  color: var(--turquesa-oscuro);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  min-height: 32px;
+  padding-top: 0.2rem;
+}
+
+.semana {
+  border-collapse: collapse;
+  margin: 0.35rem 0 0.25rem;
+  font-size: 0.9375rem;
+}
+
+.semana th,
+.semana td {
+  text-align: left;
+  padding: 0.2rem 1.25rem 0.2rem 0;
+  font-weight: 400;
+  vertical-align: top;
+}
+
+.semana .hoy th,
+.semana .hoy td {
+  font-weight: 700;
+}
+
+.nota-horario {
+  color: var(--texto-suave);
 }
 
 .avisar-error {
@@ -531,10 +617,23 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   padding: 1rem;
 }
 
+.visor-foto {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
 .visor img {
-  max-height: 78vh;
+  max-height: 74vh;
   max-width: 100%;
   border-radius: var(--radio-sm);
+}
+
+.visor figcaption a {
+  color: #fff;
+  font-size: 0.8125rem;
 }
 
 .visor-controles {

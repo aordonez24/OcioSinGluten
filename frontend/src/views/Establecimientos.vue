@@ -1,13 +1,14 @@
 <script setup>
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { LayoutGrid, LocateFixed, Map, Search, SearchX, SlidersHorizontal, Store } from 'lucide-vue-next'
+import { Clock, LayoutGrid, LocateFixed, Map, Search, SearchX, SlidersHorizontal, Store } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { coincide, distanciaKm } from '@/utils'
 import { useUbicacion } from '@/composables'
 import { useAvisos } from '@/stores/avisos'
 import { CATEGORIAS, DISTINTIVOS, PRECIOS } from '@/catalogo'
+import { estadoHorario, useAhora } from '@/horario'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
@@ -36,6 +37,9 @@ const orden = filtro('orden', 'valoracion')
 const vista = filtro('vista', 'lista')
 const categoria = filtro('tipo')
 const precio = filtro('precio')
+const abiertoTexto = filtro('abierto')
+const abierto = computed({ get: () => abiertoTexto.value === '1', set: (v) => (abiertoTexto.value = v ? '1' : '') })
+const ahora = useAhora()
 const distintivosTexto = filtro('con')
 const distintivos = computed(() => distintivosTexto.value.split(',').filter(Boolean))
 
@@ -91,6 +95,7 @@ const filtrados = computed(() =>
     .filter((e) => !provincia.value || e.provincia === provincia.value)
     .filter((e) => !categoria.value || e.categoria === categoria.value)
     .filter((e) => !precio.value || String(e.precio) === precio.value)
+    .filter((e) => !abierto.value || estadoHorario(e, ahora.value)?.abierto)
     .filter((e) => distintivos.value.every((d) => e[d]))
     .filter((e) => coincide(busqueda.value, e.nombre, e.localidad, e.provincia, e.calle))
     .sort(ORDENES[orden.value] ?? ORDENES.valoracion),
@@ -100,10 +105,10 @@ const puntos = computed(() =>
 )
 const filtrosAbiertos = ref(false)
 const numFiltros = computed(
-  () => [provincia.value, categoria.value, precio.value].filter(Boolean).length + distintivos.value.length,
+  () => [provincia.value, categoria.value, precio.value, abierto.value].filter(Boolean).length + distintivos.value.length,
 )
 const hayFiltros = computed(() =>
-  Boolean(busqueda.value || provincia.value || categoria.value || precio.value || distintivos.value.length),
+  Boolean(busqueda.value || provincia.value || categoria.value || precio.value || abierto.value || distintivos.value.length),
 )
 
 function limpiarFiltros() {
@@ -188,7 +193,10 @@ onMounted(async () => {
           <option value="nombre">Nombre (A-Z)</option>
           <option value="cerca" hidden>Más cercanos</option>
         </select>
-        <div class="chips distintivos" role="group" aria-label="Filtrar por distintivos">
+        <div class="chips distintivos" role="group" aria-label="Más filtros">
+          <button :aria-pressed="abierto" title="Solo los sitios con horario que están abiertos en este momento" @click="abierto = !abierto">
+            <Clock :size="15" /> Abierto ahora
+          </button>
           <button
             v-for="d in DISTINTIVOS"
             :key="d.clave"

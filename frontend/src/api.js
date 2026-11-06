@@ -31,11 +31,16 @@ export async function api(ruta, { method = 'GET', body, form } = {}) {
   if (auth.token) headers.Authorization = `Bearer ${auth.token}`
   if (body !== undefined) headers['Content-Type'] = 'application/json'
 
-  const respuesta = await fetch(`/api${ruta}`, {
-    method,
-    headers,
-    body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
-  })
+  let respuesta
+  try {
+    respuesta = await fetch(`/api${ruta}`, {
+      method,
+      headers,
+      body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
+    })
+  } catch {
+    throw new ApiError(0, 'No hay conexión. Comprueba la cobertura e inténtalo de nuevo.')
+  }
 
   if (respuesta.status === 401 && auth.token) auth.cerrarSesion()
   if (!respuesta.ok) throw new ApiError(respuesta.status, await mensajeDeError(respuesta))
