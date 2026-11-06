@@ -11,8 +11,10 @@ import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
 import { fecha, hace } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
+import DeslizarParaRecargar from '@/components/DeslizarParaRecargar.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
+import Insignias from '@/components/Insignias.vue'
 import Estrellas from '@/components/Estrellas.vue'
 import ListaUsuarios from '@/components/ListaUsuarios.vue'
 
@@ -56,10 +58,22 @@ async function cargarPestana(tab, forzar = false) {
   datos[tab] = await api(PESTANAS.find((p) => p.id === tab).ruta(usuario)).catch(() => [])
 }
 
+// En el perfil propio se celebra cada insignia nueva una vez (se recuerda cuáles se han visto ya).
+function celebrarInsigniasNuevas() {
+  if (!esMio.value) return
+  const clave = `insignias-vistas-${props.username}`
+  const conseguidas = perfil.value.insignias.filter((i) => i.conseguida)
+  const vistas = JSON.parse(localStorage.getItem(clave) ?? 'null')
+  localStorage.setItem(clave, JSON.stringify(conseguidas.map((i) => i.clave)))
+  if (vistas === null) return // la primera vez no se celebra lo que ya se tenía
+  for (const i of conseguidas.filter((i) => !vistas.includes(i.clave))) avisos.ok(`Nueva insignia: ${i.titulo}`)
+}
+
 async function cargar() {
   try {
     perfil.value = await api(`/usuarios/${props.username}`)
     ponerTitulo(perfil.value.username)
+    celebrarInsigniasNuevas()
     cargarPestana(pestana.value)
   } catch (e) {
     if (e.status === 404) noExiste.value = true
@@ -67,6 +81,11 @@ async function cargar() {
   }
 }
 watch(pestana, (tab) => cargarPestana(tab))
+
+async function recargar() {
+  await cargar()
+  await cargarPestana(pestana.value, true)
+}
 
 async function alternarSeguir() {
   if (!auth.autenticado) return router.push({ name: 'login', query: { volver: route.fullPath } })
@@ -122,6 +141,7 @@ onMounted(cargar)
 </script>
 
 <template>
+  <DeslizarParaRecargar :al-recargar="recargar" />
   <div v-if="noExiste" class="contenedor">
     <EstadoVacio :icono="UserX" titulo="Este perfil no existe" texto="Puede que la cuenta se haya eliminado o suspendido.">
       <RouterLink to="/comunidad" class="btn btn-primario">Ir a la comunidad</RouterLink>
@@ -179,6 +199,8 @@ onMounted(cargar)
           <button class="btn btn-pequeno btn-peligro" @click="eliminarCuenta"><Trash2 :size="16" /> Eliminar</button>
         </div>
       </section>
+
+      <Insignias :insignias="perfil.insignias" :propio="esMio" />
 
       <div class="pestanas" role="tablist">
         <button

@@ -4,6 +4,7 @@ Trabajo Fin de Grado de **Álvaro Ordóñez Romero**. Escuela Politécnica Super
 
 Red social para personas celíacas: comparten restaurantes, bares y sitios de ocio con opciones sin
 gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en un chat en tiempo real.
+Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVIL.md](docs/MOVIL.md)).
 
 ## Funcionalidades
 
@@ -23,14 +24,21 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
   sitio es la media de las opiniones. Se pueden marcar como útiles y ordenar por utilidad o puntuación.
 - **Notificaciones** cuando alguien te sigue, opina sobre un sitio que añadiste o valora tu opinión.
 - **Perfiles** con actividad, opiniones, favoritos, visitados, seguidores y seguidos; seguir a otras personas.
+- **Insignias** por lo que cada persona aporta (primera opinión, añadir un sitio, haber estado en tres
+  provincias, fotos, opiniones útiles…). En tu perfil ves lo que te falta para cada una; en el de los demás,
+  solo las que han conseguido.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
 - **Actividades** de la comunidad agrupadas por días, filtrables por tipo y por "de quienes sigo".
-- **Instalable en el móvil** como una app (manifiesto PWA con iconos y accesos directos) que **funciona sin
+- **App nativa para Android e iOS** (Capacitor) con icono y pantalla de bienvenida propios, botón «atrás»,
+  compartir y vibración nativos y GPS. El APK se compila en GitHub Actions en cada push.
+- **Instalable desde la web** como una app (manifiesto PWA con iconos y accesos directos) que **funciona sin
   conexión**: se abre sin cobertura y muestra lo que se consultó la última vez.
+- **Gestos del móvil**: deslizar hacia abajo para recargar las listas y pasar las fotos con el dedo.
 - **Recuperar la contraseña** con un enlace por email que caduca en una hora y sirve una sola vez.
   Al cambiar la contraseña se **cierran las sesiones abiertas en otros dispositivos**.
 - **Vista previa al compartir**: un enlace a un sitio enviado por WhatsApp, Telegram o redes sociales
-  muestra su nombre, una descripción (tipo, localidad, distintivos y valoración) y su foto. Los buscadores
+  muestra una tarjeta con la foto, el nombre, la valoración y los distintivos, dibujada con la letra y los
+  colores de la app. Los buscadores
   tienen `sitemap.xml` y `robots.txt`; los perfiles no se indexan, porque dicen quién es celíaco.
 - **Administración**: editar o eliminar establecimientos, suspender o eliminar cuentas y gestionar las
   consultas del formulario de contacto.
@@ -48,6 +56,7 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 | Tiempo real | WebSockets nativos |
 | Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF |
 | Frontend | Vue 3 (`<script setup>`), Vite, Pinia, Vue Router, Leaflet + OpenStreetMap |
+| App móvil | Capacitor 8 (Android e iOS) con el mismo frontend |
 | Calidad | pytest, ruff, Playwright (e2e), axe-core (accesibilidad), GitHub Actions |
 
 ## Puesta en marcha
@@ -163,19 +172,24 @@ backend/
     migraciones/       Migraciones de Alembic
     demo_fotos/        Fotos de la demo (Wikimedia Commons; autoría y licencia en creditos.json)
     routers/           auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat
-    services/          Imágenes, correo, vista previa al compartir, geolocalización, límite de intentos…
+    services/          Imágenes, correo, vista previa y tarjeta para compartir, insignias, límite de intentos…
+    recursos/          Letra Montserrat (licencia OFL) y logo para dibujar las tarjetas
   tests/
 frontend/
   src/
     api.js             Cliente HTTP único (token y errores)
     router.js          Rutas, títulos de página y protección por sesión o rol
     horario.js         ¿Está abierto? Horario semanal en la zona horaria del sitio
+    plataforma.js      Diferencias entre la web y la app nativa (servidor, compartir, GPS, botón atrás)
     stores/            Estado global: sesión, avisos y diálogo de confirmación
     components/        Cabecera, barra móvil, tarjetas, mapa, formularios…
     views/             Páginas
   sw.js                Service worker (uso sin conexión); Vite le añade la lista de ficheros al compilar
+  android/, ios/       Proyectos nativos de Capacitor (consulta docs/MOVIL.md)
+  resources/           Icono y pantalla de bienvenida de la app
 e2e/                   Pruebas de extremo a extremo y de accesibilidad
 docs/DISENO.md         Dirección de diseño: paleta, tipografía y reglas de la interfaz
+docs/MOVIL.md          App de Android e iOS: probarla, compilarla y publicarla
 Dockerfile             Imagen de producción (frontend + backend)
 ```
 
@@ -210,7 +224,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | POST | `/api/consultas` | Público |
 | GET/DELETE | `/api/consultas` | Admin |
 | WS | `/api/chat?token=` | Sesión |
-| GET | `/robots.txt`, `/sitemap.xml` | Público |
+| GET | `/robots.txt`, `/sitemap.xml`, `/vista-previa/{id}.jpg` (tarjeta para compartir) | Público |
 
 ## Créditos de las fotos de la demo
 

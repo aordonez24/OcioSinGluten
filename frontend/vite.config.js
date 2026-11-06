@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 const backend = 'http://localhost:8000'
@@ -15,7 +15,7 @@ function serviceWorker() {
   const raiz = fileURLToPath(new URL('.', import.meta.url))
   const publicos = (carpeta) =>
     readdirSync(`${raiz}public/${carpeta}`, { withFileTypes: true }).flatMap((f) =>
-      f.isDirectory() ? publicos(`${carpeta}${f.name}/`) : [`/${carpeta}${f.name}`],
+      f.isDirectory() ? publicos(`${carpeta}${f.name}/`) : [`/${carpeta}${f.name}`]
     )
   return {
     name: 'service-worker',
@@ -40,17 +40,52 @@ function serviceWorker() {
   }
 }
 
-export default defineConfig({
-  plugins: [vue(), serviceWorker()],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
-  server: {
-    // En desarrollo el navegador habla solo con Vite y este reenvía la API al backend:
-    // así no hay que escribir "http://localhost:8080" en cada vista ni pelearse con CORS.
-    proxy: {
-      '/api': { target: backend, ws: true },
-      '/uploads': backend,
+/**
+ * App nativa (Capacitor): el index.html va dentro del paquete y no lo sirve el backend, así que la
+ * Content Security Policy se pone aquí, con el servidor de la API como único destino permitido.
+ */
+function politicaMovil(servidor) {
+  const origen = new URL(servidor).origin
+  const socket = origen.replace(/^http/, 'ws')
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob: ${origen} https://*.tile.openstreetmap.org`,
+    `connect-src 'self' ${origen} ${socket}`,
+    "font-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+  ].join('; ')
+  return {
+    name: 'csp-movil',
+    transformIndexHtml: (html) =>
+      html.replace(
+        '<meta charset="utf-8" />',
+        `<meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="${csp}" />`
+      ),
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  const movil = mode === 'movil' // npm run build:movil → dist-movil, que Capacitor mete en la app
+  const servidor = loadEnv(mode, process.cwd(), '').VITE_SERVIDOR
+  if (movil && !servidor)
+    throw new Error('Falta VITE_SERVIDOR: la dirección del servidor de la API (consulta .env.movil)')
+  return {
+    plugins: [vue(), movil ? politicaMovil(servidor) : serviceWorker()],
+    build: movil ? { outDir: 'dist-movil' } : {},
+    resolve: {
+      alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },
-  },
+    server: {
+      // En desarrollo el navegador habla solo con Vite y este reenvía la API al backend:
+      // así no hay que escribir "http://localhost:8080" en cada vista ni pelearse con CORS.
+      proxy: {
+        '/api': { target: backend, ws: true },
+        '/uploads': backend,
+      },
+    },
+  }
 })

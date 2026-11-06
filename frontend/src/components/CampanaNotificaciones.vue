@@ -190,7 +190,7 @@ strong {
     position: fixed;
     left: 0.75rem;
     right: 0.75rem;
-    top: calc(var(--alto-cabecera) + 4px);
+    top: calc(var(--alto-cabecera) + env(safe-area-inset-top) + 4px);
     width: auto;
   }
 }

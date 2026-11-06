@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ocio Sin Gluten</string>
+    <string name="title_activity_main">Ocio Sin Gluten</string>
+    <string name="package_name">es.ociosingluten.app</string>
+    <string name="custom_url_scheme">es.ociosingluten.app</string>
+</resources>

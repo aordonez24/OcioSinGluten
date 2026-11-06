@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores de la identidad del proyecto (docs/DISENO.md) -->
+    <color name="turquesa">#9DD9D2</color>
+    <color name="carbon">#353535</color>
+    <color name="colorPrimary">#353535</color>
+    <color name="colorPrimaryDark">#353535</color>
+    <color name="colorAccent">#9DD9D2</color>
+</resources>

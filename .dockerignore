@@ -6,6 +6,11 @@
 frontend/dist
 backend/uploads
 backend/*.db*
+backend/correos
 backend/.env
 backend/tests
 .git
+frontend/dist-movil
+frontend/android
+frontend/ios
+frontend/resources

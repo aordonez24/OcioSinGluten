@@ -5,6 +5,7 @@ genérica. Al servir index.html se rellenan el título, la descripción y la fot
 (Open Graph), y se generan robots.txt y sitemap.xml.
 """
 
+import hashlib
 import re
 from dataclasses import dataclass
 from html import escape
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.models import Establecimiento, Usuario
+from app.services.tarjeta import DatosTarjeta
 
 NOMBRE = "Ocio Sin Gluten"
 TITULO_INICIO = "Ocio Sin Gluten - Disfrute de su tiempo de ocio sin gluten"
@@ -93,11 +95,14 @@ def metadatos(db: Session, request: Request) -> Metadatos:
         est = db.get(Establecimiento, int(m[1]))
         if est is None:
             return Metadatos(titulo=f"No encontrado - {NOMBRE}", estado=404)
+        # La tarjeta cambia con la valoración o la foto: la versión obliga a WhatsApp y compañía a
+        # pedirla de nuevo en vez de enseñar la que guardaron.
+        version = hashlib.sha256(repr(DatosTarjeta.de(est)).encode()).hexdigest()[:10]
         return Metadatos(
             titulo=f"{est.nombre} - {NOMBRE}",
             descripcion=_describir(est),
-            imagen=f"/uploads/{est.portada}" if est.portada else ICONO,
-            imagen_grande=bool(est.portada),
+            imagen=f"/vista-previa/{est.id}.jpg?v={version}",
+            imagen_grande=True,
         )
 
     if m := re.fullmatch(r"/u/([^/]+)", ruta):
@@ -136,16 +141,23 @@ def pagina(db: Session, request: Request) -> tuple[str, int] | None:
         return escape(texto, quote=True)
 
     tarjeta = "summary_large_image" if meta.imagen_grande else "summary"
+    titulo = meta.titulo.removesuffix(f" - {NOMBRE}")
     etiquetas = [
         f'<meta property="og:site_name" content="{NOMBRE}" />',
         '<meta property="og:locale" content="es_ES" />',
         '<meta property="og:type" content="website" />',
-        f'<meta property="og:title" content="{atributo(meta.titulo.removesuffix(f" - {NOMBRE}"))}" />',
+        f'<meta property="og:title" content="{atributo(titulo)}" />',
         f'<meta property="og:description" content="{atributo(meta.descripcion)}" />',
         f'<meta property="og:url" content="{atributo(url)}" />',
         f'<meta property="og:image" content="{atributo(base + meta.imagen)}" />',
         f'<meta name="twitter:card" content="{tarjeta}" />',
     ]
+    if meta.imagen_grande:
+        etiquetas[-1:-1] = [
+            '<meta property="og:image:width" content="1200" />',
+            '<meta property="og:image:height" content="630" />',
+            f'<meta property="og:image:alt" content="{atributo(titulo)}" />',
+        ]
     if request.url.path.startswith(NO_INDEXAR) or meta.estado != 200:
         etiquetas.append('<meta name="robots" content="noindex" />')
     else:

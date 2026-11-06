@@ -105,6 +105,7 @@ function salir() {
   background: var(--blanco);
   position: sticky;
   top: 0;
+  padding-top: env(safe-area-inset-top); /* barra de estado y muesca en la app y en iPhone */
   z-index: 100;
   box-shadow: 0 2px 5px rgb(0 0 0 / 8%);
 }

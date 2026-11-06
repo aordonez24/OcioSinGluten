@@ -40,6 +40,7 @@ from app.security import (
     hash_password,
     verificar_password,
 )
+from app.services import insignias
 from app.services.consultas import existe_fila, notificar, usuario_por_username
 from app.services.imagenes import borrar_imagenes, guardar_imagen
 
@@ -231,6 +232,11 @@ def perfil(username: str, db: DB, yo: UsuarioOpcional):
         num_opiniones=contar(Comentario.autor_id),
         num_visitados=contar(visitas.c.usuario_id),
         siguiendo=yo is not None and existe_fila(db, seguimientos, seguidor_id=yo.id, seguido_id=usuario.id),
+        insignias=[
+            i
+            for i in insignias.calcular(db, usuario)
+            if i["conseguida"] or (yo is not None and yo.id == usuario.id)
+        ],
         privado=UsuarioPrivado.model_validate(usuario) if puede_ver_privado else None,
     )
 

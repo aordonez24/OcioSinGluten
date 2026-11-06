@@ -58,3 +58,35 @@ jobs:
         working-directory: frontend
       - run: pip install -r e2e/requirements.txt && playwright install --with-deps chromium
       - run: pytest e2e -q
+
+  # App de Android: compila el APK y lo deja para descargar en la pestaña "Actions" del repositorio.
+  # El servidor al que se conecta sale de la variable del repositorio SERVIDOR_APP
+  # (Settings → Secrets and variables → Actions → Variables); sin ella, http://localhost:8000.
+  android:
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      VITE_SERVIDOR: ${{ vars.SERVIDOR_APP || 'http://localhost:8000' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: npm ci
+      - run: npm run movil:android
+      - run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        working-directory: frontend/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ocio-sin-gluten-android
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk

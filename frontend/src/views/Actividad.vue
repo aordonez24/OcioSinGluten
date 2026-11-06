@@ -5,6 +5,7 @@ import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { agruparPorDia, coincide } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
+import DeslizarParaRecargar from '@/components/DeslizarParaRecargar.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
 const POR_PAGINA = 40
@@ -50,9 +51,15 @@ watch(soloSiguiendo, () => {
 })
 
 onMounted(cargarMas)
+
+async function recargar() {
+  actividades.value = null
+  await cargarMas()
+}
 </script>
 
 <template>
+  <DeslizarParaRecargar :al-recargar="recargar" />
   <div class="contenedor medio">
     <div class="cabecera-pagina">
       <div>

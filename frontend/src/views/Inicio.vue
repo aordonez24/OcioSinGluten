@@ -7,6 +7,7 @@ import { useAuth } from '@/stores/auth'
 import { hace } from '@/utils'
 import Avatar from '@/components/Avatar.vue'
 import ContactoForm from '@/components/ContactoForm.vue'
+import DeslizarParaRecargar from '@/components/DeslizarParaRecargar.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 
 // El mapa de la portada solo existe en pantallas anchas: en móvil no se descarga Leaflet.
@@ -45,7 +46,7 @@ function buscar() {
   router.push({ path: '/establecimientos', query: busqueda.value.trim() ? { q: busqueda.value.trim() } : {} })
 }
 
-onMounted(async () => {
+async function cargar() {
   const [e, s, a] = await Promise.allSettled([
     api('/establecimientos'),
     api('/estadisticas'),
@@ -54,7 +55,8 @@ onMounted(async () => {
   establecimientos.value = e.value ?? []
   estadisticas.value = s.value ?? null
   actividad.value = a.value ?? []
-})
+}
+onMounted(cargar)
 
 // Con sesión, la portada empieza por los sitios que la persona ha guardado.
 onMounted(async () => {
@@ -64,6 +66,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <DeslizarParaRecargar :al-recargar="cargar" />
   <section class="hero">
     <div class="hero-interior">
       <div class="hero-texto">

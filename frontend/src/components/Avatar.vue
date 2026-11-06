@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { recurso } from '@/plataforma'
 
 const props = defineProps({
   usuario: { type: Object, required: true },
@@ -12,7 +13,7 @@ const iniciales = computed(() => (props.usuario.nombre || props.usuario.username
 <template>
   <img
     v-if="usuario.foto_url"
-    :src="usuario.foto_url"
+    :src="recurso(usuario.foto_url)"
     :alt="`Foto de ${usuario.username}`"
     class="avatar"
     :width="tamano"

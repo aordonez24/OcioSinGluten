@@ -7,6 +7,7 @@ import {
 } from 'lucide-vue-next'
 import { api, conArchivo } from '@/api'
 import { ponerTitulo } from '@/router'
+import { compartir as compartirEnlace, recurso, vibrar } from '@/plataforma'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
@@ -87,6 +88,7 @@ async function alternar(marca) {
     if (contador) est.value[contador] += valor ? 1 : -1
   }
   aplicar(!activo)
+  vibrar()
   try {
     await api(`${base}/${marca}`, { method: activo ? 'DELETE' : 'PUT' })
     if (marca === 'favorito') avisos.ok(activo ? 'Quitado de favoritos' : 'Guardado en favoritos')
@@ -98,10 +100,12 @@ async function alternar(marca) {
 }
 
 async function compartir() {
-  const datos = { title: est.value.nombre, text: `${est.value.nombre}, sin gluten en ${est.value.localidad}`, url: location.href }
-  if (navigator.share) return navigator.share(datos).catch(() => {})
-  await navigator.clipboard.writeText(location.href)
-  avisos.ok('Enlace copiado al portapapeles')
+  const resultado = await compartirEnlace({
+    titulo: est.value.nombre,
+    texto: `${est.value.nombre}, sin gluten en ${est.value.localidad}`,
+    ruta: `/establecimientos/${est.value.id}`,
+  })
+  if (resultado === 'copiado') avisos.ok('Enlace copiado al portapapeles')
 }
 
 async function subirImagen(evento) {
@@ -171,6 +175,20 @@ function moverAmpliada(paso) {
   ampliada.value = (ampliada.value + paso + total) % total
 }
 
+// En el móvil, el visor se maneja con el dedo: deslizar a los lados pasa de foto y hacia abajo cierra.
+let toque = null
+function empezarToque(e) {
+  toque = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null
+}
+function terminarToque(e) {
+  if (!toque) return
+  const dx = e.changedTouches[0].clientX - toque.x
+  const dy = e.changedTouches[0].clientY - toque.y
+  toque = null
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && est.value.imagenes.length > 1) moverAmpliada(dx < 0 ? 1 : -1)
+  else if (dy > 90 && dy > Math.abs(dx)) ampliada.value = null
+}
+
 function teclado(e) {
   if (ampliada.value === null) return
   if (e.key === 'Escape') ampliada.value = null
@@ -203,7 +221,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
       <section class="ficha">
         <figure v-if="est.imagenes.length" class="foto-principal">
           <button @click="ampliada = 0">
-            <img :src="est.imagenes[0].url" :alt="`Foto de ${est.nombre}`" />
+            <img :src="recurso(est.imagenes[0].url)" :alt="`Foto de ${est.nombre}`" />
           </button>
           <figcaption v-if="est.imagenes[0].credito">
             <a :href="est.imagenes[0].credito_url" target="_blank" rel="noopener nofollow">{{ est.imagenes[0].credito }}</a>
@@ -319,7 +337,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
           </div>
           <div v-if="est.imagenes.length" class="galeria">
             <button v-for="(img, i) in est.imagenes" :key="img.id" class="miniatura" @click="ampliada = i">
-              <img :src="img.url" :alt="`Foto ${i + 1} de ${est.nombre}`" loading="lazy" />
+              <img :src="recurso(img.url)" :alt="`Foto ${i + 1} de ${est.nombre}`" loading="lazy" />
             </button>
           </div>
           <p v-else class="suave pequeno sin-fotos">
@@ -333,9 +351,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
       <SitiosCercanos class="ancho-completo" :establecimiento="est" />
     </div>
 
-    <div v-if="ampliada !== null" class="visor" role="dialog" aria-modal="true" aria-label="Foto ampliada" @click.self="ampliada = null">
+    <div
+      v-if="ampliada !== null"
+      class="visor"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Foto ampliada"
+      @click.self="ampliada = null"
+      @touchstart.passive="empezarToque"
+      @touchend="terminarToque"
+    >
       <figure class="visor-foto">
-        <img :src="est.imagenes[ampliada].url" alt="" />
+        <img :src="recurso(est.imagenes[ampliada].url)" alt="" />
         <figcaption v-if="est.imagenes[ampliada].credito">
           <a :href="est.imagenes[ampliada].credito_url" target="_blank" rel="noopener nofollow">{{ est.imagenes[ampliada].credito }}</a>
         </figcaption>
@@ -615,6 +642,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
   gap: 1rem;
   z-index: 500;
   padding: 1rem;
+  /* Los gestos del dedo los maneja el visor (pasar foto, cerrar); el navegador solo deja ampliar
+     con dos dedos, sin su "deslizar para volver atrás" ni el desplazamiento de la página. */
+  touch-action: pinch-zoom;
+  overscroll-behavior: contain;
 }
 
 .visor-foto {

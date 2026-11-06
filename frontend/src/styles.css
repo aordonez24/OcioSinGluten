@@ -53,7 +53,7 @@
 }
 
 html {
-  scroll-padding-top: calc(var(--alto-cabecera) + 1rem);
+  scroll-padding-top: calc(var(--alto-cabecera) + env(safe-area-inset-top) + 1rem);
   -webkit-text-size-adjust: 100%;
 }
 

@@ -1,4 +1,5 @@
 import { useAuth } from '@/stores/auth'
+import { SERVIDOR } from '@/plataforma'
 
 export class ApiError extends Error {
   constructor(status, message) {
@@ -33,7 +34,7 @@ export async function api(ruta, { method = 'GET', body, form } = {}) {
 
   let respuesta
   try {
-    respuesta = await fetch(`/api${ruta}`, {
+    respuesta = await fetch(`${SERVIDOR}/api${ruta}`, {
       method,
       headers,
       body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
@@ -52,7 +53,7 @@ export async function descargar(ruta) {
   const auth = useAuth()
   let respuesta
   try {
-    respuesta = await fetch(`/api${ruta}`, { headers: { Authorization: `Bearer ${auth.token}` } })
+    respuesta = await fetch(`${SERVIDOR}/api${ruta}`, { headers: { Authorization: `Bearer ${auth.token}` } })
   } catch {
     throw new ApiError(0, 'No hay conexión. Comprueba la cobertura e inténtalo de nuevo.')
   }

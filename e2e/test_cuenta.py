@@ -70,7 +70,7 @@ def test_descargar_mis_datos(pagina, tmp_path: Path):
 def test_vista_previa_al_compartir_un_sitio(pagina, url_base):
     html = httpx.get(f"{url_base}/establecimientos/2").text
     assert '<meta property="og:title" content="Horno Sin Trigo" />' in html
-    assert re.search(r'<meta property="og:image" content="http://[^"]+/uploads/[^"]+\.webp" />', html)
+    assert re.search(r'<meta property="og:image" content="http://[^"]+/vista-previa/2\.jpg\?v=\w+" />', html)
     assert "<title>Horno Sin Trigo - Ocio Sin Gluten</title>" in html
 
     # La página sigue funcionando igual (y sin errores de la CSP, que vigila el fixture)

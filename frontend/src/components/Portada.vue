@@ -3,6 +3,7 @@
 // Nada de imágenes inventadas: la portada mejora sola en cuanto alguien sube una foto.
 import { computed } from 'vue'
 import { CATEGORIAS } from '@/catalogo'
+import { recurso } from '@/plataforma'
 
 const props = defineProps({
   url: { type: String, default: null },
@@ -13,7 +14,7 @@ const icono = computed(() => (CATEGORIAS[props.categoria] ?? CATEGORIAS.otro).ic
 
 <template>
   <div class="portada">
-    <img v-if="url" :src="url" alt="" loading="lazy" />
+    <img v-if="url" :src="recurso(url)" alt="" loading="lazy" />
     <div v-else class="sin-foto" aria-hidden="true">
       <component :is="icono" :size="36" :stroke-width="1.5" />
     </div>

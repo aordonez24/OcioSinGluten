@@ -21,7 +21,8 @@ from app.routers import (
     usuarios,
 )
 from app.security import DB
-from app.services import compartir
+from app.services import compartir, tarjeta
+from app.services.consultas import establecimiento_o_404
 
 # Para que el manifiesto de la app instalable (PWA) se sirva con su tipo correcto.
 mimetypes.add_type("application/manifest+json", ".webmanifest")
@@ -116,6 +117,12 @@ def crear_app() -> FastAPI:
     @app.get("/sitemap.xml", include_in_schema=False)
     def sitemap(request: Request, db: DB):
         return Response(compartir.sitemap(db, request), media_type="application/xml")
+
+    @app.get("/vista-previa/{est_id}.jpg", include_in_schema=False)
+    def vista_previa(est_id: int, db: DB):
+        """Imagen de 1200×630 para la vista previa de un sitio al compartirlo."""
+        imagen = tarjeta.dibujar(tarjeta.DatosTarjeta.de(establecimiento_o_404(db, est_id)))
+        return Response(imagen, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=3600"})
 
     @app.exception_handler(404)
     async def no_encontrado(request: Request, exc):

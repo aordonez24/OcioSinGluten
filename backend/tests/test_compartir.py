@@ -1,6 +1,9 @@
+import re
 import shutil
+from io import BytesIO
 
 import pytest
+from PIL import Image
 
 from app.config import get_settings
 from conftest import crear_establecimiento, imagen_png, registrar
@@ -36,7 +39,7 @@ def test_vista_previa_de_un_establecimiento(client, frontend):
         json={"puntuacion": 5, "mensaje": "Genial"},
         headers=h,
     )
-    foto = client.post(
+    client.post(
         f"/api/establecimientos/{est['id']}/imagenes", files={"archivo": ("a.png", imagen_png())}, headers=h
     ).json()
 
@@ -47,7 +50,11 @@ def test_vista_previa_de_un_establecimiento(client, frontend):
     assert '<meta property="og:title" content="Dulce &lt;Celíaca&gt;" />' in html
     descripcion = "Panadería y pastelería en Jaén. 100 % sin gluten. Cocina separada. 5 de 5 en 1 opinión."
     assert f'<meta name="description" content="{descripcion}" />' in html
-    assert f'<meta property="og:image" content="http://testserver{foto["url"]}" />' in html
+    imagen = re.search(
+        r'<meta property="og:image" content="http://testserver(/vista-previa/\d+\.jpg)\?v=\w+" />', html
+    )
+    assert imagen and imagen[1] == f"/vista-previa/{est['id']}.jpg"
+    assert '<meta property="og:image:width" content="1200" />' in html
     assert 'content="summary_large_image"' in html
     assert f'<link rel="canonical" href="http://testserver/establecimientos/{est["id"]}" />' in html
     assert html.count("<title>") == 1 and html.count('name="description"') == 1
@@ -94,3 +101,36 @@ def test_url_publica_en_las_vistas_previas(client, frontend, monkeypatch):
     monkeypatch.setattr(get_settings(), "url_publica", "https://ociosingluten.es/")
     assert 'content="https://ociosingluten.es/iconos/icono-512.png"' in client.get("/").text
     assert "Sitemap: https://ociosingluten.es/sitemap.xml" in client.get("/robots.txt").text
+
+
+def test_tarjeta_para_compartir(client):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(
+        client, h, nombre="Asador Restaurante La Cocina Sin Gluten de la Abuela Encarna", todo_sin_gluten=True
+    )
+    r = client.get(f"/vista-previa/{est['id']}.jpg")
+    assert r.status_code == 200 and r.headers["content-type"] == "image/jpeg"
+    assert Image.open(BytesIO(r.content)).size == (1200, 630)
+
+    # Con foto, y la versión del enlace cambia al cambiar la valoración (las apps la vuelven a pedir)
+    client.post(
+        f"/api/establecimientos/{est['id']}/imagenes", files={"archivo": ("a.png", imagen_png())}, headers=h
+    )
+    assert client.get(f"/vista-previa/{est['id']}.jpg").status_code == 200
+    assert client.get("/vista-previa/999.jpg").status_code == 404
+
+
+def test_la_version_de_la_tarjeta_cambia_con_las_opiniones(client, frontend):
+    h = registrar(client, "ana")
+    est = crear_establecimiento(client, h)
+
+    def version():
+        return re.search(
+            r"vista-previa/\d+\.jpg\?v=(\w+)", client.get(f"/establecimientos/{est['id']}").text
+        )[1]
+
+    antes = version()
+    client.post(
+        f"/api/establecimientos/{est['id']}/comentarios", json={"puntuacion": 3, "mensaje": "Bien"}, headers=h
+    )
+    assert version() != antes

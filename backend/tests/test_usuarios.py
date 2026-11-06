@@ -331,3 +331,53 @@ def test_descargar_mis_datos(client):
     # Solo los datos de quien lo pide
     assert client.get("/api/usuarios/yo/datos", headers=otra).json()["opiniones"] == []
     assert client.get("/api/usuarios/yo/datos").status_code == 401
+
+
+def test_la_app_movil_puede_llamar_a_la_api(client):
+    """La app nativa carga el frontend desde https://localhost (Android) o capacitor://localhost (iOS)."""
+    for origen in ("https://localhost", "capacitor://localhost"):
+        r = client.options(
+            "/api/auth/login",
+            headers={
+                "Origin": origen,
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type,authorization",
+            },
+        )
+        assert r.status_code == 200 and r.headers["access-control-allow-origin"] == origen
+    otra_web = client.options(
+        "/api/auth/login", headers={"Origin": "https://otra-web.com", "Access-Control-Request-Method": "POST"}
+    )
+    assert "access-control-allow-origin" not in otra_web.headers
+
+
+def test_insignias(client):
+    ana = registrar(client, "ana")
+    bea = registrar(client, "bea", n=1)
+    sitios = [
+        crear_establecimiento(client, ana, nombre=f"Sitio {p}", provincia=p, cod_postal=f"2300{i}")
+        for i, p in enumerate(["Jaén", "Granada", "Málaga"])
+    ]
+    opinion = client.post(
+        f"/api/establecimientos/{sitios[0]['id']}/comentarios",
+        json={"puntuacion": 5, "mensaje": "Genial"},
+        headers=ana,
+    ).json()
+    client.put(f"/api/comentarios/{opinion['id']}/util", headers=bea)
+    for s in sitios[:2]:
+        client.put(f"/api/establecimientos/{s['id']}/visita", headers=ana)
+
+    propias = {i["clave"]: i for i in client.get("/api/usuarios/ana", headers=ana).json()["insignias"]}
+    assert propias["primera_opinion"]["conseguida"] and propias["abre_camino"]["conseguida"]
+    assert propias["trotamundos"] == {**propias["trotamundos"], "actual": 2, "meta": 3, "conseguida": False}
+    assert propias["ayuda"]["actual"] == 1
+    assert list(propias)[:2] == ["primera_opinion", "abre_camino"]  # primero las conseguidas
+
+    # Quien visita el perfil solo ve las conseguidas
+    ajenas = client.get("/api/usuarios/ana", headers=bea).json()["insignias"]
+    assert {i["clave"] for i in ajenas} == {"primera_opinion", "abre_camino"}
+    assert client.get("/api/usuarios/ana").json()["insignias"] == ajenas
+
+    client.put(f"/api/establecimientos/{sitios[2]['id']}/visita", headers=ana)
+    ajenas = {i["clave"] for i in client.get("/api/usuarios/ana").json()["insignias"]}
+    assert "trotamundos" in ajenas

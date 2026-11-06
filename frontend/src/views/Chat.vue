@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { MessagesSquare, Send } from 'lucide-vue-next'
 import { useAuth } from '@/stores/auth'
 import { agruparPorDia } from '@/utils'
+import { urlSocket } from '@/plataforma'
 import Avatar from '@/components/Avatar.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
@@ -31,8 +32,7 @@ async function bajar() {
 }
 
 function conectar() {
-  const protocolo = location.protocol === 'https:' ? 'wss' : 'ws'
-  socket = new WebSocket(`${protocolo}://${location.host}/api/chat?token=${encodeURIComponent(auth.token)}`)
+  socket = new WebSocket(urlSocket(`/api/chat?token=${encodeURIComponent(auth.token)}`))
   socket.onopen = () => (estado.value = 'conectado')
   socket.onmessage = ({ data }) => {
     const evento = JSON.parse(data)

@@ -23,8 +23,10 @@ class Settings(BaseSettings):
     max_imagen_mb: int = 8
     max_lado_imagen_px: int = 1600
 
-    # Orígenes permitidos para CORS (solo hace falta si el front se sirve desde otro dominio)
-    cors_origins: list[str] = ["http://localhost:5173"]
+    # Orígenes permitidos para CORS: Vite en desarrollo y la app nativa (Capacitor), que carga el
+    # frontend desde https://localhost en Android y desde capacitor://localhost en iOS. La sesión va
+    # en la cabecera Authorization (no en cookies), así que otra web no puede usarla.
+    cors_origins: list[str] = ["http://localhost:5173", "https://localhost", "capacitor://localhost"]
 
     # Geocodificación de direcciones con OpenStreetMap (Nominatim).
     geocodificar: bool = True

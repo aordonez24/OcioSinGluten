@@ -191,6 +191,15 @@ class UsuarioPrivado(UsuarioResumen):
     creado_en: FechaUTC
 
 
+class Insignia(BaseModel):
+    clave: str
+    titulo: str
+    descripcion: str
+    actual: int
+    meta: int
+    conseguida: bool
+
+
 class UsuarioPerfil(UsuarioResumen):
     apellidos: str
     rol: Rol
@@ -200,6 +209,8 @@ class UsuarioPerfil(UsuarioResumen):
     num_opiniones: int
     num_visitados: int
     siguiendo: bool
+    # En el perfil propio, todas con su progreso; en el de otra persona, solo las conseguidas.
+    insignias: list[Insignia] = []
     # Datos personales: solo se rellenan si quien mira es el propio usuario o un admin.
     privado: UsuarioPrivado | None = None
 

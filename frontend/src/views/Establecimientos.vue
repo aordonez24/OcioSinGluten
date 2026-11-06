@@ -9,6 +9,7 @@ import { useUbicacion } from '@/composables'
 import { useAvisos } from '@/stores/avisos'
 import { CATEGORIAS, DISTINTIVOS, PRECIOS } from '@/catalogo'
 import { estadoHorario, useAhora } from '@/horario'
+import DeslizarParaRecargar from '@/components/DeslizarParaRecargar.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
@@ -116,17 +117,21 @@ function limpiarFiltros() {
   router.replace({ query: { orden: route.query.orden, vista: route.query.vista } })
 }
 
-onMounted(async () => {
+async function cargar() {
   try {
     establecimientos.value = await api('/establecimientos')
+    error.value = ''
   } catch (e) {
     error.value = e.message
-    establecimientos.value = []
+    establecimientos.value ??= []
   }
-})
+}
+
+onMounted(cargar)
 </script>
 
 <template>
+  <DeslizarParaRecargar :al-recargar="cargar" />
   <div class="contenedor">
     <div class="cabecera-pagina">
       <div>

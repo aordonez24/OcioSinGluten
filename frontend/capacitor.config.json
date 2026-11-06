@@ -1,0 +1,27 @@
+{
+  "appId": "es.ociosingluten.app",
+  "appName": "Ocio Sin Gluten",
+  "webDir": "dist-movil",
+  "backgroundColor": "#ffffff",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true
+  },
+  "ios": {
+    "contentInset": "never"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "launchShowDuration": 3000,
+      "backgroundColor": "#9DD9D2",
+      "androidScaleType": "CENTER_INSIDE",
+      "showSpinner": false
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "LIGHT",
+      "initialViewportFitValueHint": "cover"
+    }
+  }
+}
