@@ -94,7 +94,11 @@ def test_editar_perfil_y_password(client):
     ok = client.put(
         "/api/usuarios/yo/password", json={"actual": "Secreta123", "nueva": "Nueva1234"}, headers=h
     )
-    assert ok.status_code == 204
+    assert ok.status_code == 200
+    # La sesión anterior se cierra; la nueva (la que devuelve el cambio) sigue abierta
+    assert client.get("/api/auth/yo", headers=h).status_code == 401
+    nueva = {"Authorization": f"Bearer {ok.json()['access_token']}"}
+    assert client.get("/api/auth/yo", headers=nueva).status_code == 200
     assert (
         client.post("/api/auth/login", json={"email": "ana@example.com", "password": "Nueva1234"}).status_code
         == 200
@@ -299,3 +303,31 @@ def test_opiniones_utiles(client):
 
     client.delete(f"/api/comentarios/{opinion_id}/util", headers=h_bea)
     assert client.get(url).json()[0]["num_utiles"] == 0
+
+
+def test_descargar_mis_datos(client):
+    h = registrar(client, "ana")
+    otra = registrar(client, "bea", n=1)
+    est = crear_establecimiento(client, h)
+    client.post(
+        f"/api/establecimientos/{est['id']}/comentarios", json={"puntuacion": 4, "mensaje": "Rico"}, headers=h
+    )
+    client.put(f"/api/establecimientos/{est['id']}/favorito", headers=h)
+    client.put("/api/usuarios/ana/seguir", headers=otra)
+
+    r = client.get("/api/usuarios/yo/datos", headers=h)
+    assert r.status_code == 200
+    assert r.headers["content-disposition"] == 'attachment; filename="ociosingluten-ana.json"'
+    assert r.headers["cache-control"] == "no-store"
+    datos = r.json()
+    assert datos["cuenta"]["email"] == "ana@example.com" and datos["cuenta"]["dni"] == "12345678Z"
+    assert "password_hash" not in str(datos)
+    assert datos["opiniones"][0]["mensaje"] == "Rico"
+    assert datos["establecimientos_anadidos"][0]["nombre"] == "Celiaco Feliz"
+    assert [f["nombre"] for f in datos["favoritos"]] == ["Celiaco Feliz"]
+    assert [p["username"] for p in datos["te_siguen"]] == ["bea"]
+    assert datos["sigues_a"] == []
+
+    # Solo los datos de quien lo pide
+    assert client.get("/api/usuarios/yo/datos", headers=otra).json()["opiniones"] == []
+    assert client.get("/api/usuarios/yo/datos").status_code == 401

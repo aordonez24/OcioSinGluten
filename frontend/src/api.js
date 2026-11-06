@@ -42,9 +42,28 @@ export async function api(ruta, { method = 'GET', body, form } = {}) {
     throw new ApiError(0, 'No hay conexión. Comprueba la cobertura e inténtalo de nuevo.')
   }
 
-  if (respuesta.status === 401 && auth.token) auth.cerrarSesion()
+  if (respuesta.status === 401 && auth.token) auth.cerrarSesion({ porElServidor: true })
   if (!respuesta.ok) throw new ApiError(respuesta.status, await mensajeDeError(respuesta))
   return respuesta.status === 204 ? null : respuesta.json()
+}
+
+/** Descarga un fichero de la API con la sesión iniciada (un enlace normal no lleva el token). */
+export async function descargar(ruta) {
+  const auth = useAuth()
+  let respuesta
+  try {
+    respuesta = await fetch(`/api${ruta}`, { headers: { Authorization: `Bearer ${auth.token}` } })
+  } catch {
+    throw new ApiError(0, 'No hay conexión. Comprueba la cobertura e inténtalo de nuevo.')
+  }
+  if (!respuesta.ok) throw new ApiError(respuesta.status, await mensajeDeError(respuesta))
+  const nombre = /filename="([^"]+)"/.exec(respuesta.headers.get('Content-Disposition') ?? '')?.[1] ?? 'datos.json'
+  const url = URL.createObjectURL(await respuesta.blob())
+  const enlace = Object.assign(document.createElement('a'), { href: url, download: nombre })
+  document.body.append(enlace)
+  enlace.click()
+  enlace.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 export const conArchivo = (archivo) => {

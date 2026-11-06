@@ -42,7 +42,7 @@ function conectar() {
   }
   socket.onclose = ({ code }) => {
     estado.value = 'desconectado'
-    if (code === 1008) return auth.cerrarSesion() // token caducado o cuenta suspendida
+    if (code === 1008) return auth.cerrarSesion({ porElServidor: true }) // sesión caducada o cuenta suspendida
     if (!cerrandoAdrede) reintento = setTimeout(conectar, 3000) // reconexión automática
   }
 }

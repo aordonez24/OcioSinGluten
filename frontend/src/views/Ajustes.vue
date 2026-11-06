@@ -1,8 +1,8 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Camera, LogOut, Trash2 } from 'lucide-vue-next'
-import { api, conArchivo } from '@/api'
+import { Camera, Download, LogOut, Trash2 } from 'lucide-vue-next'
+import { api, conArchivo, descargar } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
 import { useConfirmar } from '@/stores/confirmar'
@@ -15,7 +15,8 @@ const avisos = useAvisos()
 const confirmar = useConfirmar()
 const router = useRouter()
 
-const { username, nombre, apellidos, telefono, fecha_nacimiento } = auth.usuario
+// Si la sesión se cierra mientras se abre la página, auth.usuario es null (y la plantilla no se muestra).
+const { username, nombre, apellidos, telefono, fecha_nacimiento } = auth.usuario ?? {}
 const perfil = reactive({ username, nombre, apellidos, telefono, fecha_nacimiento })
 const pass = reactive({ actual: '', nueva: '', repetir: '' })
 const errorPerfil = ref('')
@@ -83,13 +84,18 @@ async function cambiarPassword() {
   if (errorNueva.value || !pass.repetir) return
   await ejecutar('pass', async () => {
     try {
-      await api('/usuarios/yo/password', { method: 'PUT', body: { actual: pass.actual, nueva: pass.nueva } })
+      const sesion = await api('/usuarios/yo/password', { method: 'PUT', body: { actual: pass.actual, nueva: pass.nueva } })
+      auth.iniciarSesion(sesion) // las demás sesiones se cierran; esta sigue con el token nuevo
       Object.assign(pass, { actual: '', nueva: '', repetir: '' })
-      avisos.ok('Contraseña cambiada')
+      avisos.ok('Contraseña cambiada. Se ha cerrado la sesión en tus otros dispositivos.')
     } catch (e) {
       errorPass.value = e.message
     }
   })
+}
+
+async function descargarDatos() {
+  await ejecutar('datos', () => descargar('/usuarios/yo/datos')).catch(avisos.error)
 }
 
 function salir() {
@@ -168,7 +174,7 @@ async function eliminarCuenta() {
     <section class="seccion">
       <div class="explicacion">
         <h2>Contraseña</h2>
-        <p>Necesitas la actual para poner una nueva.</p>
+        <p>Necesitas la actual para poner una nueva. Al cambiarla se cierra la sesión en tus otros dispositivos.</p>
       </div>
       <form class="formulario" @submit.prevent="cambiarPassword">
         <label>Contraseña actual <CampoPassword v-model="pass.actual" required /></label>
@@ -185,6 +191,18 @@ async function eliminarCuenta() {
           <button class="btn btn-primario" :disabled="guardando === 'pass' || !!errorNueva">Cambiar contraseña</button>
         </div>
       </form>
+    </section>
+
+    <section class="seccion">
+      <div class="explicacion">
+        <h2>Tus datos</h2>
+        <p>Descarga en un fichero todo lo que guardamos de tu cuenta: datos personales, opiniones, fotos, favoritos, a quién sigues y tus mensajes del chat.</p>
+      </div>
+      <div>
+        <button class="btn" :disabled="guardando === 'datos'" @click="descargarDatos">
+          <Download :size="17" /> Descargar mis datos
+        </button>
+      </div>
     </section>
 
     <section class="seccion">

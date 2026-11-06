@@ -147,8 +147,11 @@ onMounted(async () => {
         <label class="buscador">
           <span class="solo-lectores">Buscar</span>
           <Search :size="18" aria-hidden="true" />
-          <input v-model="textoBusqueda" type="search" placeholder="Nombre, localidad o calle" />
+          <input v-model="textoBusqueda" type="search" placeholder="Buscar sitios" />
         </label>
+        <button class="btn mostrar-filtros" :aria-expanded="filtrosAbiertos" @click="filtrosAbiertos = !filtrosAbiertos">
+          <SlidersHorizontal :size="17" /> Filtros<span v-if="numFiltros" class="contador">{{ numFiltros }}</span>
+        </button>
         <button
           class="btn cerca"
           :class="{ 'btn-activo': orden === 'cerca' }"
@@ -158,7 +161,7 @@ onMounted(async () => {
         >
           <LocateFixed :size="17" />
           <template v-if="buscando">Buscando…</template>
-          <span v-else>Cerca<span class="de-mi"> de mí</span></span>
+          <span v-else>Cerca de mí</span>
         </button>
         <div class="interruptor" role="group" aria-label="Vista">
           <button :aria-pressed="vista === 'lista'" title="Ver en lista" @click="vista = 'lista'">
@@ -168,9 +171,6 @@ onMounted(async () => {
             <Map :size="18" /> <span class="etiqueta">Mapa</span>
           </button>
         </div>
-        <button class="btn mostrar-filtros" :aria-expanded="filtrosAbiertos" @click="filtrosAbiertos = !filtrosAbiertos">
-          <SlidersHorizontal :size="17" /> Filtros<span v-if="numFiltros" class="contador">{{ numFiltros }}</span>
-        </button>
       </div>
 
       <div class="extra" :class="{ abierto: filtrosAbiertos }">
@@ -345,17 +345,27 @@ onMounted(async () => {
     display: none;
   }
 
+  /* Buscador y "Filtros" en la primera fila; "Cerca de mí" y lista/mapa en la segunda. */
+  .principal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+
   .principal .buscador {
-    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .principal .cerca {
+    justify-self: start;
+  }
+
+  .principal .interruptor {
+    justify-self: end;
   }
 
   .mostrar-filtros {
     display: inline-flex;
-    margin-left: auto;
-  }
-
-  .principal {
-    gap: 0.4rem;
   }
 
   .principal .btn {
@@ -385,12 +395,6 @@ onMounted(async () => {
 
   .extra select {
     flex: 1 1 100%;
-  }
-}
-
-@media (max-width: 380px) {
-  .de-mi {
-    display: none;
   }
 }
 </style>

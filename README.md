@@ -28,10 +28,15 @@ gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en u
 - **Instalable en el móvil** como una app (manifiesto PWA con iconos y accesos directos) que **funciona sin
   conexión**: se abre sin cobertura y muestra lo que se consultó la última vez.
 - **Recuperar la contraseña** con un enlace por email que caduca en una hora y sirve una sola vez.
+  Al cambiar la contraseña se **cierran las sesiones abiertas en otros dispositivos**.
+- **Vista previa al compartir**: un enlace a un sitio enviado por WhatsApp, Telegram o redes sociales
+  muestra su nombre, una descripción (tipo, localidad, distintivos y valoración) y su foto. Los buscadores
+  tienen `sitemap.xml` y `robots.txt`; los perfiles no se indexan, porque dicen quién es celíaco.
 - **Administración**: editar o eliminar establecimientos, suspender o eliminar cuentas y gestionar las
   consultas del formulario de contacto.
 - **Privacidad**: el DNI, el email, el teléfono y la fecha de nacimiento solo los ven la propia persona
-  y el equipo de administración.
+  y el equipo de administración. Cada persona puede **descargar todos sus datos** en un JSON y eliminar su
+  cuenta desde Ajustes.
 
 ## Tecnologías
 
@@ -158,7 +163,7 @@ backend/
     migraciones/       Migraciones de Alembic
     demo_fotos/        Fotos de la demo (Wikimedia Commons; autoría y licencia en creditos.json)
     routers/           auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat
-    services/          Imágenes, correo, geolocalización, límite de intentos y consultas reutilizables
+    services/          Imágenes, correo, vista previa al compartir, geolocalización, límite de intentos…
   tests/
 frontend/
   src/
@@ -197,6 +202,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | GET | `/api/usuarios` (comunidad) | Sesión |
 | GET | `/api/usuarios/{username}` (+ `/opiniones`, `/seguidores`, `/seguidos`, `/favoritos`, `/visitados`) | Público |
 | PATCH/PUT/DELETE | `/api/usuarios/yo`, `/yo/password`, `/yo/foto` | Sesión |
+| GET | `/api/usuarios/yo/datos` (descargar tus datos) | Sesión |
 | PUT/DELETE | `/api/usuarios/{username}/seguir` | Sesión |
 | PATCH | `/api/usuarios/{username}/archivado` | Admin |
 | DELETE | `/api/usuarios/{username}` | La propia cuenta o admin |
@@ -204,6 +210,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | POST | `/api/consultas` | Público |
 | GET/DELETE | `/api/consultas` | Admin |
 | WS | `/api/chat?token=` | Sesión |
+| GET | `/robots.txt`, `/sitemap.xml` | Público |
 
 ## Créditos de las fotos de la demo
 

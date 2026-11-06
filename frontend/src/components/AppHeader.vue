@@ -308,4 +308,23 @@ function salir() {
     display: flex !important;
   }
 }
+
+/* Móviles estrechos (360 px): el nombre y "Crear cuenta" caben sin tocar el borde. */
+@media (max-width: 380px) {
+  .interior {
+    gap: 0.75rem;
+  }
+
+  .marca {
+    gap: 0.5rem;
+  }
+
+  .nombre-marca strong {
+    font-size: 1rem;
+  }
+
+  .pildora {
+    padding-inline: 0.8rem;
+  }
+}
 </style>

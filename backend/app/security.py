@@ -27,10 +27,20 @@ def verificar_password(password: str, hash_guardado: str) -> bool:
     return bcrypt.checkpw(datos, hash_guardado.encode())
 
 
+def _huella(usuario: Usuario) -> str:
+    """Resumen de la contraseña actual. Al cambiarla, las sesiones abiertas y los enlaces para
+    recuperarla dejan de valer, sin guardar nada más en la base de datos."""
+    return hashlib.sha256(usuario.password_hash.encode()).hexdigest()[:20]
+
+
 def crear_token(usuario: Usuario) -> str:
     ajustes = get_settings()
-    expira = datetime.now(UTC) + timedelta(minutes=ajustes.token_expira_minutos)
-    return jwt.encode({"sub": str(usuario.id), "exp": expira}, ajustes.secret_key, algorithm=ALGORITMO)
+    datos = {
+        "sub": str(usuario.id),
+        "huella": _huella(usuario),
+        "exp": datetime.now(UTC) + timedelta(minutes=ajustes.token_expira_minutos),
+    }
+    return jwt.encode(datos, ajustes.secret_key, algorithm=ALGORITMO)
 
 
 def usuario_desde_token(token: str, db: Session) -> Usuario | None:
@@ -41,7 +51,7 @@ def usuario_desde_token(token: str, db: Session) -> Usuario | None:
         usuario = db.get(Usuario, int(datos["sub"]))
     except (jwt.PyJWTError, KeyError, ValueError):
         return None
-    if usuario is None or usuario.archivado:
+    if usuario is None or usuario.archivado or datos.get("huella") != _huella(usuario):
         return None
     return usuario
 
@@ -49,11 +59,6 @@ def usuario_desde_token(token: str, db: Session) -> Usuario | None:
 # ----------------------------------------------------------------- recuperar la contraseña
 
 RECUPERAR_EXPIRA = timedelta(hours=1)
-
-
-def _huella(usuario: Usuario) -> str:
-    """Resumen de la contraseña actual: al cambiarla, los enlaces anteriores dejan de valer."""
-    return hashlib.sha256(usuario.password_hash.encode()).hexdigest()[:20]
 
 
 def crear_token_recuperacion(usuario: Usuario) -> str:

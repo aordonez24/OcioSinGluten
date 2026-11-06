@@ -46,7 +46,7 @@ def test_un_cambio_de_contrasena_invalida_los_enlaces_anteriores(client):
     h = registrar(client, "ana")
     token = _pedir_enlace(client)
     cambio = {"actual": "Secreta123", "nueva": "Distinta123"}
-    assert client.put("/api/usuarios/yo/password", json=cambio, headers=h).status_code == 204
+    assert client.put("/api/usuarios/yo/password", json=cambio, headers=h).status_code == 200
     r = client.post("/api/auth/restablecer", json={"token": token, "password": "Nueva12345"})
     assert r.status_code == 400
 

@@ -22,6 +22,19 @@ onMounted(() => {
   if (auth.autenticado) api('/auth/yo').then((u) => (auth.usuario = u)).catch(() => {})
 })
 
+// Si el servidor cierra la sesión (caducó o se cambió la contraseña en otro dispositivo), se explica
+// y, si la página necesita sesión, se lleva a "Iniciar sesión" para volver después al mismo sitio.
+watch(
+  () => auth.caducada,
+  async (caducada) => {
+    if (!caducada) return
+    avisos.error('Tu sesión se ha cerrado. Vuelve a iniciar sesión.')
+    await router.isReady() // al abrir la app, la respuesta puede llegar antes que la primera ruta
+    const actual = router.currentRoute.value
+    if (actual.meta.sesion || actual.meta.admin) router.push({ name: 'login', query: { volver: actual.fullPath } })
+  },
+)
+
 // Sin conexión la app sigue funcionando con lo guardado (service worker); se avisa de ello.
 const enLinea = ref(navigator.onLine)
 const actualizarConexion = () => (enLinea.value = navigator.onLine)

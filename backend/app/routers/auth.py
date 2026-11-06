@@ -1,7 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, status
 from sqlalchemy import select
 
-from app.config import get_settings
 from app.models import Usuario
 from app.schemas import LoginIn, RecuperarIn, RegistroIn, RestablecerIn, TokenOut, UsuarioPrivado
 from app.security import (
@@ -14,6 +13,7 @@ from app.security import (
     verificar_password,
 )
 from app.services import correo, limite
+from app.services.compartir import url_base
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -86,8 +86,7 @@ def recuperar(datos: RecuperarIn, db: DB, request: Request, tareas: BackgroundTa
 
     usuario = db.scalar(select(Usuario).where(Usuario.email == datos.email.strip().lower()))
     if usuario is not None and not usuario.archivado:
-        base = (get_settings().url_publica or str(request.base_url)).rstrip("/")
-        enlace = f"{base}/restablecer?token={crear_token_recuperacion(usuario)}"
+        enlace = f"{url_base(request)}/restablecer?token={crear_token_recuperacion(usuario)}"
         texto = TEXTO_RECUPERAR.format(nombre=usuario.nombre, enlace=enlace)
         # En segundo plano: la respuesta tarda lo mismo exista o no la cuenta.
         tareas.add_task(correo.enviar, usuario.email, "Cambia tu contraseña de Ocio Sin Gluten", texto)
