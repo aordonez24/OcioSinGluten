@@ -7,7 +7,7 @@ services:
     runtime: docker
     plan: free
     region: frankfurt
-    branch: migracion-python
+    branch: master
     healthCheckPath: /api/salud
     autoDeploy: true
     envVars:

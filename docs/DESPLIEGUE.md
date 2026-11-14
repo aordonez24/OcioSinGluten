@@ -38,7 +38,7 @@ La dirección completa, con la clave, está en `backend/.env.produccion`, que no
 ## Publicar en Render
 
 1. Abre <https://render.com/deploy?repo=https://github.com/aordonez24/OcioSinGluten> y entra con la
-   cuenta de GitHub. Render lee `render.yaml` (rama `migracion-python`).
+   cuenta de GitHub. Render lee `render.yaml` (rama `master`).
 2. Pega en `DATABASE_URL` el valor de `backend/.env.produccion` y pulsa **Deploy Blueprint**.
    `SECRET_KEY` la genera Render y `URL_PUBLICA` sale sola de `RENDER_EXTERNAL_URL`.
 3. La primera compilación tarda unos minutos. Cuando `/api/salud` responde, Render da el despliegue
