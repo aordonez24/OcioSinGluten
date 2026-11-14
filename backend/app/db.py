@@ -20,15 +20,19 @@ def _es_sqlite(url: str) -> bool:
 
 
 def crear_engine(url: str):
-    engine = create_engine(url, connect_args={"check_same_thread": False} if _es_sqlite(url) else {})
-    if _es_sqlite(url):
-        # SQLite no aplica las claves foráneas (ni los ON DELETE CASCADE) si no se activan.
-        @event.listens_for(engine, "connect")
-        def _pragmas(conexion, _):
-            cursor = conexion.cursor()
-            cursor.execute("PRAGMA foreign_keys=ON")
-            cursor.execute("PRAGMA journal_mode=WAL")
-            cursor.close()
+    if not _es_sqlite(url):
+        # PostgreSQL detrás de un pooler (Supabase): pocas conexiones y comprobadas antes de usarlas,
+        # porque el pooler corta las que llevan un rato paradas.
+        return create_engine(url, pool_size=3, max_overflow=4, pool_pre_ping=True, pool_recycle=300)
+    engine = create_engine(url, connect_args={"check_same_thread": False})
+
+    # SQLite no aplica las claves foráneas (ni los ON DELETE CASCADE) si no se activan.
+    @event.listens_for(engine, "connect")
+    def _pragmas(conexion, _):
+        cursor = conexion.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
     return engine
 

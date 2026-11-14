@@ -4,8 +4,9 @@ from io import BytesIO
 from pathlib import Path
 
 # Configuración de pruebas: BD y carpeta de subidas temporales, sin llamadas a internet.
+# Con TEST_DATABASE_URL se prueban contra PostgreSQL (como en producción) en vez de SQLite.
 _tmp = Path(tempfile.mkdtemp(prefix="osg-tests-"))
-os.environ["DATABASE_URL"] = f"sqlite:///{_tmp / 'test.db'}"
+os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", f"sqlite:///{_tmp / 'test.db'}")
 os.environ["UPLOADS_DIR"] = str(_tmp / "uploads")
 os.environ["GEOCODIFICAR"] = "false"
 os.environ["CORREOS_DIR"] = str(_tmp / "correos")

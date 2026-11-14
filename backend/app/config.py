@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     token_expira_minutos: int = 60 * 24 * 7
 
     uploads_dir: Path = BASE_DIR / "uploads"
+    # Fotos en Supabase Storage en vez de en disco (servidores sin disco persistente, como Render).
+    # La clave es la secreta (Settings > API Keys > Secret keys): no debe llegar nunca al navegador.
+    supabase_url: str | None = None
+    supabase_secret_key: str | None = None
+    supabase_bucket: str = "fotos"
     max_imagen_mb: int = 8
     max_lado_imagen_px: int = 1600
 

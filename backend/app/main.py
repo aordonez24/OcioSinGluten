@@ -2,11 +2,12 @@ import logging
 import mimetypes
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from app.config import Settings, get_settings
 from app.db import SessionLocal, migrar
@@ -21,7 +22,7 @@ from app.routers import (
     usuarios,
 )
 from app.security import DB
-from app.services import compartir, tarjeta
+from app.services import almacen, compartir, tarjeta
 from app.services.consultas import establecimiento_o_404
 
 # Para que el manifiesto de la app instalable (PWA) se sirva con su tipo correcto.
@@ -47,13 +48,16 @@ async def lifespan(_: FastAPI):
 def politica_contenido(request: Request) -> str:
     """Content Security Policy: solo se ejecuta código propio, aunque alguien consiga inyectar HTML."""
     host = request.headers.get("host", "")
+    fotos = get_settings().supabase_url.rstrip("/") if almacen.en_supabase() else ""
     return "; ".join(
         [
             "default-src 'self'",
             "script-src 'self'",
             "style-src 'self' 'unsafe-inline'",  # estilos dinámicos de Vue y Leaflet
-            "img-src 'self' data: blob: https://*.tile.openstreetmap.org",  # blob: previsualizar fotos
-            f"connect-src 'self' ws://{host} wss://{host}",  # API y chat
+            # blob: previsualizar fotos antes de subirlas
+            f"img-src 'self' data: blob: https://*.tile.openstreetmap.org {fotos}".strip(),
+            # API, chat y, si las fotos están en Supabase, el service worker que las guarda sin conexión
+            f"connect-src 'self' ws://{host} wss://{host} {fotos}".strip(),
             "font-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
@@ -109,6 +113,15 @@ def crear_app() -> FastAPI:
     @app.get("/", include_in_schema=False)
     def inicio(request: Request, db: DB):
         return pagina_spa(request, db) or JSONResponse({"detail": "No encontrado"}, status_code=404)
+
+    @app.get("/api/salud", include_in_schema=False)
+    def salud(db: DB):
+        """Para el balanceador del hosting: responde 200 si la aplicación y la base de datos funcionan."""
+        try:
+            db.execute(text("SELECT 1"))
+        except Exception as error:
+            raise HTTPException(503, "Base de datos no disponible") from error
+        return {"ok": True}
 
     @app.get("/robots.txt", include_in_schema=False)
     def robots(request: Request):

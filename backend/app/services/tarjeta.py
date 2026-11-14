@@ -12,8 +12,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-from app.config import get_settings
 from app.models import Establecimiento
+from app.services import almacen
 
 RECURSOS = Path(__file__).resolve().parent.parent / "recursos"
 ANCHO, ALTO = 1200, 630
@@ -103,9 +103,9 @@ def _estrella(dibujo: ImageDraw.ImageDraw, x: float, y: float, r: float, color) 
 
 
 def _foto(portada: str | None) -> Image.Image:
-    ruta = get_settings().uploads_dir / portada if portada else None
-    if ruta and ruta.exists():
-        return ImageOps.fit(Image.open(ruta).convert("RGB"), (ANCHO_FOTO, ALTO), Image.LANCZOS)
+    datos = almacen.leer(portada) if portada else None
+    if datos:
+        return ImageOps.fit(Image.open(BytesIO(datos)).convert("RGB"), (ANCHO_FOTO, ALTO), Image.LANCZOS)
     # Sin foto: el turquesa de la marca con el logo, nada de imágenes inventadas
     panel = Image.new("RGB", (ANCHO_FOTO, ALTO), TURQUESA)
     logo = Image.open(RECURSOS / "logo.png").convert("RGB").resize((240, 240), Image.LANCZOS)

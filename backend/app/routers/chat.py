@@ -3,6 +3,9 @@
 Los mensajes se guardan en la base de datos para que el historial sobreviva a reinicios.
 """
 
+import time
+from collections import deque
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
@@ -16,6 +19,9 @@ router = APIRouter()
 
 MAX_LONGITUD = 500
 HISTORIAL = 50
+# Como mucho RAFAGA mensajes cada RAFAGA_SEGUNDOS por conexión; los demás se descartan avisando.
+RAFAGA = 5
+RAFAGA_SEGUNDOS = 10
 
 
 class Sala:
@@ -65,12 +71,18 @@ async def chat(websocket: WebSocket, token: str = ""):
     await websocket.accept()
     await websocket.send_json({"tipo": "historial", "mensajes": await run_in_threadpool(_historial)})
     sala.conexiones.add(websocket)
+    enviados: deque[float] = deque(maxlen=RAFAGA)
     try:
         while True:
             texto = str((await websocket.receive_json()).get("texto", "")).strip()[:MAX_LONGITUD]
-            if texto:
-                mensaje = await run_in_threadpool(_guardar, autor_id, texto)
-                await sala.difundir({"tipo": "mensaje", **mensaje})
+            if not texto:
+                continue
+            if len(enviados) == RAFAGA and time.monotonic() - enviados[0] < RAFAGA_SEGUNDOS:
+                await websocket.send_json({"tipo": "aviso", "texto": "Vas muy rápido: espera unos segundos."})
+                continue
+            enviados.append(time.monotonic())
+            mensaje = await run_in_threadpool(_guardar, autor_id, texto)
+            await sala.difundir({"tipo": "mensaje", **mensaje})
     except (WebSocketDisconnect, ValueError, AttributeError):
         pass
     finally:

@@ -9,4 +9,4 @@ pyjwt>=2.10
 python-multipart>=0.0.18
 pillow>=11.0
 httpx>=0.28
-
+psycopg[binary]>=3.2  # PostgreSQL (producción en Supabase)

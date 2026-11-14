@@ -9,6 +9,7 @@ import hashlib
 import re
 from dataclasses import dataclass
 from html import escape
+from urllib.parse import urljoin
 from xml.sax.saxutils import escape as escape_xml
 
 from fastapi import Request
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.models import Establecimiento, Usuario
+from app.services import almacen
 from app.services.tarjeta import DatosTarjeta
 
 NOMBRE = "Ocio Sin Gluten"
@@ -112,7 +114,7 @@ def metadatos(db: Session, request: Request) -> Metadatos:
         return Metadatos(
             titulo=f"{usuario.username} - {NOMBRE}",
             descripcion=f"Perfil de {usuario.nombre} en {NOMBRE}: sus opiniones y sus sitios sin gluten.",
-            imagen=f"/uploads/{usuario.foto}" if usuario.foto else ICONO,
+            imagen=almacen.url(usuario.foto) if usuario.foto else ICONO,
         )
 
     if ruta == "/establecimientos":
@@ -149,7 +151,7 @@ def pagina(db: Session, request: Request) -> tuple[str, int] | None:
         f'<meta property="og:title" content="{atributo(titulo)}" />',
         f'<meta property="og:description" content="{atributo(meta.descripcion)}" />',
         f'<meta property="og:url" content="{atributo(url)}" />',
-        f'<meta property="og:image" content="{atributo(base + meta.imagen)}" />',
+        f'<meta property="og:image" content="{atributo(urljoin(base + "/", meta.imagen))}" />',
         f'<meta name="twitter:card" content="{tarjeta}" />',
     ]
     if meta.imagen_grande:

@@ -8,14 +8,12 @@ python -m app.cli migrar                     # actualiza el esquema (también se
 import argparse
 import json
 import random
-import shutil
 import uuid
 from datetime import date, timedelta
 from pathlib import Path
 
 from sqlalchemy import insert, select
 
-from app.config import get_settings
 from app.db import SessionLocal, migrar
 from app.models import (
     Actividad,
@@ -40,6 +38,7 @@ from app.models import (
 )
 from app.schemas import LETRAS_DNI
 from app.security import hash_password
+from app.services import almacen
 
 
 def hacer_admin(email: str) -> None:
@@ -204,12 +203,10 @@ FOTOS_DEMO = Path(__file__).resolve().parent / "demo_fotos"
 
 def _fotos_demo(establecimiento_id: int, nombre: str, autores: list[Usuario]) -> list[Imagen]:
     creditos = json.loads((FOTOS_DEMO / "creditos.json").read_text(encoding="utf-8"))
-    carpeta = get_settings().uploads_dir
-    carpeta.mkdir(parents=True, exist_ok=True)
     fotos = []
     for foto, autor in zip(creditos.get(nombre, []), autores, strict=False):
         fichero = f"{uuid.uuid4().hex}.webp"
-        shutil.copyfile(FOTOS_DEMO / foto["fichero"], carpeta / fichero)
+        almacen.guardar(fichero, (FOTOS_DEMO / foto["fichero"]).read_bytes())
         fotos.append(
             Imagen(
                 establecimiento_id=establecimiento_id,

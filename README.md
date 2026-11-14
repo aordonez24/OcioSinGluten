@@ -51,13 +51,13 @@ Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVI
 | Capa | Tecnología |
 |---|---|
 | Backend | Python 3.11+, [FastAPI](https://fastapi.tiangolo.com), SQLAlchemy 2, Pydantic 2 |
-| Base de datos | SQLite (por defecto, sin instalar nada) o PostgreSQL, con migraciones de Alembic |
-| Seguridad | JWT (Bearer), bcrypt, límite de intentos de login, cabeceras de seguridad |
+| Base de datos | SQLite (por defecto, sin instalar nada) o PostgreSQL (Supabase en producción), con migraciones de Alembic |
+| Seguridad | JWT (Bearer), bcrypt, límites contra la fuerza bruta y el spam, cabeceras de seguridad y CSP |
 | Tiempo real | WebSockets nativos |
-| Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF |
+| Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF; en disco o en Supabase Storage |
 | Frontend | Vue 3 (`<script setup>`), Vite, Pinia, Vue Router, Leaflet + OpenStreetMap |
 | App móvil | Capacitor 8 (Android e iOS) con el mismo frontend |
-| Calidad | pytest, ruff, Playwright (e2e), axe-core (accesibilidad), GitHub Actions |
+| Calidad | pytest (en SQLite y PostgreSQL), ruff, Playwright (e2e), axe-core (accesibilidad), GitHub Actions |
 
 ## Puesta en marcha
 
@@ -110,7 +110,13 @@ Para dar permisos de administración a cualquier cuenta: `python -m app.cli admi
 
 ## Producción
 
-### Con Docker (recomendado)
+### En Render y Supabase (gratis)
+
+La versión publicada corre en el plan gratuito de Render con la base de datos y las fotos en Supabase.
+`render.yaml` describe el servicio; el paso a paso y los límites del plan gratuito están en
+[docs/DESPLIEGUE.md](docs/DESPLIEGUE.md).
+
+### Con Docker
 
 ```bash
 docker build -t ociosingluten .
@@ -140,6 +146,9 @@ cd backend
 pytest                 # pruebas de la API
 ruff check app tests   # análisis estático
 ruff format app tests  # formato
+
+# Las mismas pruebas contra PostgreSQL (la CI lo hace en cada push):
+TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@localhost/pruebas pytest
 ```
 
 ### Pruebas de extremo a extremo y accesibilidad
@@ -172,7 +181,8 @@ backend/
     migraciones/       Migraciones de Alembic
     demo_fotos/        Fotos de la demo (Wikimedia Commons; autoría y licencia en creditos.json)
     routers/           auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat
-    services/          Imágenes, correo, vista previa y tarjeta para compartir, insignias, límite de intentos…
+    services/          Fotos (disco o Supabase Storage), correo, vista previa y tarjeta para compartir,
+                       insignias, límites contra el spam…
     recursos/          Letra Montserrat (licencia OFL) y logo para dibujar las tarjetas
   tests/
 frontend/
@@ -190,7 +200,9 @@ frontend/
 e2e/                   Pruebas de extremo a extremo y de accesibilidad
 docs/DISENO.md         Dirección de diseño: paleta, tipografía y reglas de la interfaz
 docs/MOVIL.md          App de Android e iOS: probarla, compilarla y publicarla
+docs/DESPLIEGUE.md     Publicar en Render y Supabase
 Dockerfile             Imagen de producción (frontend + backend)
+render.yaml            Servicio de Render (plan gratuito)
 ```
 
 ## API
@@ -225,6 +237,7 @@ Documentación interactiva en `http://localhost:8000/docs`. Resumen:
 | GET/DELETE | `/api/consultas` | Admin |
 | WS | `/api/chat?token=` | Sesión |
 | GET | `/robots.txt`, `/sitemap.xml`, `/vista-previa/{id}.jpg` (tarjeta para compartir) | Público |
+| GET | `/api/salud` (para el hosting: la app y la base de datos responden) | Público |
 
 ## Créditos de las fotos de la demo
 

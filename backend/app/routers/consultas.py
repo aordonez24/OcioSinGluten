@@ -1,15 +1,17 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import select
 
 from app.models import Consulta
 from app.schemas import ConsultaIn, ConsultaOut
 from app.security import DB, Admin
+from app.services import limite
 
 router = APIRouter(prefix="/api/consultas", tags=["consultas"])
 
 
 @router.post("", response_model=ConsultaOut, status_code=status.HTTP_201_CREATED)
-def enviar(datos: ConsultaIn, db: DB):
+def enviar(datos: ConsultaIn, db: DB, request: Request):
+    limite.contar(f"consulta|{limite.ip(request)}", 5)
     consulta = Consulta(**datos.model_dump())
     db.add(consulta)
     db.commit()

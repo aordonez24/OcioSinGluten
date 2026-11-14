@@ -14,3 +14,7 @@ frontend/dist-movil
 frontend/android
 frontend/ios
 frontend/resources
+e2e
+docs
+.claude
+.github

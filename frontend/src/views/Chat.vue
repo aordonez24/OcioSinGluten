@@ -2,12 +2,14 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { MessagesSquare, Send } from 'lucide-vue-next'
 import { useAuth } from '@/stores/auth'
+import { useAvisos } from '@/stores/avisos'
 import { agruparPorDia } from '@/utils'
 import { urlSocket } from '@/plataforma'
 import Avatar from '@/components/Avatar.vue'
 import EstadoVacio from '@/components/EstadoVacio.vue'
 
 const auth = useAuth()
+const avisos = useAvisos()
 const mensajes = ref([])
 const texto = ref('')
 const estado = ref('conectando') // conectando | conectado | desconectado
@@ -36,6 +38,7 @@ function conectar() {
   socket.onopen = () => (estado.value = 'conectado')
   socket.onmessage = ({ data }) => {
     const evento = JSON.parse(data)
+    if (evento.tipo === 'aviso') return avisos.error(evento.texto) // el servidor frena los envíos muy seguidos
     if (evento.tipo === 'historial') mensajes.value = evento.mensajes
     else mensajes.value.push(evento)
     bajar()

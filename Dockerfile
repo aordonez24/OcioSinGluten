@@ -1,6 +1,7 @@
 # Imagen única: compila el frontend y lo sirve junto con la API desde FastAPI.
 #   docker build -t ociosingluten .
 #   docker run -p 8000:8000 -e SECRET_KEY=... -v osg-datos:/datos ociosingluten
+# En Render se usa la misma imagen (render.yaml) con PostgreSQL y las fotos en Supabase.
 
 # ---------- 1. Frontend
 FROM node:22-alpine AS frontend
@@ -30,4 +31,7 @@ USER app
 VOLUME /datos
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+# Un solo proceso: el chat y el límite de intentos viven en memoria.
+# --forwarded-allow-ips: detrás del proxy del hosting, la IP real y el https salen de X-Forwarded-*.
+# PORT lo fija el hosting (Render usa 10000); en local, 8000.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

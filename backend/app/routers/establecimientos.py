@@ -28,6 +28,7 @@ from app.schemas import (
     ImagenOut,
 )
 from app.security import DB, Admin, UsuarioActual, UsuarioOpcional
+from app.services import limite
 from app.services.consultas import (
     borrar_actividad,
     establecimiento_o_404,
@@ -129,6 +130,7 @@ def eliminar(est_id: int, db: DB, admin: Admin):
 def avisar(est_id: int, datos: AvisoIn, db: DB, yo: UsuarioActual) -> dict:
     """Avisa al equipo de administración de un problema con el sitio (cerrado, datos mal…)."""
     establecimiento_o_404(db, est_id)
+    limite.contar(f"aviso|{yo.id}", 10)
     db.add(
         Consulta(
             nombre=yo.username,

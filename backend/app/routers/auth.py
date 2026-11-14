@@ -18,12 +18,9 @@ from app.services.compartir import url_base
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-def _ip(request: Request) -> str:
-    return request.client.host if request.client else ""
-
-
 @router.post("/registro", response_model=TokenOut, status_code=status.HTTP_201_CREATED)
-def registro(datos: RegistroIn, db: DB):
+def registro(datos: RegistroIn, db: DB, request: Request):
+    limite.contar(f"registro|{limite.ip(request)}", 10)
     email = datos.email.lower()
     for campo, valor, mensaje in (
         (Usuario.dni, datos.dni, "Ya existe una cuenta con ese DNI"),
@@ -46,7 +43,7 @@ def registro(datos: RegistroIn, db: DB):
 @router.post("/login", response_model=TokenOut)
 def login(datos: LoginIn, db: DB, request: Request):
     email = datos.email.strip().lower()
-    clave = f"{email}|{_ip(request)}"
+    clave = f"{email}|{limite.ip(request)}"
     limite.comprobar(clave)
     usuario = db.scalar(select(Usuario).where(Usuario.email == email))
     # Mismo mensaje exista o no el email, para no revelar qué cuentas hay registradas.
@@ -80,9 +77,7 @@ Ocio Sin Gluten
 @router.post("/recuperar", status_code=status.HTTP_202_ACCEPTED)
 def recuperar(datos: RecuperarIn, db: DB, request: Request, tareas: BackgroundTasks) -> dict:
     """Envía un enlace para elegir una contraseña nueva. Responde lo mismo exista o no la cuenta."""
-    clave = f"recuperar|{_ip(request)}"
-    limite.comprobar(clave)
-    limite.registrar_fallo(clave)  # cuenta cada petición: como mucho 5 cada pocos minutos
+    limite.contar(f"recuperar|{limite.ip(request)}", 5)
 
     usuario = db.scalar(select(Usuario).where(Usuario.email == datos.email.strip().lower()))
     if usuario is not None and not usuario.archivado:
