@@ -13,7 +13,6 @@ from pydantic import (
 )
 
 from app.models import Categoria, MotivoAviso, Rol, TipoActividad, TipoNotificacion
-from app.services import almacen
 
 # --------------------------------------------------------------------------- validadores
 
@@ -116,7 +115,7 @@ NotaHorario = Annotated[str, StringConstraints(strip_whitespace=True, max_length
 
 
 def url_upload(fichero: str | None) -> str | None:
-    return almacen.url(fichero) if fichero else None
+    return f"/uploads/{fichero}" if fichero else None
 
 
 class Esquema(BaseModel):

@@ -41,23 +41,19 @@ async def lifespan(_: FastAPI):
             "Define URL_PUBLICA: sin ella, los enlaces de los correos usan la dirección de cada petición."
         )
     migrar()  # aplica las migraciones pendientes (Alembic)
-    get_settings().uploads_dir.mkdir(parents=True, exist_ok=True)
     yield
 
 
 def politica_contenido(request: Request) -> str:
     """Content Security Policy: solo se ejecuta código propio, aunque alguien consiga inyectar HTML."""
     host = request.headers.get("host", "")
-    fotos = get_settings().supabase_url.rstrip("/") if almacen.en_supabase() else ""
     return "; ".join(
         [
             "default-src 'self'",
             "script-src 'self'",
             "style-src 'self' 'unsafe-inline'",  # estilos dinámicos de Vue y Leaflet
-            # blob: previsualizar fotos antes de subirlas
-            f"img-src 'self' data: blob: https://*.tile.openstreetmap.org {fotos}".strip(),
-            # API, chat y, si las fotos están en Supabase, el service worker que las guarda sin conexión
-            f"connect-src 'self' ws://{host} wss://{host} {fotos}".strip(),
+            "img-src 'self' data: blob: https://*.tile.openstreetmap.org",  # blob: previsualizar fotos
+            f"connect-src 'self' ws://{host} wss://{host}",  # API y chat
             "font-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
@@ -98,8 +94,13 @@ def crear_app() -> FastAPI:
         app.include_router(modulo.router)
     app.include_router(establecimientos.comentarios_router)
 
-    ajustes.uploads_dir.mkdir(parents=True, exist_ok=True)
-    app.mount("/uploads", StaticFiles(directory=ajustes.uploads_dir), name="uploads")
+    @app.get("/uploads/{nombre}", include_in_schema=False)
+    def foto(nombre: str, db: DB):
+        """Fotos subidas. Tienen nombre único, así que se cachean para siempre (cabeceras_seguridad)."""
+        datos = almacen.leer(db, nombre)
+        if datos is None:
+            raise HTTPException(404, "Foto no encontrada")
+        return Response(datos, media_type="image/webp")
 
     def pagina_spa(request: Request, db) -> Response | None:
         """index.html con el título, la descripción y la foto de la página (vista previa al compartir)."""

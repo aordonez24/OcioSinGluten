@@ -22,3 +22,4 @@ backend/*.db.bak-*
 .idea/
 .vscode/
 *.iml
+backend/.env.produccion

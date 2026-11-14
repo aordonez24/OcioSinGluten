@@ -54,7 +54,7 @@ Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVI
 | Base de datos | SQLite (por defecto, sin instalar nada) o PostgreSQL (Supabase en producción), con migraciones de Alembic |
 | Seguridad | JWT (Bearer), bcrypt, límites contra la fuerza bruta y el spam, cabeceras de seguridad y CSP |
 | Tiempo real | WebSockets nativos |
-| Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF; en disco o en Supabase Storage |
+| Imágenes | Pillow: redimensionadas, convertidas a WebP y sin metadatos EXIF; guardadas en la base de datos |
 | Frontend | Vue 3 (`<script setup>`), Vite, Pinia, Vue Router, Leaflet + OpenStreetMap |
 | App móvil | Capacitor 8 (Android e iOS) con el mismo frontend |
 | Calidad | pytest (en SQLite y PostgreSQL), ruff, Playwright (e2e), axe-core (accesibilidad), GitHub Actions |
@@ -112,7 +112,7 @@ Para dar permisos de administración a cualquier cuenta: `python -m app.cli admi
 
 ### En Render y Supabase (gratis)
 
-La versión publicada corre en el plan gratuito de Render con la base de datos y las fotos en Supabase.
+La versión publicada corre en el plan gratuito de Render con la base de datos (y las fotos) en Supabase.
 `render.yaml` describe el servicio; el paso a paso y los límites del plan gratuito están en
 [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md).
 
@@ -124,7 +124,7 @@ docker run -d -p 8000:8000 -e SECRET_KEY="una-clave-larga-y-secreta" -v osg-dato
 docker exec <contenedor> python -m app.cli demo   # opcional
 ```
 
-Una sola imagen contiene la API y el frontend compilado. La base de datos y las fotos se guardan en el
+Una sola imagen contiene la API y el frontend compilado. La base de datos (con las fotos) se guarda en el
 volumen `/datos`.
 
 ### Sin Docker
@@ -181,8 +181,7 @@ backend/
     migraciones/       Migraciones de Alembic
     demo_fotos/        Fotos de la demo (Wikimedia Commons; autoría y licencia en creditos.json)
     routers/           auth, usuarios, establecimientos, actividades, estadisticas, consultas, chat
-    services/          Fotos (disco o Supabase Storage), correo, vista previa y tarjeta para compartir,
-                       insignias, límites contra el spam…
+    services/          Fotos, correo, vista previa y tarjeta para compartir, insignias, límites contra el spam…
     recursos/          Letra Montserrat (licencia OFL) y logo para dibujar las tarjetas
   tests/
 frontend/

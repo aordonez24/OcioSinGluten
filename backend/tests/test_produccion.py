@@ -1,99 +1,55 @@
-"""Lo que importa al desplegar: fotos en Supabase Storage, comprobación de salud y límites contra el spam."""
+"""Lo que importa al desplegar: fotos sin disco, comprobación de salud y límites contra el spam."""
 
-import httpx
-import pytest
+from sqlalchemy import func, select
 
-from app.config import get_settings
-from app.services import almacen, tarjeta
+from app.config import Settings, get_settings
+from app.db import SessionLocal
+from app.models import Foto
+from app.services import tarjeta
 from conftest import crear_establecimiento, imagen_png, registrar
 
-SUPABASE = "https://proyecto.supabase.co"
 
-
-class StorageFalso:
-    """Imita la API de Supabase Storage guardando los ficheros en memoria."""
-
-    def __init__(self) -> None:
-        self.ficheros: dict[str, bytes] = {}
-        self.cabeceras: list[httpx.Headers] = []
-
-    def post(self, url, *, content, headers, timeout):
-        self.cabeceras.append(httpx.Headers(headers))
-        self.ficheros[url.rsplit("/", 1)[1]] = content
-        return httpx.Response(200, request=httpx.Request("POST", url))
-
-    def get(self, url, *, timeout):
-        nombre = url.rsplit("/", 1)[1]
-        estado = 200 if nombre in self.ficheros else 404
-        return httpx.Response(
-            estado, content=self.ficheros.get(nombre, b""), request=httpx.Request("GET", url)
-        )
-
-    def request(self, metodo, url, *, json, headers, timeout):
-        for nombre in json["prefixes"]:
-            self.ficheros.pop(nombre, None)
-        return httpx.Response(200, request=httpx.Request(metodo, url))
-
-
-@pytest.fixture
-def storage(monkeypatch):
-    falso = StorageFalso()
-    ajustes = get_settings()
-    monkeypatch.setattr(ajustes, "supabase_url", SUPABASE)
-    monkeypatch.setattr(ajustes, "supabase_secret_key", "sb_secret_prueba")
-    for metodo in ("post", "get", "request"):
-        monkeypatch.setattr(almacen.httpx, metodo, getattr(falso, metodo))
-    tarjeta.dibujar.cache_clear()
-    return falso
-
-
-def test_fotos_en_supabase_storage(client, storage):
+def test_las_fotos_se_guardan_en_la_base_de_datos(client):
     h = registrar(client, "ana")
-    url = f"/api/establecimientos/{crear_establecimiento(client, h)['id']}"
+    est_id = crear_establecimiento(client, h)["id"]
+    url = f"/api/establecimientos/{est_id}"
     r = client.post(f"{url}/imagenes", files={"archivo": ("a.png", imagen_png(), "image/png")}, headers=h)
-    assert r.status_code == 201
-
     imagen = r.json()
-    nombre = imagen["url"].rsplit("/", 1)[1]
-    assert imagen["url"] == f"{SUPABASE}/storage/v1/object/public/fotos/{nombre}"
-    assert storage.ficheros[nombre][:4] == b"RIFF"  # WebP
-    # Las claves nuevas no son JWT: solo van en la cabecera apikey
-    assert storage.cabeceras[0]["apikey"] == "sb_secret_prueba"
-    assert "authorization" not in storage.cabeceras[0]
+    nombre = imagen["url"].removeprefix("/uploads/")
 
-    # La tarjeta para compartir dibuja la foto descargándola de Supabase
-    assert client.get(f"/vista-previa/{url.rsplit('/', 1)[1]}.jpg").status_code == 200
+    # No se escribe nada en disco: el servidor puede no tener disco persistente (Render)
+    assert not get_settings().uploads_dir.joinpath(nombre).exists()
+    foto = client.get(imagen["url"])
+    assert foto.status_code == 200 and foto.content[:4] == b"RIFF"
+    assert foto.headers["content-type"] == "image/webp"
+    assert "immutable" in foto.headers["cache-control"]
+    assert client.get("/uploads/no-existe.webp").status_code == 404
 
-    # La web permite cargar las fotos de Supabase y el resto de dominios sigue bloqueado
-    csp = client.get("/api/estadisticas").headers["content-security-policy"]
-    assert f"img-src 'self' data: blob: https://*.tile.openstreetmap.org {SUPABASE}" in csp
-    assert f"wss://testserver {SUPABASE}" in csp
+    tarjeta.dibujar.cache_clear()  # la tarjeta para compartir dibuja la foto
+    assert client.get(f"/vista-previa/{est_id}.jpg").status_code == 200
 
-    assert client.delete(f"{url}/imagenes/{imagen['id']}", headers=h).status_code == 204
-    assert storage.ficheros == {}
+    # Al borrar la imagen o el sitio, la foto desaparece en la misma transacción
+    client.delete(f"{url}/imagenes/{imagen['id']}", headers=h)
+    assert client.get(imagen["url"]).status_code == 404
+    with SessionLocal() as db:
+        assert db.scalar(select(func.count()).select_from(Foto)) == 0
 
 
-def test_si_supabase_falla_la_subida_se_avisa(client, storage, monkeypatch):
-    def caido(url, **_):
-        raise httpx.ConnectError("sin conexión")
-
-    monkeypatch.setattr(almacen.httpx, "post", caido)
+def test_la_foto_de_perfil_anterior_se_borra(client):
     h = registrar(client, "ana")
-    url = f"/api/establecimientos/{crear_establecimiento(client, h)['id']}"
-    r = client.post(f"{url}/imagenes", files={"archivo": ("a.png", imagen_png(), "image/png")}, headers=h)
-    assert r.status_code == 503
-    assert client.get(url).json()["imagenes"] == []
-
-
-def test_sin_supabase_las_fotos_van_a_disco(client):
-    h = registrar(client, "ana")
-    r = client.put(
+    subir = lambda: client.put(  # noqa: E731
         "/api/usuarios/yo/foto", files={"archivo": ("a.png", imagen_png(), "image/png")}, headers=h
-    )
-    foto = r.json()["foto_url"]
-    assert foto.startswith("/uploads/")
-    assert (get_settings().uploads_dir / foto.removeprefix("/uploads/")).is_file()
-    assert "supabase" not in client.get("/api/estadisticas").headers["content-security-policy"]
+    ).json()["foto_url"]
+    primera, segunda = subir(), subir()
+    assert client.get(primera).status_code == 404 and client.get(segunda).status_code == 200
+    client.delete("/api/usuarios/ana", headers=h)
+    assert client.get(segunda).status_code == 404
+
+
+def test_url_publica_desde_render(monkeypatch):
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://ociosingluten.onrender.com")
+    monkeypatch.delenv("URL_PUBLICA", raising=False)
+    assert Settings().url_publica == "https://ociosingluten.onrender.com"
 
 
 def test_salud(client):

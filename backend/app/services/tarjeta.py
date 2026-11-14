@@ -12,6 +12,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
+from app.db import SessionLocal
 from app.models import Establecimiento
 from app.services import almacen
 
@@ -103,7 +104,10 @@ def _estrella(dibujo: ImageDraw.ImageDraw, x: float, y: float, r: float, color) 
 
 
 def _foto(portada: str | None) -> Image.Image:
-    datos = almacen.leer(portada) if portada else None
+    datos = None
+    if portada:
+        with SessionLocal() as db:
+            datos = almacen.leer(db, portada)
     if datos:
         return ImageOps.fit(Image.open(BytesIO(datos)).convert("RGB"), (ANCHO_FOTO, ALTO), Image.LANCZOS)
     # Sin foto: el turquesa de la marca con el logo, nada de imágenes inventadas

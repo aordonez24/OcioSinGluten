@@ -1,22 +1,18 @@
-"""Las imágenes se guardan como ficheros (no como BLOB en la base de datos), en disco o en Supabase
-Storage (ver almacen.py). Se redimensionan, se convierten a WebP y se les quitan los metadatos EXIF
-(que pueden incluir la ubicación GPS de quien hizo la foto)."""
+"""Las fotos se redimensionan, se convierten a WebP y se les quitan los metadatos EXIF (que pueden
+incluir la ubicación GPS de quien hizo la foto). Se guardan en la base de datos (ver almacen.py)."""
 
-import logging
 import uuid
 from io import BytesIO
 
-import httpx
 from fastapi import HTTPException, UploadFile, status
 from PIL import Image, ImageOps, UnidentifiedImageError
+from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.services import almacen
 
-log = logging.getLogger("uvicorn.error")
 
-
-def guardar_imagen(archivo: UploadFile, max_lado: int | None = None) -> str:
+def guardar_imagen(db: Session, archivo: UploadFile, max_lado: int | None = None) -> str:
     ajustes = get_settings()
     limite = ajustes.max_imagen_mb * 1024 * 1024
     datos = archivo.file.read(limite + 1)
@@ -40,13 +36,7 @@ def guardar_imagen(archivo: UploadFile, max_lado: int | None = None) -> str:
     salida = BytesIO()
     imagen.save(salida, "WEBP", quality=82)
     nombre = f"{uuid.uuid4().hex}.webp"
-    try:
-        almacen.guardar(nombre, salida.getvalue())
-    except httpx.HTTPError:
-        log.exception("No se pudo guardar la foto %s", nombre)
-        raise HTTPException(
-            status.HTTP_503_SERVICE_UNAVAILABLE, "No se ha podido guardar la foto. Inténtalo de nuevo."
-        ) from None
+    almacen.guardar(db, nombre, salida.getvalue())
     return nombre
 
 

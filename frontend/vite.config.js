@@ -51,8 +51,7 @@ function politicaMovil(servidor) {
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
-    // Las fotos pueden venir del propio servidor o de Supabase Storage (backend/app/services/almacen.py)
-    `img-src 'self' data: blob: ${origen} https://*.tile.openstreetmap.org https://*.supabase.co`,
+    `img-src 'self' data: blob: ${origen} https://*.tile.openstreetmap.org`,
     `connect-src 'self' ${origen} ${socket}`,
     "font-src 'self'",
     "object-src 'none'",

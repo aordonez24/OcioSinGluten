@@ -15,6 +15,7 @@ from sqlalchemy import (
     Enum,
     Float,
     ForeignKey,
+    LargeBinary,
     SmallInteger,
     String,
     Table,
@@ -139,6 +140,17 @@ class Usuario(Base):
     @property
     def es_admin(self) -> bool:
         return self.rol == Rol.ADMIN
+
+
+class Foto(Base):
+    """Contenido de una foto subida (WebP). Se guarda en la base de datos para que el servidor no
+    necesite disco propio: en hostings como Render los ficheros se borran en cada reinicio."""
+
+    __tablename__ = "fotos"
+
+    nombre: Mapped[str] = mapped_column(String(100), primary_key=True)
+    datos: Mapped[bytes] = mapped_column(LargeBinary)
+    creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
 
 
 class Imagen(Base):

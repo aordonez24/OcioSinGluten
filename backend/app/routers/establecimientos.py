@@ -120,10 +120,9 @@ def editar(est_id: int, datos: EstablecimientoUpdate, db: DB, yo: UsuarioActual)
 @router.delete("/{est_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar(est_id: int, db: DB, admin: Admin):
     est = establecimiento_o_404(db, est_id)
-    ficheros = [img.fichero for img in est.imagenes]
+    borrar_imagenes(db, *(img.fichero for img in est.imagenes))
     db.delete(est)  # comentarios, imágenes, likes, actividad... se borran en cascada
     db.commit()
-    borrar_imagenes(*ficheros)
 
 
 @router.post("/{est_id}/avisos", status_code=status.HTTP_201_CREATED)
@@ -150,7 +149,7 @@ def avisar(est_id: int, datos: AvisoIn, db: DB, yo: UsuarioActual) -> dict:
 @router.post("/{est_id}/imagenes", response_model=ImagenOut, status_code=status.HTTP_201_CREATED)
 def subir_imagen(est_id: int, archivo: UploadFile, db: DB, yo: UsuarioActual):
     establecimiento_o_404(db, est_id)
-    imagen = Imagen(establecimiento_id=est_id, autor_id=yo.id, fichero=guardar_imagen(archivo))
+    imagen = Imagen(establecimiento_id=est_id, autor_id=yo.id, fichero=guardar_imagen(db, archivo))
     db.add(imagen)
     db.commit()
     return imagen
@@ -163,9 +162,9 @@ def borrar_imagen(est_id: int, imagen_id: int, db: DB, yo: UsuarioActual):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Imagen no encontrada")
     if imagen.autor_id != yo.id and not yo.es_admin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Solo puedes borrar tus propias imágenes")
+    borrar_imagenes(db, imagen.fichero)
     db.delete(imagen)
     db.commit()
-    borrar_imagenes(imagen.fichero)
 
 
 # ----------------------------------------------------------------- like / favorito / visita

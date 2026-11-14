@@ -201,12 +201,12 @@ MENSAJES = [
 FOTOS_DEMO = Path(__file__).resolve().parent / "demo_fotos"
 
 
-def _fotos_demo(establecimiento_id: int, nombre: str, autores: list[Usuario]) -> list[Imagen]:
+def _fotos_demo(db, establecimiento_id: int, nombre: str, autores: list[Usuario]) -> list[Imagen]:
     creditos = json.loads((FOTOS_DEMO / "creditos.json").read_text(encoding="utf-8"))
     fotos = []
     for foto, autor in zip(creditos.get(nombre, []), autores, strict=False):
         fichero = f"{uuid.uuid4().hex}.webp"
-        almacen.guardar(fichero, (FOTOS_DEMO / foto["fichero"]).read_bytes())
+        almacen.guardar(db, fichero, (FOTOS_DEMO / foto["fichero"]).read_bytes())
         fotos.append(
             Imagen(
                 establecimiento_id=establecimiento_id,
@@ -275,7 +275,7 @@ def cargar_demo() -> None:
             db.flush()
             # Las suben distintos miembros (sin usar `aleatorio`, para no alterar el resto de la demo)
             db.add_all(
-                _fotos_demo(est.id, nombre, miembros[n % len(miembros) :] + miembros[: n % len(miembros)])
+                _fotos_demo(db, est.id, nombre, miembros[n % len(miembros) :] + miembros[: n % len(miembros)])
             )
             actividades.append(
                 Actividad(

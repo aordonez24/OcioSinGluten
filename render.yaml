@@ -1,24 +1,18 @@
-# Despliegue en Render (plan gratuito): https://render.com > New > Blueprint > este repositorio.
-# La base de datos es PostgreSQL de Supabase y las fotos van a Supabase Storage, porque el disco de
-# Render se borra en cada reinicio. Paso a paso en docs/DESPLIEGUE.md.
+# Despliegue en Render (plan gratuito) con la base de datos en Supabase (PostgreSQL). Las fotos se
+# guardan en la base de datos, porque el disco de Render se borra en cada reinicio.
+# Paso a paso en docs/DESPLIEGUE.md.
 services:
   - type: web
     name: ociosingluten
     runtime: docker
     plan: free
     region: frankfurt
+    branch: migracion-python
     healthCheckPath: /api/salud
     autoDeploy: true
     envVars:
       - key: SECRET_KEY
         generateValue: true
-      # postgresql+psycopg://usuario.proyecto:clave@aws-…pooler.supabase.com:5432/postgres
+      # postgresql+psycopg://usuario.proyecto:clave@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
       - key: DATABASE_URL
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SECRET_KEY
-        sync: false
-      # https://ociosingluten.onrender.com (o tu dominio): enlaces de los correos y vistas previas
-      - key: URL_PUBLICA
         sync: false

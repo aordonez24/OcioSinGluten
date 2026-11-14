@@ -192,18 +192,17 @@ def descargar_mis_datos(db: DB, yo: UsuarioActual) -> JSONResponse:
 
 @router.put("/yo/foto", response_model=UsuarioPrivado)
 def subir_foto(archivo: UploadFile, db: DB, yo: UsuarioActual):
-    anterior = yo.foto
-    yo.foto = guardar_imagen(archivo, max_lado=400)
+    borrar_imagenes(db, yo.foto)
+    yo.foto = guardar_imagen(db, archivo, max_lado=400)
     db.commit()
-    borrar_imagenes(anterior)
     return yo
 
 
 @router.delete("/yo/foto", response_model=UsuarioPrivado)
 def borrar_foto(db: DB, yo: UsuarioActual):
-    anterior, yo.foto = yo.foto, None
+    borrar_imagenes(db, yo.foto)
+    yo.foto = None
     db.commit()
-    borrar_imagenes(anterior)
     return yo
 
 
@@ -330,7 +329,6 @@ def eliminar(username: str, db: DB, yo: UsuarioActual):
     usuario = usuario_por_username(db, username, incluir_archivados=True)
     if usuario.id != yo.id and not yo.es_admin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "No puedes eliminar la cuenta de otra persona")
-    foto = usuario.foto
+    borrar_imagenes(db, usuario.foto)
     db.delete(usuario)  # seguimientos, likes, visitas, comentarios... se borran en cascada
     db.commit()
-    borrar_imagenes(foto)

@@ -5,7 +5,7 @@
  *   las rellena Vite al compilar (ver vite.config.js).
  * - Las consultas a la API van primero a la red y guardan copia; sin cobertura se usa la copia.
  *   Si la red tarda mucho y hay copia, se muestra la copia para no dejar la pantalla en blanco.
- * - Las fotos se guardan según se ven, también las de Supabase Storage (otro dominio) en producción.
+ * - Las fotos se guardan según se ven.
  * - Nunca se guardan datos privados (sesión, notificaciones, bandeja de administración, chat).
  */
 const VERSION = '__VERSION__'
@@ -15,9 +15,6 @@ const CACHE_APP = `osg-app-${VERSION}`
 const CACHE_DATOS = 'osg-datos'
 const MAX_FOTOS = 150
 const ESPERA_RED_MS = 4000
-// Fotos servidas desde Supabase Storage (ver backend/app/services/almacen.py)
-const FOTOS_SUPABASE = '/storage/v1/object/public/'
-const esFoto = (url) => url.pathname.startsWith('/uploads/') || url.pathname.startsWith(FOTOS_SUPABASE)
 const API_PRIVADA = ['/api/auth', '/api/notificaciones', '/api/consultas', '/api/usuarios/yo', '/api/chat']
 
 self.addEventListener('install', (evento) => {
@@ -63,7 +60,7 @@ async function cacheConLimite(peticion) {
   const respuesta = await fetch(peticion)
   if (respuesta.ok) {
     await cache.put(peticion, respuesta.clone())
-    const fotos = (await cache.keys()).filter((p) => esFoto(new URL(p.url)))
+    const fotos = (await cache.keys()).filter((p) => new URL(p.url).pathname.startsWith('/uploads/'))
     await Promise.all(fotos.slice(0, Math.max(0, fotos.length - MAX_FOTOS)).map((p) => cache.delete(p)))
   }
   return respuesta
@@ -80,12 +77,7 @@ async function appPrimero(peticion) {
 self.addEventListener('fetch', (evento) => {
   const { request } = evento
   const url = new URL(request.url)
-  if (request.method !== 'GET') return
-  if (url.origin !== self.location.origin) {
-    // Supabase permite CORS: así la copia no es opaca y se puede guardar y contar.
-    if (url.pathname.startsWith(FOTOS_SUPABASE)) evento.respondWith(cacheConLimite(new Request(url, { mode: 'cors' })))
-    return
-  }
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return
 
   if (url.pathname.startsWith('/api/')) {
     if (!API_PRIVADA.some((ruta) => url.pathname.startsWith(ruta))) evento.respondWith(redPrimero(request))

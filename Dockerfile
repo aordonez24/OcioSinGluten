@@ -1,7 +1,7 @@
 # Imagen única: compila el frontend y lo sirve junto con la API desde FastAPI.
 #   docker build -t ociosingluten .
 #   docker run -p 8000:8000 -e SECRET_KEY=... -v osg-datos:/datos ociosingluten
-# En Render se usa la misma imagen (render.yaml) con PostgreSQL y las fotos en Supabase.
+# En Render se usa la misma imagen (render.yaml) con PostgreSQL de Supabase.
 
 # ---------- 1. Frontend
 FROM node:22-alpine AS frontend
@@ -16,7 +16,6 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DATABASE_URL=sqlite:////datos/ociosingluten.db \
-    UPLOADS_DIR=/datos/uploads \
     FRONTEND_DIST=/app/frontend/dist
 
 WORKDIR /app/backend

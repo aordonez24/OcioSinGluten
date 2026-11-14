@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,12 +20,9 @@ class Settings(BaseSettings):
     secret_key: str = "cambia-esta-clave-en-produccion-por-una-larga-y-aleatoria"
     token_expira_minutos: int = 60 * 24 * 7
 
+    # Las fotos se guardan en la base de datos (tabla fotos). Esta carpeta solo se lee una vez, al
+    # migrar, para importar las fotos de versiones anteriores, que se guardaban como ficheros.
     uploads_dir: Path = BASE_DIR / "uploads"
-    # Fotos en Supabase Storage en vez de en disco (servidores sin disco persistente, como Render).
-    # La clave es la secreta (Settings > API Keys > Secret keys): no debe llegar nunca al navegador.
-    supabase_url: str | None = None
-    supabase_secret_key: str | None = None
-    supabase_bucket: str = "fotos"
     max_imagen_mb: int = 8
     max_lado_imagen_px: int = 1600
 
@@ -38,7 +36,10 @@ class Settings(BaseSettings):
 
     # Dirección pública de la web, para los enlaces de los correos (p. ej. https://ociosingluten.es).
     # Si no se define se usa la de la petición, que un atacante podría manipular: defínela en producción.
-    url_publica: str | None = None
+    # Render la define sola (RENDER_EXTERNAL_URL).
+    url_publica: str | None = Field(
+        default=None, validation_alias=AliasChoices("url_publica", "render_external_url")
+    )
 
     # Correo saliente (recuperar la contraseña). Sin SMTP_HOST, los correos se guardan como
     # ficheros .eml en `correos_dir` para poder abrirlos durante el desarrollo.
