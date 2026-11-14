@@ -112,7 +112,7 @@ Para dar permisos de administración a cualquier cuenta: `python -m app.cli admi
 
 ### En Render y Supabase (gratis)
 
-La versión publicada corre en el plan gratuito de Render con la base de datos (y las fotos) en Supabase.
+La versión publicada, en **<https://ociosingluten.onrender.com>**, corre en el plan gratuito de Render con la base de datos (y las fotos) en Supabase.
 `render.yaml` describe el servicio; el paso a paso y los límites del plan gratuito están en
 [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md).
 

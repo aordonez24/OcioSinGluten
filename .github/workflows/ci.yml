@@ -86,7 +86,7 @@ jobs:
 
   # App de Android: compila el APK y lo deja para descargar en la pestaña "Actions" del repositorio.
   # El servidor al que se conecta sale de la variable del repositorio SERVIDOR_APP
-  # (Settings → Secrets and variables → Actions → Variables); sin ella, http://localhost:8000.
+  # (Settings → Secrets and variables → Actions → Variables); sin ella, el servidor publicado en Render.
   android:
     runs-on: ubuntu-latest
     needs: [frontend]
@@ -94,7 +94,7 @@ jobs:
       run:
         working-directory: frontend
     env:
-      VITE_SERVIDOR: ${{ vars.SERVIDOR_APP || 'http://localhost:8000' }}
+      VITE_SERVIDOR: ${{ vars.SERVIDOR_APP || 'https://ociosingluten.onrender.com' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

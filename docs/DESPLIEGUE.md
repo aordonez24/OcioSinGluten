@@ -43,9 +43,10 @@ La dirección completa, con la clave, está en `backend/.env.produccion`, que no
    `SECRET_KEY` la genera Render y `URL_PUBLICA` sale sola de `RENDER_EXTERNAL_URL`.
 3. La primera compilación tarda unos minutos. Cuando `/api/salud` responde, Render da el despliegue
    por bueno; con cada push a la rama se vuelve a publicar.
-4. En GitHub, crea la variable del repositorio `URL_PUBLICA` con la dirección de Render (Settings >
-   Secrets and variables > Actions > Variables) para que funcione `mantener-activo.yml`. Si además
-   creas `SERVIDOR_APP` con esa dirección, el APK que compila la CI se conecta al servidor publicado.
+4. La web queda en <https://ociosingluten.onrender.com>. `mantener-activo.yml` y el APK que compila
+   la CI usan esa dirección; si cambia (por ejemplo, con un dominio propio), crea en GitHub las
+   variables del repositorio `URL_PUBLICA` y `SERVIDOR_APP` (Settings > Secrets and variables >
+   Actions > Variables).
 
 ## Después de publicar
 

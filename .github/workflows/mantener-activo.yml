@@ -1,8 +1,8 @@
 # En el plan gratuito, Supabase pausa la base de datos tras una semana sin uso y Render duerme el
 # servidor a los 15 minutos. Cada tres días se visita /api/salud, que despierta el servidor y hace una
 # consulta a la base de datos, para que Supabase no la pause.
-# La dirección sale de la variable del repositorio URL_PUBLICA (Settings > Secrets and variables >
-# Actions > Variables); sin ella no hace nada.
+# La dirección es la de Render; si cambia (dominio propio), crea la variable del repositorio
+# URL_PUBLICA (Settings > Secrets and variables > Actions > Variables).
 name: Mantener activo
 
 on:
@@ -13,7 +13,6 @@ on:
 jobs:
   visitar:
     runs-on: ubuntu-latest
-    if: vars.URL_PUBLICA != ''
     steps:
       # Render tarda hasta un minuto en despertar: se reintenta durante unos 3 minutos.
-      - run: curl --fail --silent --show-error --retry 6 --retry-delay 30 --retry-all-errors --max-time 90 "${{ vars.URL_PUBLICA }}/api/salud"
+      - run: curl --fail --silent --show-error --retry 6 --retry-delay 30 --retry-all-errors --max-time 90 "${{ vars.URL_PUBLICA || 'https://ociosingluten.onrender.com' }}/api/salud"
