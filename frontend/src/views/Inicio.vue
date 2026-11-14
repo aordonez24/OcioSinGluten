@@ -1,7 +1,7 @@
 <script setup>
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { LocateFixed, Search } from 'lucide-vue-next'
+import { LocateFixed, Search, Store } from 'lucide-vue-next'
 import { api } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { hace } from '@/utils'
@@ -9,6 +9,7 @@ import Avatar from '@/components/Avatar.vue'
 import ContactoForm from '@/components/ContactoForm.vue'
 import DeslizarParaRecargar from '@/components/DeslizarParaRecargar.vue'
 import EstablecimientoCard from '@/components/EstablecimientoCard.vue'
+import EstadoVacio from '@/components/EstadoVacio.vue'
 
 // El mapa de la portada solo existe en pantallas anchas: en móvil no se descarga Leaflet.
 const Mapa = defineAsyncComponent(() => import('@/components/Mapa.vue'))
@@ -26,6 +27,7 @@ const estadisticas = ref(null)
 const actividad = ref([])
 const guardados = ref([])
 
+const sinSitios = computed(() => establecimientos.value?.length === 0)
 const destacados = computed(() =>
   [...(establecimientos.value ?? [])]
     .sort((a, b) => (b.valoracion ?? -1) - (a.valoracion ?? -1) || b.num_opiniones - a.num_opiniones)
@@ -88,7 +90,11 @@ onMounted(async () => {
             <LocateFixed :size="17" aria-hidden="true" /> Ver los sitios más cercanos a mí
           </RouterLink>
         </p>
-        <p v-if="estadisticas" class="cifras">
+        <p v-if="estadisticas && !estadisticas.establecimientos" class="cifras">
+          Acabamos de empezar. Si conoces un sitio donde comer sin gluten con tranquilidad,
+          <RouterLink to="/establecimientos/nuevo">añádelo</RouterLink> y ayuda a otras personas celíacas.
+        </p>
+        <p v-else-if="estadisticas" class="cifras">
           Ya hay {{ plural(estadisticas.establecimientos, 'sitio sin gluten', 'sitios sin gluten') }}
           en {{ plural(estadisticas.provincias, 'provincia', 'provincias') }},
           con {{ plural(estadisticas.opiniones, 'opinión', 'opiniones') }} de la comunidad.
@@ -129,9 +135,17 @@ onMounted(async () => {
     <div class="interior">
       <div class="cabecera-pagina">
         <h2 id="titulo-destacados">Los mejor valorados</h2>
-        <RouterLink to="/establecimientos">Ver todos los establecimientos</RouterLink>
+        <RouterLink v-if="!sinSitios" to="/establecimientos">Ver todos los establecimientos</RouterLink>
       </div>
-      <div class="rejilla destacados">
+      <EstadoVacio
+        v-if="sinSitios"
+        :icono="Store"
+        titulo="Todavía no hay sitios"
+        texto="Sé la primera persona en recomendar un restaurante, un bar o una panadería sin gluten."
+      >
+        <RouterLink to="/establecimientos/nuevo" class="btn btn-primario">Añadir un sitio</RouterLink>
+      </EstadoVacio>
+      <div v-else class="rejilla destacados">
         <template v-if="establecimientos === null">
           <div v-for="n in 4" :key="n" class="esqueleto" style="aspect-ratio: 4 / 4"></div>
         </template>
@@ -290,6 +304,11 @@ onMounted(async () => {
 
 .hero a:focus-visible {
   outline-color: var(--ambar);
+}
+
+.cifras a {
+  color: var(--ambar);
+  font-weight: 600;
 }
 
 .cifras {
