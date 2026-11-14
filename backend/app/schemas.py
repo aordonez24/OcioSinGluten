@@ -1,5 +1,5 @@
 import re
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from typing import Annotated
 
 from pydantic import (
@@ -16,15 +16,6 @@ from app.models import Categoria, MotivoAviso, Rol, TipoActividad, TipoNotificac
 
 # --------------------------------------------------------------------------- validadores
 
-LETRAS_DNI = "TRWAGMYFPDXBNJZSQVHLCKE"
-
-
-def _dni(valor: str) -> str:
-    valor = valor.strip().upper()
-    if not re.fullmatch(r"\d{8}[A-Z]", valor) or LETRAS_DNI[int(valor[:8]) % 23] != valor[8]:
-        raise ValueError("DNI no válido")
-    return valor
-
 
 def _telefono(valor: str) -> str:
     valor = re.sub(r"[\s-]", "", valor)
@@ -38,14 +29,6 @@ def _password(valor: str) -> str:
         raise ValueError("La contraseña necesita al menos 8 caracteres, una mayúscula y un número")
     if len(valor.encode()) > 72:
         raise ValueError("La contraseña es demasiado larga")
-    return valor
-
-
-def _mayor_de_edad(valor: date) -> date:
-    hoy = date.today()
-    edad = hoy.year - valor.year - ((hoy.month, hoy.day) < (valor.month, valor.day))
-    if edad < 18:
-        raise ValueError("Debes ser mayor de edad")
     return valor
 
 
@@ -96,10 +79,10 @@ def _texto(max_len: int):
     return Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=max_len)]
 
 
-DNI = Annotated[str, AfterValidator(_dni)]
 Telefono = Annotated[str, AfterValidator(_telefono)]
 Password = Annotated[str, AfterValidator(_password)]
-FechaNacimiento = Annotated[date, AfterValidator(_mayor_de_edad)]
+# Opcionales: una cadena vacía quita el dato.
+Apellidos = Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)]
 CodPostal = Annotated[str, AfterValidator(_cod_postal)]
 # SQLite no guarda la zona horaria: las fechas se guardan en UTC y se marcan como tal al salir.
 FechaUTC = Annotated[datetime, AfterValidator(lambda d: d if d.tzinfo else d.replace(tzinfo=UTC))]
@@ -126,12 +109,9 @@ class Esquema(BaseModel):
 
 
 class RegistroIn(BaseModel):
-    dni: DNI
     username: Username
     nombre: _texto(50)
-    apellidos: _texto(80)
-    fecha_nacimiento: FechaNacimiento
-    telefono: Telefono
+    apellidos: Apellidos = ""
     email: EmailStr
     password: Password
 
@@ -153,9 +133,7 @@ class RestablecerIn(BaseModel):
 class UsuarioUpdate(BaseModel):
     username: Username | None = None
     nombre: _texto(50) | None = None
-    apellidos: _texto(80) | None = None
-    fecha_nacimiento: FechaNacimiento | None = None
-    telefono: Telefono | None = None
+    apellidos: Apellidos | None = None
 
 
 class PasswordCambio(BaseModel):
@@ -182,12 +160,9 @@ class UsuarioPrivado(UsuarioResumen):
     """Todos los datos: solo para el propio usuario o un administrador."""
 
     id: int
-    apellidos: str
+    apellidos: str | None
     rol: Rol
     email: str
-    dni: str
-    telefono: str
-    fecha_nacimiento: date
     creado_en: FechaUTC
 
 
@@ -201,7 +176,7 @@ class Insignia(BaseModel):
 
 
 class UsuarioPerfil(UsuarioResumen):
-    apellidos: str
+    apellidos: str | None
     rol: Rol
     creado_en: FechaUTC
     num_seguidores: int

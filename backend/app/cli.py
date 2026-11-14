@@ -9,7 +9,7 @@ import argparse
 import json
 import random
 import uuid
-from datetime import date, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 from sqlalchemy import insert, select
@@ -36,7 +36,6 @@ from app.models import (
     utiles,
     visitas,
 )
-from app.schemas import LETRAS_DNI
 from app.security import hash_password
 from app.services import almacen
 
@@ -219,10 +218,6 @@ def _fotos_demo(db, establecimiento_id: int, nombre: str, autores: list[Usuario]
     return fotos
 
 
-def _dni(numero: int) -> str:
-    return f"{numero:08d}{LETRAS_DNI[numero % 23]}"
-
-
 def cargar_demo() -> None:
     aleatorio = random.Random(42)
     with SessionLocal() as db:
@@ -234,12 +229,9 @@ def cargar_demo() -> None:
             usuarios[username] = Usuario(
                 username=username,
                 email=f"{username}@example.com",
-                dni=_dni(10000000 + i),
                 password_hash=hash_password(password),
                 nombre=nombre,
                 apellidos=apellidos,
-                fecha_nacimiento=date(1985 + i * 3, 1 + i, 10 + i),
-                telefono=f"60000000{i}",
                 rol=rol,
                 creado_en=ahora() - timedelta(days=60 - i * 5),
             )

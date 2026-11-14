@@ -1,5 +1,7 @@
 <script setup>
 import logo from '@/assets/logo.webp'
+
+const ano = new Date().getFullYear()
 </script>
 
 <template>
@@ -16,8 +18,12 @@ import logo from '@/assets/logo.webp'
         <RouterLink to="/establecimientos">Establecimientos</RouterLink>
         <RouterLink to="/actividad">Actividades</RouterLink>
         <RouterLink :to="{ path: '/', hash: '#contacto' }">Contacto</RouterLink>
+        <RouterLink to="/privacidad">Privacidad</RouterLink>
       </nav>
-      <p class="credito">Trabajo Fin de Grado de Álvaro Ordóñez Romero en la Universidad de Jaén.</p>
+      <p class="credito">
+        © {{ ano }} Ocio Sin Gluten. Mapas de
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+      </p>
     </div>
   </footer>
 </template>
@@ -75,6 +81,13 @@ a {
 a:hover {
   text-decoration: underline;
   color: var(--carbon);
+}
+
+.credito a {
+  display: inline;
+  min-height: 0;
+  font-weight: 500;
+  text-decoration: underline;
 }
 
 .credito {

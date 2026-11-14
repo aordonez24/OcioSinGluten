@@ -186,8 +186,6 @@ onMounted(cargar)
           <h2>Moderación</h2>
           <dl v-if="perfil.privado" class="privado pequeno">
             <div><dt>Email</dt><dd>{{ perfil.privado.email }}</dd></div>
-            <div><dt>DNI</dt><dd>{{ perfil.privado.dni }}</dd></div>
-            <div><dt>Teléfono</dt><dd>{{ perfil.privado.telefono }}</dd></div>
           </dl>
         </div>
         <div class="fila">

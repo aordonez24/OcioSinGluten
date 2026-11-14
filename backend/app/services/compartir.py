@@ -115,6 +115,12 @@ def metadatos(db: Session, request: Request) -> Metadatos:
             imagen=f"/uploads/{usuario.foto}" if usuario.foto else ICONO,
         )
 
+    if ruta == "/privacidad":
+        return Metadatos(
+            titulo=f"Privacidad - {NOMBRE}",
+            descripcion="Qué datos guarda Ocio Sin Gluten, qué es público y cómo descargarlos o borrarlos.",
+        )
+
     if ruta == "/establecimientos":
         provincia = request.query_params.get("provincia")
         donde = f" en {provincia}" if provincia and len(provincia) <= 60 else ""
@@ -182,7 +188,7 @@ def robots(request: Request) -> str:
 
 def sitemap(db: Session, request: Request) -> str:
     base = url_base(request)
-    rutas = ["/", "/establecimientos"]
+    rutas = ["/", "/establecimientos", "/privacidad"]
     ids = db.scalars(select(Establecimiento.id).order_by(Establecimiento.id))
     rutas += [f"/establecimientos/{i}" for i in ids]
     urls = "\n".join(f"  <url><loc>{escape_xml(base + ruta)}</loc></url>" for ruta in rutas)

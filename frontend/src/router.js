@@ -27,6 +27,7 @@ const routes = [
   { path: '/chat', component: () => import('@/views/Chat.vue'), meta: { titulo: 'Chat', sesion: true } },
   { path: '/ajustes', component: () => import('@/views/Ajustes.vue'), meta: { titulo: 'Ajustes', sesion: true } },
   { path: '/consultas', component: () => import('@/views/Consultas.vue'), meta: { titulo: 'Consultas', admin: true } },
+  { path: '/privacidad', component: () => import('@/views/Privacidad.vue'), meta: { titulo: 'Privacidad' } },
   { path: '/u/:username', component: () => import('@/views/Perfil.vue'), props: true, meta: { titulo: 'Perfil' } },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NoEncontrado.vue'), meta: { titulo: 'No encontrado' } },
 ]

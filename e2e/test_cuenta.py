@@ -10,16 +10,11 @@ from playwright.sync_api import expect
 from conftest import en_ruta, entrar
 
 
-def _registrar(url_base: str, username: str, numero: int) -> str:
+def _registrar(url_base: str, username: str) -> str:
     """Crea una cuenta nueva por la API (así la prueba no cambia la contraseña de la demo)."""
-    dni = f"{numero:08d}{'TRWAGMYFPDXBNJZSQVHLCKE'[numero % 23]}"
     datos = {
-        "dni": dni,
         "username": username,
         "nombre": username.title(),
-        "apellidos": "Pruebas",
-        "fecha_nacimiento": "1990-01-01",
-        "telefono": "600123123",
         "email": f"{username}@example.com",
         "password": "Secreta123",
     }
@@ -29,7 +24,7 @@ def _registrar(url_base: str, username: str, numero: int) -> str:
 
 
 def test_cambiar_la_contrasena_cierra_las_demas_sesiones(pagina, navegador, url_base):
-    correo = _registrar(url_base, "nora", 31415926)
+    correo = _registrar(url_base, "nora")
     otro_dispositivo = navegador.new_context(base_url=url_base).new_page()
     entrar(otro_dispositivo, correo, "Secreta123")
     entrar(pagina, correo, "Secreta123")

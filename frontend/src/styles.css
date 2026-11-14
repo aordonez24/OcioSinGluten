@@ -430,6 +430,11 @@ input:disabled {
   font-weight: 400;
 }
 
+.opcional {
+  color: var(--texto-suave);
+  font-weight: 400;
+}
+
 .error-campo {
   color: var(--rojo);
   font-size: 0.8125rem;

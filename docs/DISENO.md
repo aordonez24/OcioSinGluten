@@ -12,7 +12,7 @@ qué ofrece: si es todo sin gluten, si tiene carta o cocina separada. Lo segundo
 
 ## Identidad
 
-Se mantiene la del proyecto original del TFG: cabecera blanca con el logo, el nombre y el lema
+Cabecera blanca con el logo, el nombre y el lema
 «Disfrute de su tiempo de ocio sin gluten»; enlaces de navegación en píldora turquesa; banda principal
 en carbón; ámbar para la llamada a la acción; pie turquesa; Montserrat.
 

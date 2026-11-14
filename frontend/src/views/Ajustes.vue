@@ -16,8 +16,8 @@ const confirmar = useConfirmar()
 const router = useRouter()
 
 // Si la sesión se cierra mientras se abre la página, auth.usuario es null (y la plantilla no se muestra).
-const { username, nombre, apellidos, telefono, fecha_nacimiento } = auth.usuario ?? {}
-const perfil = reactive({ username, nombre, apellidos, telefono, fecha_nacimiento })
+const { username, nombre, apellidos } = auth.usuario ?? {}
+const perfil = reactive({ username, nombre, apellidos: apellidos ?? '' })
 const pass = reactive({ actual: '', nueva: '', repetir: '' })
 const errorPerfil = ref('')
 const errorPass = ref('')
@@ -25,8 +25,6 @@ const guardando = ref('')
 
 const erroresPerfil = computed(() => ({
   username: validar.username(perfil.username),
-  telefono: validar.telefono(perfil.telefono),
-  fecha_nacimiento: validar.mayorDeEdad(perfil.fecha_nacimiento),
 }))
 const errorNueva = computed(() =>
   pass.nueva && validar.password(pass.nueva)
@@ -153,18 +151,15 @@ async function eliminarCuenta() {
 
     <section class="seccion">
       <div class="explicacion">
-        <h2>Datos personales</h2>
-        <p>El email y el DNI no se pueden cambiar. Solo tú y el equipo de administración veis estos datos.</p>
+        <h2>Tus datos</h2>
+        <p>Tu nombre y tus apellidos se ven en tu perfil. El email no se puede cambiar y solo lo ves tú.</p>
       </div>
       <form class="formulario" @submit.prevent="guardarPerfil">
         <div class="dos-columnas">
           <label>Nombre de usuario <input v-model="perfil.username" required /></label>
           <label>Email <input :value="auth.usuario.email" disabled /></label>
           <label>Nombre <input v-model="perfil.nombre" required maxlength="50" /></label>
-          <label>Apellidos <input v-model="perfil.apellidos" required maxlength="80" /></label>
-          <label>Teléfono <input v-model="perfil.telefono" inputmode="tel" required /></label>
-          <label>Fecha de nacimiento <input v-model="perfil.fecha_nacimiento" type="date" required /></label>
-          <label>DNI <input :value="auth.usuario.dni" disabled /></label>
+          <label><span>Apellidos <span class="opcional">(opcional)</span></span> <input v-model="perfil.apellidos" maxlength="80" /></label>
         </div>
         <p v-if="errorPerfil" class="alerta" role="alert">{{ errorPerfil }}</p>
         <div><button class="btn btn-primario" :disabled="guardando === 'perfil'">Guardar cambios</button></div>

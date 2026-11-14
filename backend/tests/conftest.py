@@ -21,8 +21,6 @@ from app.main import app  # noqa: E402
 
 migrar()  # el esquema se crea una vez con las migraciones, igual que en producción
 
-DNIS = ["12345678Z", "87654321X", "11111111H", "22222222J"]
-
 
 @pytest.fixture
 def client():
@@ -36,15 +34,12 @@ def client():
         yield c
 
 
-def registrar(client, username: str, n: int = 0, **extra) -> dict:
+def registrar(client, username: str, **extra) -> dict:
     """Registra un usuario y devuelve las cabeceras de autenticación."""
     datos = {
-        "dni": DNIS[n],
         "username": username,
         "nombre": username.title(),
         "apellidos": "Pruebas",
-        "fecha_nacimiento": "1990-01-01",
-        "telefono": "600123123",
         "email": f"{username}@example.com",
         "password": "Secreta123",
         **extra,

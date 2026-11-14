@@ -23,7 +23,6 @@ def registro(datos: RegistroIn, db: DB, request: Request):
     limite.contar(f"registro|{limite.ip(request)}", 10)
     email = datos.email.lower()
     for campo, valor, mensaje in (
-        (Usuario.dni, datos.dni, "Ya existe una cuenta con ese DNI"),
         (Usuario.email, email, "Ya existe una cuenta con ese email"),
         (Usuario.username, datos.username, "Ese nombre de usuario ya está en uso"),
     ):
@@ -31,7 +30,8 @@ def registro(datos: RegistroIn, db: DB, request: Request):
             raise HTTPException(status.HTTP_409_CONFLICT, mensaje)
 
     usuario = Usuario(
-        **datos.model_dump(exclude={"password", "email"}),
+        **datos.model_dump(exclude={"password", "email", "apellidos"}),
+        apellidos=datos.apellidos or None,
         email=email,
         password_hash=hash_password(datos.password),
     )

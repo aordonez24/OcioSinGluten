@@ -19,26 +19,26 @@ def test_login_incorrecto_no_revela_si_existe_la_cuenta(client):
 
 
 def test_registro_valida_datos(client):
-    base = {
-        "dni": "12345678Z",
-        "username": "ana",
-        "nombre": "Ana",
-        "apellidos": "P",
-        "fecha_nacimiento": "1990-01-01",
-        "telefono": "600123123",
-        "email": "ana@example.com",
-        "password": "Secreta123",
-    }
+    base = {"username": "ana", "nombre": "Ana", "email": "ana@example.com", "password": "Secreta123"}
     for campo, valor in [
-        ("dni", "12345678A"),  # letra de control incorrecta
-        ("telefono", "12345"),
         ("password", "corta"),
         ("password", "sinmayusculas1"),
-        ("fecha_nacimiento", "2020-01-01"),  # menor de edad
         ("email", "no-es-un-email"),
+        ("username", "con espacios"),
+        ("nombre", "   "),
     ]:
         r = client.post("/api/auth/registro", json={**base, campo: valor})
         assert r.status_code == 422, (campo, valor)
+
+
+def test_registro_pide_los_datos_minimos(client):
+    """Solo usuario, nombre, email y contraseña: ni DNI, ni teléfono, ni fecha de nacimiento."""
+    datos = {"username": "ana", "nombre": "Ana", "email": "Ana@Example.com", "password": "Secreta123"}
+    r = client.post("/api/auth/registro", json=datos)
+    assert r.status_code == 201
+    usuario = r.json()["usuario"]
+    assert usuario["apellidos"] is None and usuario["email"] == "ana@example.com"
+    assert not {"dni", "telefono", "fecha_nacimiento"} & usuario.keys()
 
 
 def test_registro_duplicado(client):
@@ -46,12 +46,8 @@ def test_registro_duplicado(client):
     r = client.post(
         "/api/auth/registro",
         json={
-            "dni": "87654321X",
             "username": "ana",
             "nombre": "Ana",
-            "apellidos": "P",
-            "fecha_nacimiento": "1990-01-01",
-            "telefono": "600123123",
             "email": "otra@example.com",
             "password": "Secreta123",
         },
@@ -74,18 +70,20 @@ def test_endpoints_protegidos_requieren_sesion(client):
 
 
 def test_perfil_oculta_datos_privados_a_otros(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     assert client.get("/api/usuarios/ana", headers=h_bea).json()["privado"] is None
     assert client.get("/api/usuarios/ana").json()["privado"] is None
-    assert client.get("/api/usuarios/ana", headers=h_ana).json()["privado"]["dni"] == "12345678Z"
+    assert client.get("/api/usuarios/ana", headers=h_ana).json()["privado"]["email"] == "ana@example.com"
 
 
 def test_editar_perfil_y_password(client):
     h = registrar(client, "ana")
-    r = client.patch("/api/usuarios/yo", json={"nombre": "Anita", "telefono": "611 222 333"}, headers=h)
+    r = client.patch("/api/usuarios/yo", json={"nombre": "Anita", "apellidos": "López"}, headers=h)
     assert r.status_code == 200
-    assert r.json()["nombre"] == "Anita" and r.json()["telefono"] == "611222333"
+    assert r.json()["nombre"] == "Anita" and r.json()["apellidos"] == "López"
+    # Los apellidos son opcionales: una cadena vacía los quita
+    assert client.patch("/api/usuarios/yo", json={"apellidos": ""}, headers=h).json()["apellidos"] is None
 
     mal = client.put(
         "/api/usuarios/yo/password", json={"actual": "Mala1234", "nueva": "Nueva1234"}, headers=h
@@ -106,8 +104,8 @@ def test_editar_perfil_y_password(client):
 
 
 def test_seguir_y_dejar_de_seguir(client):
-    h_ana = registrar(client, "ana", 0)
-    registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    registrar(client, "bea")
     assert client.put("/api/usuarios/bea/seguir", headers=h_ana).status_code == 204
     assert client.put("/api/usuarios/bea/seguir", headers=h_ana).status_code == 204  # idempotente
     assert client.put("/api/usuarios/ana/seguir", headers=h_ana).status_code == 400
@@ -140,8 +138,8 @@ def test_foto_de_perfil(client):
 
 
 def test_suspender_usuario(client):
-    h_admin = registrar(client, "admin", 0)
-    h_ana = registrar(client, "ana", 1)
+    h_admin = registrar(client, "admin")
+    h_ana = registrar(client, "ana")
     hacer_admin("admin")
 
     assert (
@@ -168,8 +166,8 @@ def test_suspender_usuario(client):
 def test_eliminar_usuario_borra_en_cascada(client):
     from conftest import crear_establecimiento
 
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     est = crear_establecimiento(client, h_ana)
     client.put(f"/api/establecimientos/{est['id']}/like", headers=h_bea)
     client.post(
@@ -202,9 +200,9 @@ def test_login_limita_intentos_fallidos(client):
 def test_comunidad_y_contadores_de_perfil(client):
     from conftest import crear_establecimiento
 
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
-    registrar(client, "carla", 2)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
+    registrar(client, "carla")
     client.put("/api/usuarios/carla/seguir", headers=h_ana)
     client.put("/api/usuarios/carla/seguir", headers=h_bea)
 
@@ -236,9 +234,9 @@ def test_cabeceras_de_seguridad(client):
 
 
 def test_actividad_de_quienes_sigo(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
-    h_carlos = registrar(client, "carlos", 2)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
+    h_carlos = registrar(client, "carlos")
     crear_establecimiento(client, h_bea)
     crear_establecimiento(client, h_carlos, nombre="Otro sitio")
 
@@ -251,8 +249,8 @@ def test_actividad_de_quienes_sigo(client):
 
 
 def test_notificaciones(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     est = crear_establecimiento(client, h_ana)
 
     assert client.get("/api/notificaciones").status_code == 401
@@ -285,8 +283,8 @@ def test_notificaciones(client):
 
 
 def test_opiniones_utiles(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     est = crear_establecimiento(client, h_ana)
     url = f"/api/establecimientos/{est['id']}/comentarios"
     opinion_id = client.post(url, json={"puntuacion": 4, "mensaje": "Bien"}, headers=h_ana).json()["id"]
@@ -320,7 +318,7 @@ def test_descargar_mis_datos(client):
     assert r.headers["content-disposition"] == 'attachment; filename="ociosingluten-ana.json"'
     assert r.headers["cache-control"] == "no-store"
     datos = r.json()
-    assert datos["cuenta"]["email"] == "ana@example.com" and datos["cuenta"]["dni"] == "12345678Z"
+    assert datos["cuenta"]["email"] == "ana@example.com" and datos["cuenta"]["nombre"] == "Ana"
     assert "password_hash" not in str(datos)
     assert datos["opiniones"][0]["mensaje"] == "Rico"
     assert datos["establecimientos_anadidos"][0]["nombre"] == "Celiaco Feliz"

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Camera, ShieldCheck } from 'lucide-vue-next'
+import { Camera } from 'lucide-vue-next'
 import { api, conArchivo } from '@/api'
 import { useAuth } from '@/stores/auth'
 import { useAvisos } from '@/stores/avisos'
@@ -15,7 +15,7 @@ const route = useRoute()
 
 const datos = reactive({
   username: '', email: '', password: '',
-  nombre: '', apellidos: '', dni: '', telefono: '', fecha_nacimiento: '',
+  nombre: '', apellidos: '',
 })
 const confirmacion = ref('')
 const aceptaCondiciones = ref(false)
@@ -32,11 +32,7 @@ const errores = computed(() => ({
   password: validar.password(datos.password),
   confirmacion: confirmacion.value === datos.password ? '' : 'Las contraseñas no coinciden',
   nombre: datos.nombre.trim() ? '' : 'Obligatorio',
-  apellidos: datos.apellidos.trim() ? '' : 'Obligatorio',
-  dni: validar.dni(datos.dni),
-  telefono: validar.telefono(datos.telefono),
-  fecha_nacimiento: validar.mayorDeEdad(datos.fecha_nacimiento),
-  condiciones: aceptaCondiciones.value ? '' : 'Debes aceptar las condiciones',
+  condiciones: aceptaCondiciones.value ? '' : 'Debes aceptar las normas de la comunidad y la política de privacidad',
 }))
 // Los errores se muestran al salir de cada campo, no mientras se escribe por primera vez.
 const err = (campo) => (intentado.value || tocados.has(campo) ? errores.value[campo] : '')
@@ -106,8 +102,9 @@ async function registrarse() {
             </label>
             <label>
               Email
-              <input v-model="datos.email" type="email" autocomplete="email" v-bind="vincular('email')" />
-              <span class="error-campo">{{ err('email') }}</span>
+              <input v-model="datos.email" type="email" autocomplete="email" aria-describedby="email-ayuda" v-bind="vincular('email')" />
+              <span v-if="err('email')" class="error-campo">{{ err('email') }}</span>
+              <span v-else id="email-ayuda" class="ayuda">Solo lo ves tú; nunca se muestra en la comunidad.</span>
             </label>
             <label>
               Contraseña
@@ -122,10 +119,7 @@ async function registrarse() {
         </fieldset>
 
         <fieldset>
-          <legend>Datos personales</legend>
-          <p class="privacidad pequeno">
-            <ShieldCheck :size="18" aria-hidden="true" /> Estos datos son privados: solo los ves tú y el equipo de administración.
-          </p>
+          <legend>Cómo te verá la comunidad</legend>
           <div class="dos-columnas">
             <label>
               Nombre
@@ -133,40 +127,21 @@ async function registrarse() {
               <span class="error-campo">{{ err('nombre') }}</span>
             </label>
             <label>
-              Apellidos
-              <input v-model="datos.apellidos" autocomplete="family-name" maxlength="80" v-bind="vincular('apellidos')" />
-              <span class="error-campo">{{ err('apellidos') }}</span>
-            </label>
-            <label>
-              DNI
-              <input v-model="datos.dni" maxlength="9" placeholder="12345678Z" v-bind="vincular('dni')" />
-              <span class="error-campo">{{ err('dni') }}</span>
-            </label>
-            <label>
-              Teléfono
-              <input v-model="datos.telefono" inputmode="tel" autocomplete="tel" placeholder="600 123 123" v-bind="vincular('telefono')" />
-              <span class="error-campo">{{ err('telefono') }}</span>
-            </label>
-            <label>
-              Fecha de nacimiento
-              <input v-model="datos.fecha_nacimiento" type="date" autocomplete="bday" v-bind="vincular('fecha_nacimiento')" />
-              <span class="error-campo">{{ err('fecha_nacimiento') }}</span>
+              <span>Apellidos <span class="opcional">(opcional)</span></span>
+              <input v-model="datos.apellidos" autocomplete="family-name" maxlength="80" />
             </label>
           </div>
         </fieldset>
 
         <div class="condiciones">
-          <details>
-            <summary>Leer las condiciones del servicio</summary>
-            <p class="suave">
-              Al registrarte aceptas respetar a los demás miembros y las normas de la comunidad, y eres
-              responsable del contenido que compartes. Tus datos personales nunca se muestran a otros
-              usuarios. Puedes eliminar tu cuenta y todos tus datos en cualquier momento desde Ajustes.
-            </p>
-          </details>
+          <p class="suave pequeno">
+            Tu nombre de usuario, tu nombre, tus apellidos si los pones, tu foto y tus opiniones son públicos.
+            Respeta a los demás miembros: eres responsable de lo que compartes. Puedes descargar tus datos o
+            eliminar tu cuenta cuando quieras desde Ajustes.
+          </p>
           <label class="casilla">
-            <input v-model="aceptaCondiciones" type="checkbox" />
-            He leído y acepto las condiciones del servicio
+            <input v-model="aceptaCondiciones" type="checkbox" v-bind="vincular('condiciones')" />
+            <span>Acepto las normas de la comunidad y la <RouterLink to="/privacidad" target="_blank">política de privacidad</RouterLink></span>
           </label>
           <span class="error-campo">{{ err('condiciones') }}</span>
         </div>
@@ -234,37 +209,11 @@ fieldset + fieldset {
   object-fit: cover;
 }
 
-.privacidad {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: -0.25rem 0 0;
-  padding: 0.65rem 0.9rem;
-  border-radius: var(--radio-sm);
-  background: var(--niebla);
-  color: var(--carbon);
-  font-weight: 500;
-}
-
-.privacidad svg {
-  color: var(--turquesa-oscuro);
-  flex-shrink: 0;
-}
-
 .condiciones {
   display: grid;
   gap: 0.6rem;
   padding-top: 2rem;
   border-top: 1px solid var(--borde);
-}
-
-summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--turquesa-oscuro);
-  min-height: 44px;
-  display: flex;
-  align-items: center;
 }
 
 .pie {

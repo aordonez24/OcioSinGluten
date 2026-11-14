@@ -70,6 +70,8 @@ def listar(db: DB, yo: UsuarioActual):
 @router.patch("/yo", response_model=UsuarioPrivado)
 def actualizar_mis_datos(datos: UsuarioUpdate, db: DB, yo: UsuarioActual):
     cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
+    if "apellidos" in cambios:
+        cambios["apellidos"] = cambios["apellidos"] or None  # vacío: quitar los apellidos
     nuevo_username = cambios.get("username")
     if (
         nuevo_username

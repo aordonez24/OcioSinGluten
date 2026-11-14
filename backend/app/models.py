@@ -6,7 +6,7 @@ usuario o un establecimiento la base de datos limpia todo en cascada.
 """
 
 import enum
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     JSON,
@@ -110,12 +110,9 @@ class Usuario(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(30), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
-    dni: Mapped[str] = mapped_column(String(9), unique=True)
     password_hash: Mapped[str] = mapped_column(String(100))
     nombre: Mapped[str] = mapped_column(String(50))
-    apellidos: Mapped[str] = mapped_column(String(80))
-    fecha_nacimiento: Mapped[date]
-    telefono: Mapped[str] = mapped_column(String(15))
+    apellidos: Mapped[str | None] = mapped_column(String(80))
     foto: Mapped[str | None] = mapped_column(String(100))
     rol: Mapped[Rol] = mapped_column(Enum(Rol, native_enum=False), default=Rol.COMUN)
     archivado: Mapped[bool] = mapped_column(default=False)

@@ -29,8 +29,8 @@ def test_crear_y_listar(client):
 
 
 def test_like_favorito_y_visita(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     est_id = crear_establecimiento(client, h_ana)["id"]
     url = f"/api/establecimientos/{est_id}"
 
@@ -55,9 +55,9 @@ def test_like_favorito_y_visita(client):
 
 
 def test_permisos_de_edicion_y_borrado(client):
-    h_ana = registrar(client, "ana", 0)
-    h_admin = registrar(client, "jefa", 1)
-    h_otro = registrar(client, "otro", 2)
+    h_ana = registrar(client, "ana")
+    h_admin = registrar(client, "jefa")
+    h_otro = registrar(client, "otro")
     hacer_admin("jefa")
     est = crear_establecimiento(client, h_ana)
     est_id = est["id"]
@@ -84,8 +84,8 @@ def test_permisos_de_edicion_y_borrado(client):
 
 
 def test_imagenes(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
     est_id = crear_establecimiento(client, h_ana)["id"]
     url = f"/api/establecimientos/{est_id}"
 
@@ -107,9 +107,9 @@ def test_imagenes(client):
 
 
 def test_opiniones_con_puntuacion(client):
-    h_ana = registrar(client, "ana", 0)
-    h_bea = registrar(client, "bea", 1)
-    h_carla = registrar(client, "carla", 2)
+    h_ana = registrar(client, "ana")
+    h_bea = registrar(client, "bea")
+    h_carla = registrar(client, "carla")
     est_id = crear_establecimiento(client, h_ana)["id"]
     url = f"/api/establecimientos/{est_id}/comentarios"
 
@@ -176,8 +176,8 @@ def test_categoria_y_distintivos(client):
 
 
 def test_actividades_y_consultas(client):
-    h_ana = registrar(client, "ana", 0)
-    h_admin = registrar(client, "jefa", 1)
+    h_ana = registrar(client, "ana")
+    h_admin = registrar(client, "jefa")
     hacer_admin("jefa")
     est_id = crear_establecimiento(client, h_ana)["id"]
     client.post(
@@ -288,8 +288,8 @@ def test_las_franjas_se_ordenan(client):
 
 
 def test_avisos_de_un_sitio_llegan_a_administracion(client):
-    h_ana = registrar(client, "ana", 0)
-    h_admin = registrar(client, "jefa", 1)
+    h_ana = registrar(client, "ana")
+    h_admin = registrar(client, "jefa")
     hacer_admin("jefa")
     est = crear_establecimiento(client, h_admin)
     url = f"/api/establecimientos/{est['id']}/avisos"

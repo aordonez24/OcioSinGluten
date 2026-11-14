@@ -23,7 +23,7 @@ En local nada cambia: sin `DATABASE_URL` se usa SQLite.
 El proyecto `ociosingluten` (ref `bvtixoafufafzpgrtloo`, región Frankfurt) tiene un usuario de base de
 datos `ociosingluten`, dueño de un esquema con el mismo nombre y con ese esquema como `search_path`.
 Las tablas no están en `public`, así que la Data API de Supabase no las expone: solo la aplicación
-puede leer los datos personales (DNI, email, teléfono). Las tablas las crean las migraciones de
+puede leer los datos de las cuentas, como los emails. Las tablas las crean las migraciones de
 Alembic al arrancar el servidor, igual que en local.
 
 La conexión va por el *session pooler*, porque la conexión directa de Supabase solo funciona por IPv6 y

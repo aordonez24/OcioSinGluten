@@ -1,10 +1,10 @@
 # Ocio Sin Gluten
 
-Trabajo Fin de Grado de **Álvaro Ordóñez Romero**. Escuela Politécnica Superior, Universidad de Jaén.
-
 Red social para personas celíacas: comparten restaurantes, bares y sitios de ocio con opciones sin
 gluten, los valoran, opinan, suben fotos, siguen a otros miembros y charlan en un chat en tiempo real.
 Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVIL.md](docs/MOVIL.md)).
+
+**En línea en <https://ociosingluten.onrender.com>.**
 
 ## Funcionalidades
 
@@ -42,9 +42,10 @@ Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVI
   tienen `sitemap.xml` y `robots.txt`; los perfiles no se indexan, porque dicen quién es celíaco.
 - **Administración**: editar o eliminar establecimientos, suspender o eliminar cuentas y gestionar las
   consultas del formulario de contacto.
-- **Privacidad**: el DNI, el email, el teléfono y la fecha de nacimiento solo los ven la propia persona
-  y el equipo de administración. Cada persona puede **descargar todos sus datos** en un JSON y eliminar su
-  cuenta desde Ajustes.
+- **Privacidad**: para registrarse basta con usuario, nombre, email y contraseña (sin DNI, teléfono ni
+  fecha de nacimiento). El email solo lo ven la propia persona y el equipo de administración. Cada persona
+  puede **descargar todos sus datos** en un JSON y eliminar su cuenta desde Ajustes, y la página
+  `/privacidad` explica qué se guarda y qué es público.
 
 ## Tecnologías
 

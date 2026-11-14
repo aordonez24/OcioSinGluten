@@ -1,14 +1,6 @@
 // Validaciones (las mismas reglas que aplica el backend, que es quien manda).
 
-const LETRAS_DNI = 'TRWAGMYFPDXBNJZSQVHLCKE'
-
 export const validar = {
-  dni(v) {
-    const dni = v.trim().toUpperCase()
-    return /^\d{8}[A-Z]$/.test(dni) && LETRAS_DNI[Number(dni.slice(0, 8)) % 23] === dni[8]
-      ? ''
-      : 'DNI no válido (revisa la letra)'
-  },
   telefono: (v) => (/^\d{9}$/.test(String(v).replace(/[\s-]/g, '')) ? '' : 'Debe tener 9 dígitos'),
   email: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Email no válido'),
   password: (v) =>
@@ -17,15 +9,6 @@ export const validar = {
       : 'Mínimo 8 caracteres, con una mayúscula y un número',
   codPostal: (v) => (/^\d{5}$/.test(v) ? '' : 'Debe tener 5 dígitos'),
   username: (v) => (/^[A-Za-z0-9_.-]{3,30}$/.test(v) ? '' : 'Entre 3 y 30 letras, números, _ . -'),
-  mayorDeEdad(v) {
-    if (!v) return 'Obligatorio'
-    const nacimiento = new Date(v)
-    const hoy = new Date()
-    let edad = hoy.getFullYear() - nacimiento.getFullYear()
-    const m = hoy.getMonth() - nacimiento.getMonth()
-    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--
-    return edad >= 18 ? '' : 'Debes ser mayor de edad'
-  },
 }
 
 /** Pasa a minúsculas y quita tildes, para buscar "jaen" y encontrar "Jaén". */
