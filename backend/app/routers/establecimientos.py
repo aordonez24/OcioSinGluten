@@ -102,7 +102,7 @@ def editar(est_id: int, datos: EstablecimientoUpdate, db: DB, yo: UsuarioActual)
         )
     cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
     # Una cadena vacía, un precio 0 o un horario [] significan "quitar este dato".
-    for campo in ("precio", "horario", "nota_horario", "web"):
+    for campo in ("telefono", "precio", "horario", "nota_horario", "web"):
         if campo in cambios and not cambios[campo]:
             cambios[campo] = None
     _comprobar_duplicado(

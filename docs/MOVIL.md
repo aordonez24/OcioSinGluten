@@ -59,14 +59,29 @@ repositorio, como artefacto `ocio-sin-gluten-android`. Para que esa app se conec
 crea la variable del repositorio `SERVIDOR_APP` con su dirección (por ejemplo `https://ociosingluten.es`)
 en *Settings → Secrets and variables → Actions → Variables*.
 
-## Publicar en Google Play
+## Publicar una versión
 
-1. Compila contra el servidor real: `VITE_SERVIDOR=https://tu-dominio.es npm run movil:android`.
-2. Crea una clave de firma una sola vez y guárdala fuera del repositorio:
-   `keytool -genkey -v -keystore ociosingluten.jks -alias ociosingluten -keyalg RSA -keysize 2048 -validity 10000`
-3. En Android Studio: *Build → Generate Signed App Bundle*, con esa clave. Sube el `.aab` a Google Play
+La app firmada se descarga desde la propia web, en `/app` (el fichero es
+`backend/app/descargas/ociosingluten.apk`). Para sacar una versión nueva:
+
+1. Sube `versionCode` (un número más) y `versionName` en `android/app/build.gradle`.
+2. Compila contra el servidor publicado y genera el APK y el paquete para Google Play:
+
+   ```bash
+   cd frontend
+   VITE_SERVIDOR=https://ociosingluten.onrender.com npm run movil:android
+   cd android && ./gradlew assembleRelease bundleRelease
+   ```
+
+3. Copia `android/app/build/outputs/apk/release/app-release.apk` a
+   `backend/app/descargas/ociosingluten.apk` y haz push: la web ofrece la versión nueva en cuanto se
+   despliega. El `.aab` de `android/app/build/outputs/bundle/release/` es el que se sube a Google Play
    Console.
-4. Antes de cada versión nueva, sube `versionCode` y `versionName` en `android/app/build.gradle`.
+
+La firma está en `frontend/android/firma/` (la clave y `firma.properties` con sus contraseñas). No está en
+git: **haz copia de seguridad de esa carpeta**. Sin ella, Android no deja instalar las actualizaciones
+encima de la versión anterior y Google Play no las acepta. Si falta, la versión release se compila sin
+firmar.
 
 ## iOS
 

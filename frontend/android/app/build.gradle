@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// Firma de las versiones publicadas: android/firma/firma.properties (no está en git; ver docs/MOVIL.md).
+// Sin ese fichero, la versión release se compila sin firmar.
+def firma = new Properties()
+def ficheroFirma = rootProject.file('firma/firma.properties')
+if (ficheroFirma.exists()) {
+    ficheroFirma.withInputStream { firma.load(it) }
+}
+
 android {
     namespace = "es.ociosingluten.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +24,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (ficheroFirma.exists()) {
+                storeFile file(firma['storeFile'])
+                storePassword firma['storePassword']
+                keyAlias firma['keyAlias']
+                keyPassword firma['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (ficheroFirma.exists()) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

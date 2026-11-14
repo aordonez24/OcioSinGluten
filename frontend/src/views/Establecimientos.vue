@@ -108,6 +108,14 @@ const filtrosAbiertos = ref(false)
 const numFiltros = computed(
   () => [provincia.value, categoria.value, precio.value, abierto.value].filter(Boolean).length + distintivos.value.length,
 )
+// Las tarjetas se pintan por tandas: con cientos de sitios, pintarlas todas de golpe va lento en el móvil.
+const POR_TANDA = 24
+const visibles = ref(POR_TANDA)
+watch(
+  () => route.query,
+  () => (visibles.value = POR_TANDA),
+)
+
 const hayFiltros = computed(() =>
   Boolean(busqueda.value || provincia.value || categoria.value || precio.value || abierto.value || distintivos.value.length),
 )
@@ -254,7 +262,11 @@ onMounted(cargar)
 
     <template v-else>
       <div class="rejilla">
-        <EstablecimientoCard v-for="e in filtrados" :key="e.id" :establecimiento="e" />
+        <EstablecimientoCard v-for="e in filtrados.slice(0, visibles)" :key="e.id" :establecimiento="e" />
+      </div>
+      <div v-if="filtrados.length > visibles" class="mas">
+        <button class="btn" @click="visibles += POR_TANDA">Ver más sitios</button>
+        <span class="suave pequeno">Has visto {{ visibles }} de {{ filtrados.length }}</span>
       </div>
       <p v-if="hayFiltros" class="pie suave">
         ¿No encuentras lo que buscas? <button class="enlace" @click="limpiarFiltros">Quitar filtros</button>
@@ -338,6 +350,15 @@ onMounted(cargar)
   border: 0;
   background: none;
   padding-inline: 0.5rem;
+}
+
+.mas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  margin-top: 2rem;
 }
 
 .pie {

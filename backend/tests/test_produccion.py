@@ -76,3 +76,10 @@ def test_el_chat_frena_los_mensajes_muy_seguidos(client):
             ws.send_json({"texto": f"mensaje {i}"})
         tipos = [ws.receive_json()["tipo"] for _ in range(6)]
     assert tipos == ["mensaje"] * 5 + ["aviso"]
+
+
+def test_descargar_la_app_de_android(client):
+    r = client.get("/descargas/ociosingluten.apk")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "application/vnd.android.package-archive"
+    assert r.content[:2] == b"PK"  # un APK es un zip

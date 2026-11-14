@@ -195,7 +195,7 @@ class Establecimiento(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(String(60), index=True)
-    telefono: Mapped[str] = mapped_column(String(15))
+    telefono: Mapped[str | None] = mapped_column(String(15))
     calle: Mapped[str] = mapped_column(String(120))
     cod_postal: Mapped[str] = mapped_column(String(5))
     localidad: Mapped[str] = mapped_column(String(60))
@@ -221,6 +221,8 @@ class Establecimiento(Base):
     longitud: Mapped[float | None] = mapped_column(Float)
     creado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id", ondelete="SET NULL"))
     creado_en: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=ahora)
+    # "node/123" o "way/456" si el sitio se importó de OpenStreetMap (ver services/osm.py)
+    osm_id: Mapped[str | None] = mapped_column(String(30), unique=True)
 
     imagenes: Mapped[list[Imagen]] = relationship(order_by=Imagen.id, viewonly=True)
     creado_por: Mapped[Usuario | None] = relationship(viewonly=True)

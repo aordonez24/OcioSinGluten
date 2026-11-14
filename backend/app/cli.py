@@ -7,6 +7,7 @@ python -m app.cli migrar                     # actualiza el esquema (también se
 
 import argparse
 import json
+import logging
 import random
 import uuid
 from datetime import timedelta
@@ -14,6 +15,7 @@ from pathlib import Path
 
 from sqlalchemy import insert, select
 
+from app.config import BASE_DIR
 from app.db import SessionLocal, migrar
 from app.models import (
     Actividad,
@@ -37,7 +39,7 @@ from app.models import (
     visitas,
 )
 from app.security import hash_password
-from app.services import almacen
+from app.services import almacen, osm
 
 
 def hacer_admin(email: str) -> None:
@@ -391,12 +393,28 @@ def cargar_demo() -> None:
         print(f"  {username}@example.com / {password}{'  (admin)' if rol == Rol.ADMIN else ''}")
 
 
+def importar_osm() -> None:
+    """Sitios reales marcados como sin gluten en OpenStreetMap. Se puede repetir: solo añade los nuevos."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    print("Descargando de OpenStreetMap los sitios sin gluten de España…")
+    elementos = osm.descargar()
+    print(f"{len(elementos)} elementos. Buscando la dirección de los que no la tienen (1 por segundo)…")
+    extra = osm.direcciones(elementos, BASE_DIR / "osm_direcciones.json")
+    with SessionLocal() as db:
+        resultado = osm.importar(db, elementos, extra)
+    print(
+        f"Añadidos {resultado['nuevos']}; ya estaban {resultado['ya_estaban']}; "
+        f"sin datos suficientes {resultado['incompletos']}."
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="comando", required=True)
     sub.add_parser("admin", help="Convierte una cuenta en administradora").add_argument("email")
     sub.add_parser("demo", help="Carga datos de ejemplo")
     sub.add_parser("migrar", help="Actualiza el esquema de la base de datos")
+    sub.add_parser("importar-osm", help="Añade los sitios sin gluten de España de OpenStreetMap")
     args = parser.parse_args()
 
     migrar()
@@ -404,6 +422,8 @@ def main() -> None:
         hacer_admin(args.email)
     elif args.comando == "demo":
         cargar_demo()
+    elif args.comando == "importar-osm":
+        importar_osm()
 
 
 if __name__ == "__main__":

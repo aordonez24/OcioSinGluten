@@ -1,6 +1,7 @@
 import logging
 import mimetypes
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,11 @@ from app.services.consultas import establecimiento_o_404
 
 # Para que el manifiesto de la app instalable (PWA) se sirva con su tipo correcto.
 mimetypes.add_type("application/manifest+json", ".webmanifest")
+mimetypes.add_type("application/vnd.android.package-archive", ".apk")
+
+# La app de Android para descargar desde la web (página /app). No va en frontend/public para que el
+# service worker no la precargue y para que no acabe metida dentro de la propia app.
+DESCARGAS = Path(__file__).resolve().parent / "descargas"
 
 
 @asynccontextmanager
@@ -147,6 +153,9 @@ def crear_app() -> FastAPI:
             if respuesta is not None:
                 return respuesta
         return JSONResponse({"detail": getattr(exc, "detail", "No encontrado")}, status_code=404)
+
+    if DESCARGAS.is_dir():
+        app.mount("/descargas", StaticFiles(directory=DESCARGAS), name="descargas")
 
     # En producción el frontend compilado se sirve desde aquí: un único proceso para todo.
     if ajustes.frontend_dist.exists():

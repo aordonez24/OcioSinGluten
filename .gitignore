@@ -23,3 +23,5 @@ backend/*.db.bak-*
 .vscode/
 *.iml
 backend/.env.produccion
+backend/osm_direcciones.json
+frontend/android/firma/

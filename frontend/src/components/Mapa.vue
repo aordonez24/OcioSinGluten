@@ -15,6 +15,7 @@ const emit = defineEmits(['seleccionar'])
 const contenedor = ref(null)
 let mapa
 let capa
+let lienzo
 
 function popup(punto) {
   const div = document.createElement('div')
@@ -33,11 +34,14 @@ function popup(punto) {
 function dibujar() {
   capa.clearLayers()
   const validos = props.puntos.filter((p) => p.latitud != null && p.longitud != null)
+  const muchos = validos.length > 100 // con cientos de sitios, puntos más pequeños para que no se tapen
   for (const p of validos) {
     const marcador = L.circleMarker([p.latitud, p.longitud], {
-      radius: 10,
+      radius: muchos ? 6 : 10,
       color: '#fff',
-      weight: 3,
+      weight: muchos ? 2 : 3,
+      // Con cientos de puntos, canvas: los dibuja sin crear un elemento SVG por cada uno.
+      renderer: muchos ? (lienzo ??= L.canvas()) : undefined,
       fillColor: '#17675f',
       fillOpacity: 1,
     }).addTo(capa)

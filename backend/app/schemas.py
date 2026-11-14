@@ -206,7 +206,7 @@ class TokenOut(BaseModel):
 
 class EstablecimientoIn(BaseModel):
     nombre: _texto(60)
-    telefono: Telefono
+    telefono: Telefono | None = None
     calle: _texto(120)
     cod_postal: CodPostal
     localidad: _texto(60)
@@ -225,7 +225,8 @@ class EstablecimientoIn(BaseModel):
 
 class EstablecimientoUpdate(BaseModel):
     nombre: _texto(60) | None = None
-    telefono: Telefono | None = None
+    # Una cadena vacía quita el teléfono
+    telefono: Telefono | Annotated[str, StringConstraints(max_length=0)] | None = None
     calle: _texto(120) | None = None
     cod_postal: CodPostal | None = None
     localidad: _texto(60) | None = None
@@ -246,7 +247,7 @@ class EstablecimientoUpdate(BaseModel):
 class EstablecimientoResumen(Esquema):
     id: int
     nombre: str
-    telefono: str
+    telefono: str | None
     calle: str
     cod_postal: str
     localidad: str
@@ -290,6 +291,13 @@ class EstablecimientoDetalle(EstablecimientoResumen):
     creado_por: UsuarioResumen | None
     creado_en: FechaUTC
     imagenes: list[ImagenOut]
+    osm_id: str | None = Field(default=None, exclude=True)
+
+    @computed_field
+    def osm_url(self) -> str | None:
+        """Ficha en OpenStreetMap de los sitios importados de allí (atribución de la licencia ODbL)."""
+        return f"https://www.openstreetmap.org/{self.osm_id}" if self.osm_id else None
+
     # Estado respecto al usuario que consulta (False si no hay sesión).
     me_gusta: bool = False
     favorito: bool = False

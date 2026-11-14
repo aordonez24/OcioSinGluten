@@ -262,13 +262,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
             <h2 id="titulo-ofrece">Qué ofrece sin gluten</h2>
             <Distintivos :establecimiento="est" detallado class="distintivos" />
             <p v-if="!est.todo_sin_gluten && !est.carta_sin_gluten && !est.cocina_separada && !est.acreditado" class="suave">
-              Aún no sabemos qué opciones sin gluten tiene. Si has estado, cuéntalo en tu opinión.
+              {{ est.osm_url ? 'Según OpenStreetMap tiene opciones sin gluten, pero aún no sabemos cuáles.' : 'Aún no sabemos qué opciones sin gluten tiene.' }}
+              Si has estado, cuéntalo en tu opinión.
             </p>
           </section>
 
           <ul class="lista-limpia datos">
             <li><MapPin :size="18" aria-hidden="true" /> {{ direccion }}, {{ est.provincia }} ({{ est.pais }})</li>
-            <li><Phone :size="18" aria-hidden="true" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
+            <li v-if="est.telefono"><Phone :size="18" aria-hidden="true" /> <a :href="`tel:${est.telefono}`">{{ est.telefono }}</a></li>
             <li v-if="est.horario || est.nota_horario" class="horario">
               <Clock :size="18" aria-hidden="true" />
               <div>
@@ -292,6 +293,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', teclado))
             <li v-if="est.precio">
               <Wallet :size="18" aria-hidden="true" />
               <span><strong>{{ PRECIOS[est.precio].simbolo }}</strong> {{ PRECIOS[est.precio].texto }}</span>
+            </li>
+            <li v-if="est.osm_url" class="suave pequeno">
+              <span>
+                Datos de <a :href="est.osm_url" target="_blank" rel="noopener">OpenStreetMap</a>.
+                Confirma con el local cómo preparan la comida sin gluten antes de ir.
+              </span>
             </li>
             <li v-if="est.creado_por" class="suave pequeno">
               <span>

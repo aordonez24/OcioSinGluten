@@ -115,6 +115,13 @@ def metadatos(db: Session, request: Request) -> Metadatos:
             imagen=f"/uploads/{usuario.foto}" if usuario.foto else ICONO,
         )
 
+    if ruta == "/app":
+        return Metadatos(
+            titulo=f"La app - {NOMBRE}",
+            descripcion="Descarga la app de Ocio Sin Gluten para Android o añádela a la pantalla de inicio "
+            "del iPhone.",
+        )
+
     if ruta == "/privacidad":
         return Metadatos(
             titulo=f"Privacidad - {NOMBRE}",
@@ -188,7 +195,7 @@ def robots(request: Request) -> str:
 
 def sitemap(db: Session, request: Request) -> str:
     base = url_base(request)
-    rutas = ["/", "/establecimientos", "/privacidad"]
+    rutas = ["/", "/establecimientos", "/app", "/privacidad"]
     ids = db.scalars(select(Establecimiento.id).order_by(Establecimiento.id))
     rutas += [f"/establecimientos/{i}" for i in ids]
     urls = "\n".join(f"  <url><loc>{escape_xml(base + ruta)}</loc></url>" for ruta in rutas)

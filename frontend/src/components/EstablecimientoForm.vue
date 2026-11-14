@@ -30,7 +30,7 @@ const intentado = ref(false)
 
 const errores = computed(() => ({
   nombre: datos.nombre.trim() ? '' : 'Obligatorio',
-  telefono: validar.telefono(datos.telefono),
+  telefono: datos.telefono.trim() ? validar.telefono(datos.telefono) : '',
   calle: datos.calle.trim() ? '' : 'Obligatorio',
   cod_postal: validar.codPostal(datos.cod_postal),
   localidad: datos.localidad.trim() ? '' : 'Obligatorio',
@@ -51,6 +51,7 @@ function enviar() {
   const vacio = (valor, borrar) => valor || (editando ? borrar : null)
   emit('guardar', {
     ...datos,
+    telefono: vacio(datos.telefono.trim(), ''),
     precio: vacio(Number(datos.precio), 0),
     horario: datos.horario ?? (editando ? [] : null),
     nota_horario: vacio(datos.nota_horario.trim(), ''),
@@ -111,7 +112,7 @@ function enviar() {
 
     <div class="dos-columnas">
       <label>
-        Teléfono
+        <span>Teléfono <span class="opcional">(opcional)</span></span>
         <input v-model="datos.telefono" inputmode="tel" :aria-invalid="!!err('telefono')" />
         <span class="error-campo">{{ err('telefono') }}</span>
       </label>

@@ -1,5 +1,6 @@
 <script setup>
 import logo from '@/assets/logo.webp'
+import { esNativa } from '@/plataforma'
 
 const ano = new Date().getFullYear()
 </script>
@@ -18,6 +19,7 @@ const ano = new Date().getFullYear()
         <RouterLink to="/establecimientos">Establecimientos</RouterLink>
         <RouterLink to="/actividad">Actividades</RouterLink>
         <RouterLink :to="{ path: '/', hash: '#contacto' }">Contacto</RouterLink>
+        <RouterLink v-if="!esNativa" to="/app">La app</RouterLink>
         <RouterLink to="/privacidad">Privacidad</RouterLink>
       </nav>
       <p class="credito">
