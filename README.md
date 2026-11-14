@@ -11,6 +11,10 @@ Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVI
 - **Establecimientos** en lista o en mapa, ordenables por cercanía, con búsqueda que ignora tildes y filtros por provincia,
   tipo de sitio, precio, distintivos y **abierto ahora**. Se ordenan por valoración, opiniones, visitas o nombre. Los filtros quedan
   en la URL, así que se pueden compartir.
+- **Sitios reales desde el primer día**: `python -m app.cli importar-osm` añade los restaurantes,
+  cafeterías, panaderías, heladerías y bares de España marcados como sin gluten en OpenStreetMap (unos
+  900), con su dirección, horario, web y teléfono. Cada ficha enlaza a OpenStreetMap y recuerda
+  confirmar con el local. Se puede repetir: solo añade los nuevos.
 - **Distintivos para celíacos** en cada sitio: 100 % sin gluten, carta sin gluten, cocina separada y
   acreditado por una asociación de celíacos.
 - **Ficha de cada sitio**: mapa, "cómo llegar", horario, web y rango de precio, me gusta, "he estado",
@@ -29,7 +33,7 @@ Funciona en la web y como **app nativa para Android e iOS** (consulta [docs/MOVI
   solo las que han conseguido.
 - **Comunidad** y **chat** en tiempo real (WebSockets) con historial persistente.
 - **Actividades** de la comunidad agrupadas por días, filtrables por tipo y por "de quienes sigo".
-- **App nativa para Android e iOS** (Capacitor) con icono y pantalla de bienvenida propios, botón «atrás»,
+- **App para Android** firmada, que se descarga desde la página `/app` de la web; en iPhone se añade la web a la pantalla de inicio. **App nativa para Android e iOS** (Capacitor) con icono y pantalla de bienvenida propios, botón «atrás»,
   compartir y vibración nativos y GPS. El APK se compila en GitHub Actions en cada push.
 - **Instalable desde la web** como una app (manifiesto PWA con iconos y accesos directos) que **funciona sin
   conexión**: se abre sin cobertura y muestra lo que se consultó la última vez.

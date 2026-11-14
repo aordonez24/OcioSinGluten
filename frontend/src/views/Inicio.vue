@@ -96,8 +96,8 @@ onMounted(async () => {
         </p>
         <p v-else-if="estadisticas" class="cifras">
           Ya hay {{ plural(estadisticas.establecimientos, 'sitio sin gluten', 'sitios sin gluten') }}
-          en {{ plural(estadisticas.provincias, 'provincia', 'provincias') }},
-          con {{ plural(estadisticas.opiniones, 'opinión', 'opiniones') }} de la comunidad.
+          en {{ plural(estadisticas.provincias, 'provincia', 'provincias') }}<template v-if="estadisticas.opiniones">,
+          con {{ plural(estadisticas.opiniones, 'opinión', 'opiniones') }} de la comunidad</template>.
         </p>
       </div>
       <div v-if="ancho" class="hero-mapa">

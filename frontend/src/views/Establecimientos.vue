@@ -146,7 +146,7 @@ onMounted(cargar)
         <h1>Establecimientos sin gluten</h1>
         <p>
           <template v-if="establecimientos && filtrados.length === establecimientos.length">
-            {{ establecimientos.length }} establecimientos recomendados por la comunidad
+            {{ establecimientos.length === 1 ? "1 sitio" : `${establecimientos.length} sitios` }} con opciones sin gluten
           </template>
           <template v-else-if="establecimientos">{{ filtrados.length }} de {{ establecimientos.length }} establecimientos</template>
           <template v-else>Cargando establecimientos…</template>
