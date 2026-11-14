@@ -2,6 +2,7 @@
 
 import email
 import re
+import time
 from urllib.parse import urlparse
 
 from playwright.sync_api import expect
@@ -46,14 +47,20 @@ def test_abierto_ahora(pagina):
     expect(pagina.locator(".semana tr:has-text('Domingo')")).to_contain_text("Cerrado")
 
 
-def _ultimo_enlace(destino: str) -> str:
-    for fichero in sorted(CORREOS.glob("*.eml"), key=lambda f: f.stat().st_mtime, reverse=True):
-        mensaje = email.message_from_bytes(fichero.read_bytes())
-        if mensaje["To"] == destino:
-            texto = mensaje.get_payload(decode=True).decode()
-            enlace = urlparse(re.search(r"https?://\S+", texto).group(0))
-            return f"{enlace.path}?{enlace.query}"
-    raise AssertionError(f"No se ha enviado ningún correo a {destino}")
+def _ultimo_enlace(destino: str, espera: float = 10) -> str:
+    # El correo se envía en segundo plano después de responder: en una máquina lenta (la CI) puede
+    # tardar un poco en aparecer.
+    limite = time.monotonic() + espera
+    while True:
+        for fichero in sorted(CORREOS.glob("*.eml"), key=lambda f: f.stat().st_mtime, reverse=True):
+            mensaje = email.message_from_bytes(fichero.read_bytes())
+            if mensaje["To"] == destino:
+                texto = mensaje.get_payload(decode=True).decode()
+                enlace = urlparse(re.search(r"https?://\S+", texto).group(0))
+                return f"{enlace.path}?{enlace.query}"
+        if time.monotonic() > limite:
+            raise AssertionError(f"No se ha enviado ningún correo a {destino}")
+        time.sleep(0.2)
 
 
 def test_recuperar_la_contrasena(pagina):
